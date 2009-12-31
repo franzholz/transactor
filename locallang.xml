@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<T3locallang>
+	<meta type="array">
+		<description>texts for processing of the transactions</description>
+		<type>module</type>
+		<csh_table></csh_table>
+		<fileId>EXT:transactor/locallang.xml</fileId>
+		<labelContext type="array">
+		</labelContext>
+	</meta>
+	<data type="array">
+		<languageKey index="default" type="array">
+			<label index="error_transaction_init">ERROR: Could not initialize transaction.</label>
+			<label index="error_reference_id">ERROR: reference ID could not be generated.</label>
+			<label index="error_transaction_details">ERROR: Setting details of transaction failed.</label>
+			<label index="error_relay_url">ERROR: No relay URL given!</label>
+			<label index="error_gateway_missing">ERROR: Could not find gateway object for payment method '|'.</label>
+		</languageKey>
+		<languageKey index="de" type="array">
+			<label index="error_transaction_init">FEHLER: Die Transaktion konnte nicht gestartet werden.</label>
+			<label index="error_reference_id">FEHLER: Es konnte keine Referenz ID erzeugt werden.</label>
+			<label index="error_transaction_details">FEHLER: Das Setzen der Details der Transaktion ist fehlgeschlagen.</label>
+			<label index="error_relay_url">FEHLER: Es ist keine Weiterleitungs-URL angegeben worden!</label>
+		</languageKey>
+	</data>
+</T3locallang>

@@ -1,0 +1,87 @@
+<?php
+/***************************************************************
+*  Copyright notice
+*
+*  (c) 2009 Franz Holzinger <franz@ttproducts.de>
+*  All rights reserved
+*
+*  This script is part of the TYPO3 project. The TYPO3 project is
+*  free software; you can redistribute it and/or modify
+*  it under the terms of the GNU General Public License as published by
+*  the Free Software Foundation; either version 2 of the License, or
+*  (at your option) any later version.
+*
+*  The GNU General Public License can be found at
+*  http://www.gnu.org/copyleft/gpl.html.
+*  A copy is found in the textfile GPL.txt and important notices to the license
+*  from the author is found in LICENSE.txt distributed with these scripts.
+*
+*
+*  This script is distributed in the hope that it will be useful,
+*  but WITHOUT ANY WARRANTY; without even the implied warranty of
+*  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+*  GNU General Public License for more details.
+*
+*  This copyright notice MUST APPEAR in all copies of the script!
+***************************************************************/
+/**
+ * Part of the transactor (Shop System) extension.
+ *
+ * language object
+ *
+ * $Id$
+ *
+ * @author	Franz Holzinger <franz@ttproducts.de>
+ * @maintainer	Franz Holzinger <franz@ttproducts.de>
+ * @package TYPO3
+ * @subpackage tt_products
+ *
+ *
+ */
+
+
+require_once(t3lib_extMgm::extPath('div2007') . 'class.tx_div2007_alpha_language_base.php');
+
+
+class tx_transactor_language extends tx_div2007_alpha_language_base {
+
+	public function init ($pObj, $cObj, $conf)	{
+
+		parent::init(
+			$cObj,
+			'transactor',
+			$conf,
+			''
+		);
+
+		if (isset($pObj->LOCAL_LANG) && is_array($pObj->LOCAL_LANG))	{
+			$this->LOCAL_LANG = $pObj->LOCAL_LANG;
+		}
+		if (isset($pObj->LOCAL_LANG_charset) && is_array($pObj->LOCAL_LANG_charset))	{
+			$this->LOCAL_LANG_charset = $pObj->LOCAL_LANG_charset;
+		}
+		if (isset($pObj->LOCAL_LANG_loaded) && is_array($pObj->LOCAL_LANG_loaded))	{
+			$this->LOCAL_LANG_loaded = $pObj->LOCAL_LANG_loaded;
+		}
+	}
+
+
+	public function getLanguage ()	{
+		global $TSFE;
+
+		if (isset($TSFE->config) && is_array($TSFE->config) && isset($TSFE->config['config']) && is_array($TSFE->config['config']))	{
+			$rc = $TSFE->config['config']['language'];
+		} else {
+			$rc = 'default';
+		}
+		return $rc;
+	}
+}
+
+
+if (defined('TYPO3_MODE') && $GLOBALS['TYPO3_CONF_VARS'][TYPO3_MODE]['XCLASS']['ext/transactor/model/class.tx_transactor_language.php'])	{
+	include_once($GLOBALS['TYPO3_CONF_VARS'][TYPO3_MODE]['XCLASS']['ext/transactor/model/class.tx_transactor_language.php']);
+}
+
+
+?>

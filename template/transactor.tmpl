@@ -1,0 +1,120 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+
+<html>
+<head>
+	<title>Template for the Payment Transactor</title>
+<!-- $Id$ -->
+</head>
+
+<body>
+
+
+
+
+<!-- ###TRANSACTOR_FORM_TEMPLATE###
+
+This subpart is used to display the card number information dialog before the transfer to the payment gateway
+-->
+
+
+<table border="0" cellspacing="0" cellpadding="1" width=1>
+	<tr>
+		<td><img src="clear.gif" width=100 height=1></td>
+		<td><img src="clear.gif" width=5 height=1></td>
+		<td><img src="clear.gif" width=100 height=1></td>
+		<td colspan=3><img src="clear.gif" width=200 height=1></td>
+	</tr>
+	<tr>
+		<td colspan=6 bgcolor="###GC2###">###GW2B###<b>TOTAL:</b>###GW2E###</td>
+	</tr>
+	<tr>
+		<td valign=top colspan=3>###GW1B###
+			<strong>Total amount in EURO:</strong>
+		###GW1E###</td>
+
+		<td valign=top align=right colspan=3 nowrap>###GW1B###
+		<b>€ ###PRICE_TOTAL_TAX###</b><br>
+		###GW1E###</td>
+	</tr>
+</table>
+
+###GW1B###
+This is some text here.
+
+###GW1E###
+
+
+<form action="###REDIRECT_URL###" method="post" autocomplete="off" name="connectForm">
+<input type="submit" name="pay" value="Connect to the ###TRANSACTOR_TITLE### server" />&nbsp;&nbsp;
+	###HIDDENFIELDS###
+</form>
+
+
+<table BORDER="0" CELLPADDING="0" CELLSPACING="5">
+<tr>
+<td><a href="http://###TRANSACTOR_WWW###" target="_blank"><img src="###TRANSACTOR_IMAGE###"></a></td>
+<td><font FACE="Verdana, Arial, Helvetica" SIZE=1>###TRANSACTOR_INFO###</font></td>
+</tr>
+</table>
+
+<!-- ###TRANSACTOR_FORM_TEMPLATE###	 end -->
+
+
+
+
+<!-- ###TRANSACTOR_FORM_CANCEL_TEMPLATE###
+
+This subpart is used to display information IF the payment was cancel by Unibank Solo-E software
+
+Has the standard fields of the normal BASKET-templates
+
+-->
+###GW1B###
+
+<strong>Du har afbrudt transaktionen med Unibank e-betaling.</strong><br>
+<br>
+
+Din ordre er i midlertid ikke slettet, så du kan <a href="http://www.inter-photo.dk/?butik">gå tilbage til butikken</a> og vælge en anden betalingsform.
+<br>
+<br>
+
+
+###GW1E###
+
+<!-- ###TRANSACTOR_FORM_CANCEL_TEMPLATE### 	 end -->
+
+
+
+
+
+
+<!-- ###TRANSACTOR_REDIRECT_TEMPLATE###
+
+This subpart is used to display information IF the payment was declined!
+
+Has the standard fields of the normal BASKET-templates
++ ###REDIRECT_URL###
+
+-->
+###GW1B###
+	Du omdirigeres nu til en sikker betalingsserver.
+	<script>
+		document.location = '###REDIRECT_URL###';
+	</script>
+###GW1E###
+
+<!-- ###TRANSACTOR_REDIRECT_TEMPLATE###	 end -->
+
+
+
+
+<!-- ###TRANSACTOR_ACCEPT_TEMPLATE###
+Used for dummy purpose onlu
+-->
+DUMMY
+<!-- ###TRANSACTOR_ACCEPT_TEMPLATE###	 end -->
+
+
+
+</body>
+</html>
