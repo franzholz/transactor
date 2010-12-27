@@ -7,8 +7,8 @@ if (TYPO3_MODE=='BE')	{
 
 	$TCA['tx_transactor_transactions'] = Array (
 		'ctrl' => Array (
-			'title' => 'LLL:EXT:transactor/locallang_db.php:tx_transactor_transactions',
-			'label' => 'name',
+			'title' => 'LLL:EXT:transactor/locallang_db.xml:tx_transactor_transactions',
+			'label' => 'reference',
 			'crdate' => 'crdate',
 			'default_sortby' => 'ORDER BY crdate',
 			'dividers2tabs' => TRUE,

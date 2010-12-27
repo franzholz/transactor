@@ -1,10 +1,9 @@
 <?php
 /***************************************************************
-* $Id$
 *
 *  Copyright notice
 *
-*  (c) 2009 Franz Holzinger (franz@ttproducts.de)
+*  (c) 2010 Franz Holzinger (franz@ttproducts.de)
 *  All rights reserved
 *
 *  This script is part of the Typo3 project. The Typo3 project is
@@ -31,6 +30,9 @@ require_once (t3lib_extMgM::extPath('transactor') . 'model/class.tx_transactor_g
  * class hangs between the real gateway implementation and the application
  * using it.
  *
+ * $Id$
+ *
+ *
  * @package 	TYPO3
  * @subpackage	tx_transactor
  * @author	Robert Lemke <robert@typo3.org>
@@ -50,6 +52,7 @@ class tx_transactor_gatewayproxy implements tx_transactor_gateway_int {
 	 * @access	public
 	 */
 	public function init ($extKey) {
+
 		$this->extensionManagerConf = unserialize($GLOBALS['TYPO3_CONF_VARS']['EXT']['extConf']['transactor']);
 		if (isset($GLOBALS['TYPO3_CONF_VARS']['EXT']['extConf'][$extKey]))	{
 			$newExtensionManagerConf = unserialize($GLOBALS['TYPO3_CONF_VARS']['EXT']['extConf'][$extKey]);
@@ -61,13 +64,18 @@ class tx_transactor_gatewayproxy implements tx_transactor_gateway_int {
 				$this->extensionManagerConf = $newExtensionManagerConf;
 			}
 		}
-		$this->gatewayClass = 'tx_'. str_replace('_','',$extKey) . '_gateway';
+		$this->gatewayClass = 'tx_' . str_replace('_','',$extKey) . '_gateway';
+		$this->gatewayExt = $extKey;
 		require_once(t3lib_extMgm::extPath($extKey) . 'model/class.' . $this->gatewayClass . '.php');
 	}
 
 
 	public function getGatewayObj ()	{
-		return t3lib_div::getUserObj('&' . $this->gatewayClass);
+		$rc = t3lib_div::getUserObj('&' . $this->gatewayClass);
+		if (!is_object($rc))	{
+			exit('internal ERROR in the usage of the Payment Transactor API (transactor) by the extension "' . $this->gatewayExt . '": no object exists for the class "' . $this->gatewayClass . '"');
+		}
+		return $rc;
 	}
 
 
@@ -80,6 +88,21 @@ class tx_transactor_gatewayproxy implements tx_transactor_gateway_int {
 	 */
 	public function getGatewayKey () {
 		return $this->getGatewayObj()->getGatewayKey();
+	}
+
+
+	public function getConf ()	{
+		return $this->getGatewayObj()->getConf();
+	}
+
+
+	public function getConfig ()	{
+		return $this->getGatewayObj()->getConfig();
+	}
+
+
+	public function setConfig ($config)	{
+		$this->getGatewayObj()->setConfig($config);
 	}
 
 
@@ -248,30 +271,34 @@ class tx_transactor_gatewayproxy implements tx_transactor_gateway_int {
 	}
 
 
-    /**
-     * Returns any extra parameter for the form tag to be used in mode TX_TRANSACTOR_GATEWAYMODE_FORM.
-     *
-     * @return  string      Form tag extra parameters
-     * @access  public
-     */
-    public function transaction_formGetFormParms () {
-        if ($this->gatewayMode != TX_TRANSACTOR_GATEWAYMODE_FORM) return '';
+	/**
+	* Returns any extra parameter for the form tag to be used in mode TX_TRANSACTOR_GATEWAYMODE_FORM.
+	*
+	* @return  string      Form tag extra parameters
+	* @access  public
+	*/
+	public function transaction_formGetFormParms () {
+		$result = '';
+		if ($this->getGatewayObj()->getGatewayMode() == TX_TRANSACTOR_GATEWAYMODE_FORM) {
+			$result = $this->getGatewayObj()->transaction_formGetFormParms();
+		}
+		return $result;
+	}
 
-        return $this->getGatewayObj()->transaction_formGetFormParms();
-    }
 
-
-    /**
-     * Returns any extra parameter for the form submit button to be used in mode TX_TRANSACTOR_GATEWAYMODE_FORM.
-     *
-     * @return  string      Form submit button extra parameters
-     * @access  public
-     */
-    public function transaction_formGetSubmitParms () {
-        if ($this->gatewayMode != TX_TRANSACTOR_GATEWAYMODE_FORM) return '';
-
-        return $this->getGatewayObj()->transaction_formGetSubmitParms();
-    }
+	/**
+		* Returns any extra HTML attributes for the form tag to be used in mode TX_TRANSACTOR_GATEWAYMODE_FORM.
+	*
+	* @return  string      Form submit button extra parameters
+	* @access  public
+	*/
+	public function transaction_formGetAttributes () {
+		$result = '';
+		if ($this->getGatewayObj()->getGatewayMode() == TX_TRANSACTOR_GATEWAYMODE_FORM) {
+			$result = $this->getGatewayObj()->transaction_formGetAttributes();
+		}
+		return $result;
+	}
 
 
 	/**
@@ -283,21 +310,6 @@ class tx_transactor_gatewayproxy implements tx_transactor_gateway_int {
 	 */
 	public function transaction_formGetHiddenFields () {
 		return $this->getGatewayObj()->transaction_formGetHiddenFields();
-	}
-
-
-	/**
-	 * Returns an array of field names and their configuration which must be rendered
-	 * for submitting credit card numbers etc.
-	 *
-	 * The configuration has the format of the TCA fields section and can be used for
-	 * rendering the labels and fields with by the extension frontendformslib
-	 *
-	 * @return	array		Field names and configuration to be rendered as visible fields
-	 * @access	public
-	 */
-	public function transaction_formGetVisibleFields () {
-		return $this->getGatewayObj()->transaction_formGetVisibleFields();
 	}
 
 
@@ -320,6 +332,19 @@ class tx_transactor_gatewayproxy implements tx_transactor_gateway_int {
 	 */
 	public function transaction_setErrorPage ($uri) {
 	    $this->getGatewayObj()->transaction_setErrorPage($uri);
+	}
+
+
+	/**
+	 * Return if the transaction is still in the initialization state
+	 * This is the case if the gateway initialization is called several times before starting the processing of it.
+	 *
+	 * @param array   transaction record
+	 * @return boolean
+	 * @access public
+	 */
+	public function transaction_isInitState ($row) {
+		return $this->getGatewayObj()->transaction_isInitState($row);
 	}
 
 
@@ -347,6 +372,7 @@ class tx_transactor_gatewayproxy implements tx_transactor_gateway_int {
 
 			if ($dbResult) {
 				$row = $TYPO3_DB->sql_fetch_assoc($dbResult);
+
 				if (is_array ($row) && $row['gatewayid'] === $resultsArr['gatewayid']) {
 					$resultsArr['internaltransactionuid'] = $dbTransactionUid;
 				} else {
@@ -355,6 +381,8 @@ class tx_transactor_gatewayproxy implements tx_transactor_gateway_int {
 					$fields = $resultsArr;
 					$fields['crdate'] = time();
 					$fields['pid'] = $this->extensionManagerConf['pid'];
+					$TYPO3_DB->sql_free_result($dbResult);
+
 					if ($fields['uid'] && $fields['reference'])	{
 						$dbResult = $TYPO3_DB->exec_INSERTquery(
 							'tx_transactor_transactions',
@@ -366,6 +394,16 @@ class tx_transactor_gatewayproxy implements tx_transactor_gateway_int {
 			}
 		}
 		return $resultsArr;
+	}
+
+
+	public function transaction_getResultsError ($message)	{
+		return $this->getGatewayObj()->transaction_getResultsError($message);
+	}
+
+
+	public function transaction_getResultsSuccess ($message)	{
+		return $this->getGatewayObj()->transaction_getResultsSuccess($message);
 	}
 
 
@@ -427,17 +465,26 @@ class tx_transactor_gatewayproxy implements tx_transactor_gateway_int {
 
 
 	public function hasErrors ()	{
-		$this->getGatewayObj()->hasErrors();
+		$rc = $this->getGatewayObj()->hasErrors();
+		return $rc;
 	}
 
 
 	public function getErrors ()	{
-		$this->getGatewayObj()->getErrors();
+		$rc = $this->getGatewayObj()->getErrors();
+		return $rc;
 	}
 
 
 	public function usesBasket ()	{
-		$this->getGatewayObj()->usesBasket();
+		$rc = $this->getGatewayObj()->usesBasket();
+		return $rc;
+	}
+
+
+	public function getTransaction ($referenceId)	{
+		$rc = $this->getGatewayObj()->getTransaction($referenceId);
+		return $rc;
 	}
 
 

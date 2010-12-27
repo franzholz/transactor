@@ -1,10 +1,9 @@
 <?php
 /***************************************************************
-* $Id$
 *
 *  Copyright notice
 *
-*  (c) 2009 Franz Holzinger (franz@ttproducts.de)
+*  (c) 2010 Franz Holzinger (franz@ttproducts.de)
 *  All rights reserved
 *
 *  This script is part of the Typo3 project. The Typo3 project is
@@ -25,6 +24,9 @@
 ***************************************************************/
 
 /**
+ *
+ * $Id$
+ *
  *
  * @package 	TYPO3
  * @subpackage	tx_transactor
@@ -114,6 +116,8 @@ final class tx_transactor_gatewayfactory {
 	 * @access		public
 	 */
 	public static function getGatewayProxyObjectByPaymentMethod ($paymentMethod) {
+		$rc = FALSE;
+
 		if (is_array (self::$gatewayProxyObjects)) {
 			foreach (self::$gatewayProxyObjects as $extKey => $gatewayProxyObject) {
 				$paymentMethodsArray = $gatewayProxyObject->getAvailablePaymentMethods();
@@ -124,7 +128,6 @@ final class tx_transactor_gatewayfactory {
 					if ($paymentMethodsArray != FALSE) {
 						self::addError('tx_transactor_gatewayfactory::getGatewayObjectByPaymentMethod ' . $paymentMethodsArray);
 					}
-					$rc = FALSE;
 				}
 			}
 		}

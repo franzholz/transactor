@@ -45,6 +45,8 @@ define('TX_TRANSACTOR_TRANSACTION_STATE_NO_PROCESS', 000);
 
 // ok constants
 // @see the TX_TRANSACTOR_TRANSACTION_LIMIT constants
+define('TX_TRANSACTOR_TRANSACTION_STATE_IDLE', 0);
+define('TX_TRANSACTOR_TRANSACTION_STATE_INIT', 400);
 define('TX_TRANSACTOR_TRANSACTION_STATE_APPROVE_OK', 500);
 define('TX_TRANSACTOR_TRANSACTION_STATE_APPROVE_DUPLICATE', 501);
 define('TX_TRANSACTOR_TRANSACTION_STATE_CAPTURE_OK', 502);
@@ -62,7 +64,7 @@ define('TX_TRANSACTOR_TRANSACTION_STATE_RENEW_NOK', 605);
 define('TX_TRANSACTOR_TRANSACTION_STATE_INTERNAL_ERROR', 651);
 
 
-define('TX_TRANSACTOR_TRANSACTION_MESSAGE_NOT_PROCESSED', 000);
+define('TX_TRANSACTOR_TRANSACTION_MESSAGE_NOT_PROCESSED', '-');
 
 
 
@@ -87,6 +89,16 @@ interface tx_transactor_gateway_int {
 	 * @access	public
 	 */
 	public function getGatewayKey ();
+
+
+	public function getConf ();
+
+
+	public function getConfig ();
+
+
+	public function setConfig ($config);
+
 
 	/**
 	 * Returns an array of keys of the supported payment methods
@@ -120,7 +132,7 @@ interface tx_transactor_gateway_int {
 	 * @return	void
 	 * @access	public
 	 */
-	 public function transaction_init ($action, $paymentMethod, $gatewayMode, $callingExtKey);
+	public function transaction_init ($action, $paymentMethod, $gatewayMode, $callingExtKey);
 
 	/**
 	 * Sets the payment details. Which fields can be set usually depends on the
@@ -166,21 +178,21 @@ interface tx_transactor_gateway_int {
 	 */
 	public function transaction_formGetActionURI ();
 
-    /**
-     * Returns any extra parameter for the form tag to be used in mode TX_TRANSACTOR_GATEWAYMODE_FORM.
-     *
-     * @return  string      Form tag extra parameters
-     * @access  public
-     */
-    public function transaction_formGetFormParms ();
+	/**
+	* Returns any extra parameter for the form tag to be used in mode TX_TRANSACTOR_GATEWAYMODE_FORM.
+	*
+	* @return  string      Form tag extra parameters
+	* @access  public
+	*/
+	public function transaction_formGetFormParms ();
 
-    /**
-     * Returns any extra parameter for the form submit button to be used in mode TX_TRANSACTOR_GATEWAYMODE_FORM.
-     *
-     * @return  string      Form submit button extra parameters
-     * @access  public
-     */
-    public function transaction_formGetSubmitParms ();
+	/**
+	* Returns any extra HTML attributes for the form tag to be used in mode TX_TRANSACTOR_GATEWAYMODE_FORM.
+	*
+	* @return  string      Form submit button extra parameters
+	* @access  public
+	*/
+	public function transaction_formGetAttributes ();
 
 	/**
 	 * Returns an array of field names and values which must be included as hidden
@@ -191,17 +203,6 @@ interface tx_transactor_gateway_int {
 	 */
 	public function transaction_formGetHiddenFields ();
 
-	/**
-	 * Returns an array of field names and their configuration which must be rendered
-	 * for submitting credit card numbers etc.
-	 *
-	 * The configuration has the format of the TCA fields section and can be used for
-	 * rendering th	e labels and fields with by the extension frontendformslib
-	 *
-	 * @return	array		Field names and configuration to be rendered as visible fields
-	 * @access	public
-	 */
-	public function transaction_formGetVisibleFields ();
 
 	/**
 	 * Sets the URI which the user should be redirected to after a successful payment/transaction
@@ -218,10 +219,22 @@ interface tx_transactor_gateway_int {
 	 * If your gateway/gateway implementation only supports one redirect URI, set okpage and
 	 * errorpage to the same URI
 	 *
+	 * @param array   transaction record
 	 * @return void
 	 * @access public
 	 */
-	public function transaction_setErrorPage ($uri);
+	public function transaction_setErrorPage ($row);
+
+
+	/**
+	 * Return if the transaction is still in the initialization state
+	 * This is the case if the gateway initialization is called several times before starting the processing of it.
+	 *
+	 * @return boolean
+	 * @access public
+	 */
+	public function transaction_isInitState ($uri);
+
 
 	/**
 	 * Returns the results of a processed transaction
@@ -231,6 +244,24 @@ interface tx_transactor_gateway_int {
 	 * @access	public
 	 */
 	public function transaction_getResults ($reference);
+
+	/**
+	 * Returns the error result
+	 *
+	 * @param	string		$message ... message to show
+	 * @return	array		Results of an internal error
+	 * @access	public
+	 */
+	public function transaction_getResultsError ($message);
+
+	/**
+	 * Returns the error result
+	 *
+	 * @param	string		$message ... message to show
+	 * @return	array		Results of an internal error
+	 * @access	public
+	 */
+	public function transaction_getResultsSuccess ($message);
 
 	/**
 	 * Returns if the transaction has been successfull
@@ -268,6 +299,8 @@ interface tx_transactor_gateway_int {
 	public function getErrors ();
 
 	public function usesBasket ();
+
+	public function getTransaction ($referenceId);
 
 	public function generateReferenceUid ($orderuid, $callingExtension);
 

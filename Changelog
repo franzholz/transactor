@@ -1,3 +1,7 @@
+2010-12-27	Franz Holzinger <franz@ttproducts.de>
+	* Consider the vouchers as virtual products having VOUCHER as itemnumber
+	* fill in $errorMessage in all error cases
+
 2009-12-31	Franz Holzinger <franz@ttproducts.de>
 	* The code is derived from franz's branch of paymentlib
 	* This extension uses code from tt_products 2.9.0 and paymentlib_paypal 0.0.4

@@ -18,3 +18,4 @@ CREATE TABLE tx_transactor_transactions (
 	PRIMARY KEY (uid),
 	KEY parent (pid)
 );
+

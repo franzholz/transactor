@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<T3locallang>
+	<meta type="array">
+		<description>database fields</description>
+		<type>database</type>
+		<csh_table></csh_table>
+		<fileId>EXT:transactor/locallang_db.xml</fileId>
+		<labelContext type="array">
+		</labelContext>
+	</meta>
+	<data type="array">
+		<languageKey index="default" type="array">
+			<label index="tstamp">Time stamp</label>
+			<label index="crdate">Creation date</label>
+			<label index="tx_transactor_transactions">Transactions</label>
+			<label index="tx_transactor_transactions.gatewayid">Gateway identifier:</label>
+			<label index="tx_transactor_transactions.reference">Reference of transaction:</label>
+			<label index="tx_transactor_transactions.currency">Currency of amount:</label>
+			<label index="tx_transactor_transactions.amount">Amount:</label>
+			<label index="tx_transactor_transactions.state">State:</label>
+			<label index="tx_transactor_transactions.state_time">State time:</label>
+			<label index="tx_transactor_transactions.message">Message:</label>
+			<label index="tx_transactor_transactions.ext_key">Extension key:</label>
+			<label index="tx_transactor_transactions.paymethod_key">Key of payment method:</label>
+			<label index="tx_transactor_transactions.paymethod_method">Payment method:</label>
+			<label index="tx_transactor_transactions.config">Configuration:</label>
+			<label index="tx_transactor_transactions.user">Gateway specific:</label>
+		</languageKey>
+		<languageKey index="de" type="array">
+		</languageKey>
+	</data>
+</T3locallang>
