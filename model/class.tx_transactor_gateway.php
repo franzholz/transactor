@@ -209,6 +209,7 @@ abstract class tx_transactor_gateway implements tx_transactor_gateway_int {
 		global $TSFE;
 
 		$rc = (isset($TSFE->config['config']) && is_array($TSFE->config['config']) && $TSFE->config['config']['language'] ? $TSFE->config['config']['language'] : 'en');
+
 		return $rc;
 	}
 
@@ -256,13 +257,15 @@ abstract class tx_transactor_gateway implements tx_transactor_gateway_int {
 			'user' => $detailsArr['user']
 		);
 
-		$res = $TYPO3_DB->exec_DELETEquery('tx_transactor_transactions', 'gatewayid =' . $TYPO3_DB->fullQuoteStr($this->getGatewayKey(), 'tx_transactor_transactions') . ' AND amount LIKE "0.00" AND message LIKE "s:25:\"Transaction not processed\";"');
+		$res = $TYPO3_DB->exec_DELETEquery('tx_transactor_transactions', 'gatewayid =' . $TYPO3_DB->fullQuoteStr($this->getGatewayKey(), 'tx_transactor_transactions') . ' AND amount LIKE "0.00" AND message LIKE "' . TX_TRANSACTOR_TRANSACTION_MESSAGE_NOT_PROCESSED . '"');
 
 		if (($row = $this->getTransaction($referenceId)) === FALSE)	{
+debug ($dataArr, 'transaction_setDetails $dataArr');
 			$res = $TYPO3_DB->exec_INSERTquery('tx_transactor_transactions', $dataArr);
 			$dbTransactionUid = $TYPO3_DB->sql_insert_id();
 			$this->setTransactionUid($dbTransactionUid);
 		} else {
+debug ($dataArr, 'transaction_setDetails $dataArr');
 			$this->setTransactionUid($row['uid']);
 			$res = $TYPO3_DB->exec_UPDATEquery('tx_transactor_transactions', 'reference = ' . $TYPO3_DB->fullQuoteStr($referenceId, 'tx_transactor_transactions'), $dataArr);
 		}
@@ -511,11 +514,13 @@ abstract class tx_transactor_gateway implements tx_transactor_gateway_int {
 
 	public function transaction_message ($resultsArray)	{
 
+debug ($resultsArray, 'transaction_message $resultsArray');
 		if (isset($resultsArray['message']))	{
 			$rc = $resultsArray['message'];
 		} else {
 			$rc = 'internal error in extension "' . $this->extKey . '": The resultsArray has not been filled for method transaction_message';
 		}
+debug ($rc, 'transaction_message $rc');
 		return $rc;
 	}
 

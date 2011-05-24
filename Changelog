@@ -1,3 +1,6 @@
+2011-05-24	Franz Holzinger <franz@ttproducts.de>
+	* fix bug with wrong parameter encodage of success and failure links
+
 2010-12-27	Franz Holzinger <franz@ttproducts.de>
 	* Consider the vouchers as virtual products having VOUCHER as itemnumber
 	* fill in $errorMessage in all error cases

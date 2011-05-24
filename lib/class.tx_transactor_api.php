@@ -2,7 +2,7 @@
 /***************************************************************
 *  Copyright notice
 *
-*  (c) 2010 Franz Holzinger <franz@ttproducts.de>
+*  (c) 2011 Franz Holzinger <franz@ttproducts.de>
 *  All rights reserved
 *
 *  This script is part of the TYPO3 project. The TYPO3 project is
@@ -187,7 +187,6 @@ class tx_transactor_api {
 	// 		$gatewayFactoryObj->registerGatewayExt($gatewayExtName);
 
 			$paymentMethod = $confScript['paymentMethod'];
-		//	$gatewayProxyObject = &$gatewayFactoryObj->getGatewayProxyObjectByPaymentMethod($paymentMethod);
 			$gatewayProxyObject = self::getGatewayProxyObject($handleLib, $confScript);
 
 			if (is_object($gatewayProxyObject)) {
@@ -283,6 +282,7 @@ class tx_transactor_api {
 							$resultsArray = $gatewayProxyObject->transaction_getResults($referenceId); //array holen mit allen daten
 
 							if ($paymentActivity == 'verify' && $gatewayProxyObject->transaction_succeded($resultsArray) == FALSE) {
+
 								$errorMessage = htmlspecialchars($gatewayProxyObject->transaction_message($resultsArray)); // message auslesen
 							} else {
 								$bFinalize = TRUE;
@@ -351,6 +351,11 @@ class tx_transactor_api {
 			$messageArray =  explode('|', $message);
 			$errorMessage = $messageArray[0] . $paymentMethod . $messageArray[1];
 		}
+
+		if ($errorMessage == TX_TRANSACTOR_TRANSACTION_MESSAGE_NOT_PROCESSED) {
+			$errorMessage = tx_div2007_alpha::getLL($langObj, 'error_transaction_no');
+		}
+
 		return $content;
 	} // includeHandleLib
 
@@ -455,11 +460,21 @@ class tx_transactor_api {
 	) {
 		global $TSFE;
 
-		$param = '';
-		$paramNameActivity = '&' . $extKey . '[activity][' . $paymentActivity . ']';
-		$paramFailLink = $paramNameActivity . '=0' . $param;
-		$paramSuccessLink = $paramNameActivity . '=1' . $param;
-		$paramReturi = $param;
+		$paramNameActivity = $extKey . '[activity][' . $paymentActivity . ']';
+
+		$failLinkParams = array($paramNameActivity => '0');
+
+		if (isset($linkParams) && is_array($linkParams)) {
+			$failLinkParams = array_merge($failLinkParams, $linkParams);
+		}
+
+		$successLinkParams = array($paramNameActivity => '1');
+
+		if (isset($linkParams) && is_array($linkParams)) {
+			$successLinkParams = array_merge($successLinkParams, $linkParams);
+		}
+
+		$paramReturi = '';
 
 			// Prepare some values for the form fields:
 		$totalPrice = $calculatedArray['priceNoTax']['total'];
@@ -473,8 +488,10 @@ class tx_transactor_api {
 		$urlDir = t3lib_div::getIndpEnv('TYPO3_REQUEST_DIR');
 		$retlink = $urlDir . self::getUrl($conf, $TSFE->id, $linkParams);
 		$returi = $retlink . $paramReturi;
-		$faillink = $urlDir . self::getUrl($conf, $pidArray['PIDpayment'], $linkParams) . $paramFailLink;
-		$successlink = $urlDir . self::getUrl($conf, $successPid, $linkParams) . $paramSuccessLink;
+
+		$faillink = $urlDir . self::getUrl($conf, $pidArray['PIDpayment'], $failLinkParams);
+		$successlink = $urlDir . self::getUrl($conf, $successPid, $successLinkParams);
+
 		$transactionDetailsArray = array (
 			'transaction' => array (
 				'amount' => $totalPrice,
@@ -492,7 +509,8 @@ class tx_transactor_api {
 		);
 
 		if ($paymentActivity == 'verify') {
-			$transactionDetailsArray['transaction']['verifylink'] = $retlink . $paramNameActivity . '=1';
+			$verifyLink = $urlDir . self::getUrl($conf, $TSFE->id, $successLinkParams);
+			$transactionDetailsArray['transaction']['verifylink'] = $verifyLink;
 		}
 
 		if (isset($confScript['conf.']) && is_array($confScript['conf.'])) {
