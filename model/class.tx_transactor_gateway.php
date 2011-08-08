@@ -48,6 +48,7 @@ abstract class tx_transactor_gateway implements tx_transactor_gateway_int {
 	protected $optionsArray;
 	protected $resultsArray = array();
 	protected $config = array();
+	protected $bMergeConf = TRUE;
 	private $errorStack;
 	private	$action;
 	private	$paymentMethod;
@@ -74,7 +75,7 @@ abstract class tx_transactor_gateway implements tx_transactor_gateway_int {
 		$this->conf = unserialize($GLOBALS['TYPO3_CONF_VARS']['EXT']['extConf']['transactor']);
 		$extManagerConf = unserialize($GLOBALS['TYPO3_CONF_VARS']['EXT']['extConf'][$this->extKey]);
 
-		if (is_array($this->conf))	{
+		if ($this->bMergeConf && is_array($this->conf))	{
 			if (is_array($extManagerConf))	{
 				$this->conf = array_merge($this->conf, $extManagerConf);
 			}

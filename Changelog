@@ -1,3 +1,6 @@
+2011-08-08	Franz Holzinger <franz@ttproducts.de>
+	* move the call to set the detailsArray to the front because some Gateways need the data to make a verification
+
 2011-05-24	Franz Holzinger <franz@ttproducts.de>
 	* fix bug with wrong parameter encodage of success and failure links
 
