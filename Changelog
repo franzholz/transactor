@@ -1,3 +1,6 @@
+2011-08-26	Franz Holzinger <franz@ttproducts.de>
+	* fix bug: the interface file must be included
+
 2011-08-08	Franz Holzinger <franz@ttproducts.de>
 	* move the call to set the detailsArray to the front because some Gateways need the data to make a verification
 

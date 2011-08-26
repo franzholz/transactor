@@ -3,7 +3,7 @@
 *
 *  Copyright notice
 *
-*  (c) 2010 Franz Holzinger (franz@ttproducts.de)
+*  (c) 2011 Franz Holzinger (franz@ttproducts.de)
 *  All rights reserved
 *
 *  This script is part of the Typo3 project. The Typo3 project is
@@ -22,6 +22,9 @@
 *
 *  This copyright notice MUST APPEAR in all copies of the script!
 ***************************************************************/
+
+
+require_once (t3lib_extMgM::extPath('transactor') . 'interfaces/interface.tx_transactor_gateway_int.php');
 
 require_once (t3lib_extMgM::extPath('transactor') . 'model/class.tx_transactor_gateway.php');
 

@@ -39,7 +39,7 @@
 
 
 
-require_once (t3lib_extMgm::extPath('transactor') . 'model/class.tx_transactor_language.php');
+require_once(t3lib_extMgm::extPath('transactor') . 'model/class.tx_transactor_language.php');
 require_once(t3lib_extMgm::extPath('div2007') . 'class.tx_div2007.php');
 
 
@@ -164,6 +164,7 @@ class tx_transactor_api {
 		} else {
 			$bValidParams = TRUE;
 		}
+
 		if ($bValidParams) {
 			$lConf = $confScript;
 			if (is_array($confScript)) {
@@ -182,10 +183,6 @@ class tx_transactor_api {
 				}
 			}
 
-	// 		require_once(t3lib_extMgm::extPath($handleLib) . 'model/class.tx_' . $handleLib . '_gatewayfactory.php');
-	// 		$gatewayFactoryObj = tx_transactor_gatewayfactory::getInstance();
-	// 		$gatewayFactoryObj->registerGatewayExt($gatewayExtName);
-
 			$paymentMethod = $confScript['paymentMethod'];
 			$gatewayProxyObject = self::getGatewayProxyObject($handleLib, $confScript);
 
@@ -199,9 +196,10 @@ class tx_transactor_api {
 					$extKey,
 					$confScript['conf.']
 				);
+
 				if (!$ok) {
-					$rc = tx_div2007_alpha::getLL($langObj,'error_transaction_init');
-					return $rc;
+					$errorMessage = tx_div2007_alpha::getLL($langObj, 'error_transaction_init');
+					return '';
 				}
 				$gatewayConf = $gatewayProxyObject->getConf();
 				self::getPaymentBasket(
@@ -217,8 +215,33 @@ class tx_transactor_api {
 				$referenceId = self::getReferenceUid($handleLib, $confScript, $extKey, $orderUid); // in the case of a callback, a former order than the current would have been read in
 
 				if (!$referenceId) {
-					$rc = tx_div2007_alpha::getLL($langObj,'error_reference_id');
-					return $rc;
+					$errorMessage = tx_div2007_alpha::getLL($langObj,'error_reference_id');
+					return '';
+				}
+
+				$transactionDetailsArray = self::getTransactionDetails(
+					$referenceId,
+					$handleLib,
+					$confScript,
+					$extKey,
+					$calculatedArray,
+					$paymentActivity,
+					$pidArray,
+					$linkParams,
+					$trackingCode,
+					$orderUid,
+					$cardRow,
+					$totalArray,
+					$addressArray,
+					$paymentBasketArray
+				);
+
+					// Set payment details and get the form data:
+				$ok = $gatewayProxyObject->transaction_setDetails($transactionDetailsArray);
+
+				if (!$ok) {
+					$errorMessage = tx_div2007_alpha::getLL($langObj,'error_transaction_details');
+					return '';
 				}
 
 					// Get results of a possible earlier submit and display messages:
@@ -242,31 +265,6 @@ class tx_transactor_api {
 					} else if ($gatewayProxyObject->transaction_failed($transactionResults)) {
 						$errorMessage = $gatewayProxyObject->transaction_message($transactionResults);
 					} else {
-						$transactionDetailsArray = self::getTransactionDetails(
-							$referenceId,
-							$handleLib,
-							$confScript,
-							$extKey,
-							$calculatedArray,
-							$paymentActivity,
-							$pidArray,
-							$linkParams,
-							$trackingCode,
-							$orderUid,
-							$cardRow,
-							$totalArray,
-							$addressArray,
-							$paymentBasketArray
-						);
-
-							// Set payment details and get the form data:
-						$ok = $gatewayProxyObject->transaction_setDetails($transactionDetailsArray);
-
-						if (!$ok) {
-							$rc = tx_div2007_alpha::getLL($langObj,'error_transaction_details');
-							return $rc;
-						}
-
 						$gatewayProxyObject->transaction_setOkPage($transactionDetailsArray['transaction']['successlink']);
 						$gatewayProxyObject->transaction_setErrorPage($transactionDetailsArray['transaction']['faillink']);
 
@@ -287,13 +285,18 @@ class tx_transactor_api {
 							} else {
 								$bFinalize = TRUE;
 							}
-							$contentArray = array();
 						} else if ($gatewayMode == $compGatewayForm && $currentPaymentActivity != 'verify') {
 
 							if (!$templateFilename) {
 								$templateFilename = ($lConf['templateFile'] ? $lConf['templateFile'] : 'EXT:transactor/template/transactor.tmpl');
 							}
 							$localTemplateCode = self::$cObj->fileResource($templateFilename);
+
+							if (!$localTemplateCode && $templateFilename != '') {
+								$errorMessage = tx_div2007_alpha::getLL($langObj, 'error_no_template');
+								$errorMessage = sprintf($errorMessage, $templateFilename);
+								return '';
+							}
 
 								// Render hidden fields:
 							$hiddenFields = '';
@@ -408,7 +411,9 @@ class tx_transactor_api {
 				$ok = $gatewayProxyObject->transaction_validate();
 
 				if (!$ok) {
-					return 'ERROR: invalid data.';
+					$langObj = &t3lib_div::getUserObj('&tx_transactor_language');
+					$errorMessage = tx_div2007_alpha::getLL($langObj, 'error_invalid_data');
+					return $errorMessage;
 				}
 				if ($gatewayProxyObject->transaction_succeded() == FALSE) {
 					$rc = htmlspecialchars($gatewayProxyObject->transaction_message(array()));
@@ -419,7 +424,7 @@ class tx_transactor_api {
 	} // checkRequired
 
 
-	public static function getUrl ($conf,$pid,$linkParamArray) {
+	public static function getUrl ($conf, $pid,$linkParamArray) {
 		global $TSFE;
 
 		if (!$pid) {
@@ -436,6 +441,18 @@ class tx_transactor_api {
 		$linkParams = implode('&', $linkArray);
 		$url = tx_div2007_alpha::getTypoLink_URL_fh002(self::$cObj,$pid,$linkParamArray,'',$conf);
 		return $url;
+	}
+
+
+	public static function getLanguage () {
+		global $TSFE;
+
+		if (isset($TSFE->config) && is_array($TSFE->config) && isset($TSFE->config['config']) && is_array($TSFE->config['config'])) {
+			$rc = strtolower($TSFE->config['config']['language']);
+		} else {
+			$rc = 'default';
+		}
+		return $rc;
 	}
 
 
@@ -505,7 +522,8 @@ class tx_transactor_api {
 			'tracking' => $trackingCode,
 			'address' => $addressArray,
 			'basket' => $paymentBasketArray,
-			'cc' => $cardRow
+			'cc' => $cardRow,
+			'language' => self::getLanguage()
 		);
 
 		if ($paymentActivity == 'verify') {
