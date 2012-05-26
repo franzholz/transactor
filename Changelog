@@ -1,3 +1,11 @@
+2012-05-26	Franz Holzinger <franz@ttproducts.de>
+	* make amount a double value
+	* add markers
+
+2012-01-20	Franz Holzinger <franz@ttproducts.de>
+	* Do not overwrite a formerly generated error message
+	* support for the new language system of TYPO3 4.6
+
 2011-08-26	Franz Holzinger <franz@ttproducts.de>
 	* fix bug: the interface file must be included
 

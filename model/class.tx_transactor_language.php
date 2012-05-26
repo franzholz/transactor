@@ -2,7 +2,7 @@
 /***************************************************************
 *  Copyright notice
 *
-*  (c) 2009 Franz Holzinger <franz@ttproducts.de>
+*  (c) 2012 Franz Holzinger <franz@ttproducts.de>
 *  All rights reserved
 *
 *  This script is part of the TYPO3 project. The TYPO3 project is
@@ -34,7 +34,7 @@
  * @author	Franz Holzinger <franz@ttproducts.de>
  * @maintainer	Franz Holzinger <franz@ttproducts.de>
  * @package TYPO3
- * @subpackage tt_products
+ * @subpackage transactor
  *
  *
  */
@@ -44,32 +44,33 @@ require_once(t3lib_extMgm::extPath('div2007') . 'class.tx_div2007_alpha_language
 
 
 class tx_transactor_language extends tx_div2007_alpha_language_base {
-
-	public function init ($pObj, $cObj, $conf)	{
+	public function init ($pObj, $cObj, $conf, $scriptRelPath) {
 
 		parent::init(
 			$cObj,
 			'transactor',
 			$conf,
-			''
+			$scriptRelPath
 		);
 
-		if (isset($pObj->LOCAL_LANG) && is_array($pObj->LOCAL_LANG))	{
-			$this->LOCAL_LANG = $pObj->LOCAL_LANG;
-		}
-		if (isset($pObj->LOCAL_LANG_charset) && is_array($pObj->LOCAL_LANG_charset))	{
-			$this->LOCAL_LANG_charset = $pObj->LOCAL_LANG_charset;
-		}
-		if (isset($pObj->LOCAL_LANG_loaded) && is_array($pObj->LOCAL_LANG_loaded))	{
-			$this->LOCAL_LANG_loaded = $pObj->LOCAL_LANG_loaded;
+		if (isset($pObj) && is_object($pObj)) {
+			if (isset($pObj->LOCAL_LANG) && is_array($pObj->LOCAL_LANG)) {
+				$this->LOCAL_LANG = $pObj->LOCAL_LANG;
+			}
+			if (isset($pObj->LOCAL_LANG_charset) && is_array($pObj->LOCAL_LANG_charset)) {
+				$this->LOCAL_LANG_charset = $pObj->LOCAL_LANG_charset;
+			}
+			if (isset($pObj->LOCAL_LANG_loaded) && is_array($pObj->LOCAL_LANG_loaded)) {
+				$this->LOCAL_LANG_loaded = $pObj->LOCAL_LANG_loaded;
+			}
 		}
 	}
 
 
-	public function getLanguage ()	{
+	public function getLanguage () {
 		global $TSFE;
 
-		if (isset($TSFE->config) && is_array($TSFE->config) && isset($TSFE->config['config']) && is_array($TSFE->config['config']))	{
+		if (isset($TSFE->config) && is_array($TSFE->config) && isset($TSFE->config['config']) && is_array($TSFE->config['config'])) {
 			$rc = $TSFE->config['config']['language'];
 		} else {
 			$rc = 'default';

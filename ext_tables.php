@@ -1,9 +1,11 @@
 <?php
 //$Id$
 
-if (!defined ('TYPO3_MODE')) 	die ('Access denied.');
+if (!defined ('TYPO3_MODE')) {
+	die ('Access denied.');
+}
 
-if (TYPO3_MODE=='BE')	{
+if (TYPO3_MODE == 'BE') {
 
 	$TCA['tx_transactor_transactions'] = Array (
 		'ctrl' => Array (
@@ -17,4 +19,5 @@ if (TYPO3_MODE=='BE')	{
 		),
 	);
 }
+
 ?>

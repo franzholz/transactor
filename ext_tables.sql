@@ -5,7 +5,7 @@ CREATE TABLE tx_transactor_transactions (
 	gatewayid varchar(255) DEFAULT '0' NOT NULL,
 	reference varchar(255) DEFAULT '0' NOT NULL,
 	currency varchar(3) DEFAULT '' NOT NULL,
-	amount bigint(64) unsigned DEFAULT '0' NOT NULL,
+	amount decimal(19,2) DEFAULT '0.00' NOT NULL,
 	state int(3) unsigned DEFAULT '0' NOT NULL,
 	state_time int(11) unsigned DEFAULT '0' NOT NULL,
 	message varchar(255) DEFAULT '' NOT NULL,

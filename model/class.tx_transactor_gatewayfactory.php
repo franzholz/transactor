@@ -81,7 +81,7 @@ final class tx_transactor_gatewayfactory {
 	 */
 	public static function registerGatewayExt ($extKey) {
 
-		if (t3lib_extMgm::isLoaded($extKey))	{
+		if (t3lib_extMgm::isLoaded($extKey)) {
 			$gatewayProxy = t3lib_div::getUserObj('tx_transactor_gatewayproxy');
 			$gatewayProxy->init($extKey);
 			self::$gatewayProxyObjects[$extKey] = $gatewayProxy;
@@ -215,22 +215,22 @@ final class tx_transactor_gatewayfactory {
 	}
 
 
-	public static function clearErrors ()	{
+	public static function clearErrors () {
 		self::$errorStack = array();
 	}
 
 
-	public static function addError ($error)	{
+	public static function addError ($error) {
 		self::$errorStack[] = $error;
 	}
 
 
-	public static function hasErrors ()	{
+	public static function hasErrors () {
 		$rc = (count(self::$errorStack) > 0);
 	}
 
 
-	public static function getErrors ()	{
+	public static function getErrors () {
 		return self::$errorStack;
 	}
 }

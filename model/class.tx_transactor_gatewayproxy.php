@@ -3,7 +3,7 @@
 *
 *  Copyright notice
 *
-*  (c) 2011 Franz Holzinger (franz@ttproducts.de)
+*  (c) 2012 Franz Holzinger (franz@ttproducts.de)
 *  All rights reserved
 *
 *  This script is part of the Typo3 project. The Typo3 project is
@@ -57,10 +57,10 @@ class tx_transactor_gatewayproxy implements tx_transactor_gateway_int {
 	public function init ($extKey) {
 
 		$this->extensionManagerConf = unserialize($GLOBALS['TYPO3_CONF_VARS']['EXT']['extConf']['transactor']);
-		if (isset($GLOBALS['TYPO3_CONF_VARS']['EXT']['extConf'][$extKey]))	{
+		if (isset($GLOBALS['TYPO3_CONF_VARS']['EXT']['extConf'][$extKey])) {
 			$newExtensionManagerConf = unserialize($GLOBALS['TYPO3_CONF_VARS']['EXT']['extConf'][$extKey]);
-			if (is_array($this->extensionManagerConf))	{
-				if (is_array($newExtensionManagerConf))	{
+			if (is_array($this->extensionManagerConf)) {
+				if (is_array($newExtensionManagerConf)) {
 					$this->extensionManagerConf = array_merge($this->extensionManagerConf, $newExtensionManagerConf);
 				}
 			} else {
@@ -73,9 +73,9 @@ class tx_transactor_gatewayproxy implements tx_transactor_gateway_int {
 	}
 
 
-	public function getGatewayObj ()	{
+	public function getGatewayObj () {
 		$rc = t3lib_div::getUserObj('&' . $this->gatewayClass);
-		if (!is_object($rc))	{
+		if (!is_object($rc)) {
 			exit('internal ERROR in the usage of the Payment Transactor API (transactor) by the extension "' . $this->gatewayExt . '": no object exists for the class "' . $this->gatewayClass . '"');
 		}
 		return $rc;
@@ -94,17 +94,17 @@ class tx_transactor_gatewayproxy implements tx_transactor_gateway_int {
 	}
 
 
-	public function getConf ()	{
+	public function getConf () {
 		return $this->getGatewayObj()->getConf();
 	}
 
 
-	public function getConfig ()	{
+	public function getConfig () {
 		return $this->getGatewayObj()->getConfig();
 	}
 
 
-	public function setConfig ($config)	{
+	public function setConfig ($config) {
 		$this->getGatewayObj()->setConfig($config);
 	}
 
@@ -199,7 +199,7 @@ class tx_transactor_gatewayproxy implements tx_transactor_gateway_int {
 	 * @return	boolean		TRUE if the transaction went fine
 	 * @access	public
 	 */
-	public function transaction_succeded ($resultsArr)	{
+	public function transaction_succeded ($resultsArr) {
 		return $this->getGatewayObj()->transaction_succeded($resultsArr);
 	}
 
@@ -211,7 +211,7 @@ class tx_transactor_gatewayproxy implements tx_transactor_gateway_int {
 	 * @return	boolean		TRUE if the transaction went wrong
 	 * @access	public
 	 */
-	public function transaction_failed ($resultsArr)	{
+	public function transaction_failed ($resultsArr) {
 		return $this->getGatewayObj()->transaction_failed($resultsArr);
 	}
 
@@ -223,7 +223,7 @@ class tx_transactor_gatewayproxy implements tx_transactor_gateway_int {
 	 * @return	boolean		TRUE if the transaction went wrong
 	 * @access	public
 	 */
-	public function transaction_message ($resultsArr)	{
+	public function transaction_message ($resultsArr) {
 		return $this->getGatewayObj()->transaction_message($resultsArr);
 	}
 
@@ -250,7 +250,7 @@ class tx_transactor_gatewayproxy implements tx_transactor_gateway_int {
 			$fields['crdate'] = time();
 			$fields['pid'] = intval($this->extensionManagerConf['pid']);
 			$fields['message'] = (is_array ($fields['message'])) ? serialize($fields['message']) : $fields['message'];
-			if ($fields['uid'] && $fields['reference'])	{
+			if ($fields['uid'] && $fields['reference']) {
 				$dbResult = $TYPO3_DB->exec_INSERTquery (
 					'tx_transactor_transactions',
 					$fields
@@ -386,7 +386,7 @@ class tx_transactor_gatewayproxy implements tx_transactor_gateway_int {
 					$fields['pid'] = $this->extensionManagerConf['pid'];
 					$TYPO3_DB->sql_free_result($dbResult);
 
-					if ($fields['uid'] && $fields['reference'])	{
+					if ($fields['uid'] && $fields['reference']) {
 						$dbResult = $TYPO3_DB->exec_INSERTquery(
 							'tx_transactor_transactions',
 							$fields
@@ -400,12 +400,12 @@ class tx_transactor_gatewayproxy implements tx_transactor_gateway_int {
 	}
 
 
-	public function transaction_getResultsError ($message)	{
+	public function transaction_getResultsError ($message) {
 		return $this->getGatewayObj()->transaction_getResultsError($message);
 	}
 
 
-	public function transaction_getResultsSuccess ($message)	{
+	public function transaction_getResultsSuccess ($message) {
 		return $this->getGatewayObj()->transaction_getResultsSuccess($message);
 	}
 
@@ -422,7 +422,7 @@ class tx_transactor_gatewayproxy implements tx_transactor_gateway_int {
 	 * @access	public
 	 */
 	public function __call ($method, $params) {
-		if (method_exists($this, $method))	{
+		if (method_exists($this, $method)) {
 			$rc = call_user_func_array(array($this->getGatewayObj(), $method), $params);
 		} else {
 			debug ('ERROR: unkown method "' . $method . '" in call of tx_transactor_gatewayproxy object');
@@ -457,41 +457,41 @@ class tx_transactor_gatewayproxy implements tx_transactor_gateway_int {
 	}
 
 
-	public function clearErrors ()	{
+	public function clearErrors () {
 		$this->getGatewayObj()->clearErrors();
 	}
 
 
-	public function addError ($error)	{
+	public function addError ($error) {
 		$this->getGatewayObj()->addError($error);
 	}
 
 
-	public function hasErrors ()	{
+	public function hasErrors () {
 		$rc = $this->getGatewayObj()->hasErrors();
 		return $rc;
 	}
 
 
-	public function getErrors ()	{
+	public function getErrors () {
 		$rc = $this->getGatewayObj()->getErrors();
 		return $rc;
 	}
 
 
-	public function usesBasket ()	{
+	public function usesBasket () {
 		$rc = $this->getGatewayObj()->usesBasket();
 		return $rc;
 	}
 
 
-	public function getTransaction ($referenceId)	{
+	public function getTransaction ($referenceId) {
 		$rc = $this->getGatewayObj()->getTransaction($referenceId);
 		return $rc;
 	}
 
 
-	public function generateReferenceUid ($orderuid, $callingExtension)	{
+	public function generateReferenceUid ($orderuid, $callingExtension) {
 		$rc = $this->getGatewayObj()->generateReferenceUid($orderuid, $callingExtension);
 		return $rc;
 	}
@@ -504,7 +504,7 @@ class tx_transactor_gatewayproxy implements tx_transactor_gateway_int {
 	 * @return	void
 	 * @access	public
 	 */
-	public function setReferenceUid ($reference)	{
+	public function setReferenceUid ($reference) {
 		$this->getGatewayObj()->setReferenceUid($reference);
 	}
 
@@ -515,7 +515,7 @@ class tx_transactor_gatewayproxy implements tx_transactor_gateway_int {
 	 * @return	void		unique reference
 	 * @access	public
 	 */
-	public function getReferenceUid ()	{
+	public function getReferenceUid () {
 		$rc = $this->getGatewayObj()->getReferenceUid();
 		return $rc;
 	}
@@ -528,7 +528,7 @@ class tx_transactor_gatewayproxy implements tx_transactor_gateway_int {
 	 * @return	void
 	 * @access	public
 	 */
-	public function setTransactionUid ($transUid)	{
+	public function setTransactionUid ($transUid) {
 		$this->getGatewayObj()->setTransactionUid($transUid);
 	}
 
@@ -539,7 +539,7 @@ class tx_transactor_gatewayproxy implements tx_transactor_gateway_int {
 	 * @return	void		unique transaction id
 	 * @access	public
 	 */
-	public function getTransactionUid ()	{
+	public function getTransactionUid () {
 		$this->getGatewayObj()->getTransactionUid();
 	}
 }

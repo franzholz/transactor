@@ -3,7 +3,7 @@
 *
 *  Copyright notice
 *
-*  (c) 2011 Franz Holzinger (franz@ttproducts.de)
+*  (c) 2012 Franz Holzinger (franz@ttproducts.de)
 *  All rights reserved
 *
 *  This script is part of the TYPO3 project. The TYPO3 project is
@@ -75,11 +75,11 @@ abstract class tx_transactor_gateway implements tx_transactor_gateway_int {
 		$this->conf = unserialize($GLOBALS['TYPO3_CONF_VARS']['EXT']['extConf']['transactor']);
 		$extManagerConf = unserialize($GLOBALS['TYPO3_CONF_VARS']['EXT']['extConf'][$this->extKey]);
 
-		if ($this->bMergeConf && is_array($this->conf))	{
-			if (is_array($extManagerConf))	{
+		if ($this->bMergeConf && is_array($this->conf)) {
+			if (is_array($extManagerConf)) {
 				$this->conf = array_merge($this->conf, $extManagerConf);
 			}
-		} else if (is_array($extManagerConf))	{
+		} else if (is_array($extManagerConf)) {
 			$this->conf = $extManagerConf;
 		}
 
@@ -89,22 +89,22 @@ abstract class tx_transactor_gateway implements tx_transactor_gateway_int {
 	}
 
 
-	public function getGatewayKey ()	{
+	public function getGatewayKey () {
 			return $this->gatewayKey;
 	}
 
 
-	public function getConf ()	{
+	public function getConf () {
 		return $this->conf;
 	}
 
 
-	public function getConfig ()	{
+	public function getConfig () {
 		return $this->config;
 	}
 
 
-	public function setConfig ($config)	{
+	public function setConfig ($config) {
 		$this->config = $config;
 	}
 
@@ -126,18 +126,18 @@ abstract class tx_transactor_gateway implements tx_transactor_gateway_int {
 		$filename = t3lib_extMgm::extPath($this->extKey) . 'paymentmethods.xml';
 		$filenamepath = t3lib_div::getUrl(t3lib_extMgm::extPath($this->extKey) . 'paymentmethods.xml');
 
-		if ($filenamepath)	{
-			$rc = t3lib_div::xml2array($filenamepath);
+		if ($filenamepath) {
+			$result = t3lib_div::xml2array($filenamepath);
 			$errorIndices = $filenamepath;
 		} else {
 			$errorIndices = $filename . ' not found';
 		}
 
-		if (!is_array($rc))	{
-			$this->addError('tx_transactor_gateway::getAvailablePaymentMethods "' . $this->extKey . ':' . $errorIndices . ':' .  $rc . '"');
-			$rc = FALSE;
+		if (!is_array($result)) {
+			$this->addError('tx_transactor_gateway::getAvailablePaymentMethods "' . $this->extKey . ':' . $errorIndices . ':' .  $result . '"');
+			$result = FALSE;
 		}
-		return $rc;
+		return $result;
 	}
 
 
@@ -151,9 +151,9 @@ abstract class tx_transactor_gateway implements tx_transactor_gateway_int {
 	 * @return	void
 	 * @access	public
 	 */
-	public function supportsGatewayMode ($gatewayMode)	{
-		$rc = in_array($gatewayMode, $this->supportedGatewayArray);
-		return $rc;
+	public function supportsGatewayMode ($gatewayMode) {
+		$result = in_array($gatewayMode, $this->supportedGatewayArray);
+		return $result;
 	}
 
 
@@ -168,50 +168,50 @@ abstract class tx_transactor_gateway implements tx_transactor_gateway_int {
 	 * @return	void
 	 * @access	public
 	 */
-	public function transaction_init ($action, $paymentMethod, $gatewayMode, $callingExtKey, $conf=array())	{
+	public function transaction_init ($action, $paymentMethod, $gatewayMode, $callingExtKey, $conf=array()) {
 
-		if ($this->supportsGatewayMode($gatewayMode))	{
+		if ($this->supportsGatewayMode($gatewayMode)) {
 			$this->action = $action;
 			$this->paymentMethod = $paymentMethod;
 			$this->gatewayMode = $gatewayMode;
 			$this->callingExtension = $callingExtKey;
-			if (is_array($this->conf) && is_array($conf))	{
+			if (is_array($this->conf) && is_array($conf)) {
 				$this->conf = array_merge($this->conf, $conf);
 			}
-			$rc = TRUE;
+			$result = TRUE;
 		} else {
-			$rc = FALSE;
+			$result = FALSE;
 		}
-		return $rc;
+		return $result;
 	}
 
 
-	public function setCookieArray ($cookieArray)	{
-		if (is_array($cookieArray))	{
+	public function setCookieArray ($cookieArray) {
+		if (is_array($cookieArray)) {
 			$this->cookieArray = array_merge($this->cookieArray, $cookieArray);
 		}
 	}
 
 
-	public function getCookies ()	{
-		$rc = '';
-		if (count($this->cookieArray))	{
+	public function getCookies () {
+		$result = '';
+		if (count($this->cookieArray)) {
 			$tmpArray = array();
-			foreach ($this->cookieArray as $k => $v)	{
+			foreach ($this->cookieArray as $k => $v) {
 				$tmpArray[] = $k . '=' . $v;
 			}
-			$rc = implode('; ',$tmpArray);
+			$result = implode('; ', $tmpArray);
 		}
-		return $rc;
+		return $result;
 	}
 
 
-	public function getLanguage ()	{
+	public function getLanguage () {
 		global $TSFE;
 
-		$rc = (isset($TSFE->config['config']) && is_array($TSFE->config['config']) && $TSFE->config['config']['language'] ? $TSFE->config['config']['language'] : 'en');
+		$result = (isset($TSFE->config['config']) && is_array($TSFE->config['config']) && $TSFE->config['config']['language'] ? $TSFE->config['config']['language'] : 'en');
 
-		return $rc;
+		return $result;
 	}
 
 
@@ -224,22 +224,32 @@ abstract class tx_transactor_gateway implements tx_transactor_gateway_int {
 	 * @return	boolean		Returns TRUE if all required details have been set
 	 * @access	public
 	 */
-	public function transaction_setDetails ($detailsArr)	{
+	public function transaction_setDetails ($detailsArr) {
 		global $TYPO3_DB;
 
-		$rc = TRUE;
+		$result = TRUE;
 		$this->detailsArr = $detailsArr;
 		$referenceId = $detailsArr['reference'];
 		$this->setReferenceUid($referenceId);
 
-		if (isset($detailsArr['options']) && is_array($detailsArr['options']) && isset($this->optionsArray) && is_array($this->optionsArray))	{
-
-			foreach ($detailsArr['options'] as $k => $v)	{
-				if (in_array($k, $this->optionsArray))	{
+		if (
+			isset($detailsArr['options']) &&
+			is_array($detailsArr['options']) &&
+			isset($this->optionsArray) &&
+			is_array($this->optionsArray)
+		) {
+			foreach ($detailsArr['options'] as $k => $v) {
+				if (in_array($k, $this->optionsArray)) {
 					$this->config[$k] = $v;
 				}
 			}
-			$xmlOptions = t3lib_div::array2xml_cs($this->config,'phparray',array(),'utf-8');
+			$xmlOptions =
+				t3lib_div::array2xml_cs(
+					$this->config,
+					'phparray',
+					array(),
+					'utf-8'
+				);
 		}
 
 		// Store order id in database
@@ -258,41 +268,64 @@ abstract class tx_transactor_gateway implements tx_transactor_gateway_int {
 			'user' => $detailsArr['user']
 		);
 
-		$res = $TYPO3_DB->exec_DELETEquery('tx_transactor_transactions', 'gatewayid =' . $TYPO3_DB->fullQuoteStr($this->getGatewayKey(), 'tx_transactor_transactions') . ' AND amount LIKE "0.00" AND message LIKE "' . TX_TRANSACTOR_TRANSACTION_MESSAGE_NOT_PROCESSED . '"');
+		$res =
+			$TYPO3_DB->exec_DELETEquery(
+				'tx_transactor_transactions',
+				'gatewayid =' .
+					$TYPO3_DB->fullQuoteStr(
+						$this->getGatewayKey(),
+						'tx_transactor_transactions'
+					) .
+					' AND amount LIKE "0.00" AND message LIKE "' .
+					TX_TRANSACTOR_TRANSACTION_MESSAGE_NOT_PROCESSED . '"'
+			);
 
-		if (($row = $this->getTransaction($referenceId)) === FALSE)	{
-			$res = $TYPO3_DB->exec_INSERTquery('tx_transactor_transactions', $dataArr);
+		if (($row = $this->getTransaction($referenceId)) === FALSE) {
+			$res =
+				$TYPO3_DB->exec_INSERTquery(
+					'tx_transactor_transactions',
+					$dataArr
+				);
 			$dbTransactionUid = $TYPO3_DB->sql_insert_id();
 			$this->setTransactionUid($dbTransactionUid);
 		} else {
 			$this->setTransactionUid($row['uid']);
-			$res = $TYPO3_DB->exec_UPDATEquery('tx_transactor_transactions', 'reference = ' . $TYPO3_DB->fullQuoteStr($referenceId, 'tx_transactor_transactions'), $dataArr);
+			$res =
+				$TYPO3_DB->exec_UPDATEquery(
+					'tx_transactor_transactions',
+					'reference = ' .
+						$TYPO3_DB->fullQuoteStr(
+							$referenceId,
+							'tx_transactor_transactions'
+						),
+					$dataArr
+				);
 		}
 
-		if (!$res)	{
-			$rc = FALSE;
+		if (!$res) {
+			$result = FALSE;
 		}
 
-		return $rc;
+		return $result;
 	}
 
 
-	public function getDetails ()	{
+	public function getDetails () {
 		return $this->detailsArr;
 	}
 
 
-	public function getGatewayMode ()	{
+	public function getGatewayMode () {
 		return $this->gatewayMode;
 	}
 
 
-	public function getPaymentMethod ()	{
+	public function getPaymentMethod () {
 		return $this->paymentMethod;
 	}
 
 
-	public function getCallingExtension ()	{
+	public function getCallingExtension () {
 		return $this->callingExtension;
 	}
 
@@ -309,7 +342,7 @@ abstract class tx_transactor_gateway implements tx_transactor_gateway_int {
 	 * @return	boolean		Returns TRUE if validation was successful, FALSE if not
 	 * @access	public
 	 */
-	public function transaction_validate ($level=1) 	{
+	public function transaction_validate ($level=1) {
 		return FALSE;
 	}
 
@@ -323,7 +356,7 @@ abstract class tx_transactor_gateway implements tx_transactor_gateway_int {
 	 * @return	boolean		TRUE if transaction was successul, FALSE if not. The result can be accessed via transaction_getResults()
 	 * @access	public
 	 */
-	public function transaction_process ()	{
+	public function transaction_process () {
 		return FALSE;
 	}
 
@@ -334,13 +367,13 @@ abstract class tx_transactor_gateway implements tx_transactor_gateway_int {
 	 * @return	string		Form action URI
 	 * @access	public
 	 */
-	public function transaction_formGetActionURI ()	{
-		if ($this->getGatewayMode() == TX_TRANSACTOR_GATEWAYMODE_FORM)	{
-			$rc = $this->conf['formActionURI'];
+	public function transaction_formGetActionURI () {
+		if ($this->getGatewayMode() == TX_TRANSACTOR_GATEWAYMODE_FORM) {
+			$result = $this->conf['formActionURI'];
 		} else {
-			$rc = FALSE;
+			$result = FALSE;
 		}
-		return $rc;
+		return $result;
 	}
 
 
@@ -350,7 +383,7 @@ abstract class tx_transactor_gateway implements tx_transactor_gateway_int {
 	* @return  string      Form tag extra parameters
 	* @access  public
 	*/
-	public function transaction_formGetFormParms ()	{
+	public function transaction_formGetFormParms () {
 		return '';
 	}
 
@@ -361,7 +394,7 @@ abstract class tx_transactor_gateway implements tx_transactor_gateway_int {
 	* @return  string      Form submit button extra parameters
 	* @access  public
 	*/
-	public function transaction_formGetAttributes ()	{
+	public function transaction_formGetAttributes () {
 		return '';
 	}
 
@@ -373,7 +406,7 @@ abstract class tx_transactor_gateway implements tx_transactor_gateway_int {
 	 * @return	array		Field names and values to be rendered as hidden fields
 	 * @access	public
 	 */
-	public function transaction_formGetHiddenFields ()	{
+	public function transaction_formGetHiddenFields () {
 		return FALSE;
 	}
 
@@ -386,7 +419,7 @@ abstract class tx_transactor_gateway implements tx_transactor_gateway_int {
 	 * @return void
 	 * @access public
 	 */
-	public function transaction_setOkPage ($uri)	{
+	public function transaction_setOkPage ($uri) {
 		$this->internalArray['return'] = $uri;
 	}
 
@@ -400,15 +433,15 @@ abstract class tx_transactor_gateway implements tx_transactor_gateway_int {
 	 * @access public
 	 */
 	public function transaction_isInitState ($row) {
-		$rc = TRUE;
+		$result = TRUE;
 
 		if (is_array($row))	{
 			if ($row['message'] != TX_TRANSACTOR_TRANSACTION_MESSAGE_NOT_PROCESSED)	{
-				$rc = FALSE;
+				$result = FALSE;
 			}
 		}
 
-		return $rc;
+		return $result;
 	}
 
 
@@ -420,7 +453,7 @@ abstract class tx_transactor_gateway implements tx_transactor_gateway_int {
 	 * @return void
 	 * @access public
 	 */
-	public function transaction_setErrorPage ($uri)	{
+	public function transaction_setErrorPage ($uri) {
 		$this->internalArray['cancel_return'] = $uri;
 	}
 
@@ -432,8 +465,9 @@ abstract class tx_transactor_gateway implements tx_transactor_gateway_int {
 	 * @return	array		Results of a processed transaction
 	 * @access	public
 	 */
-	public function transaction_getResults ($reference)	{
-		return self::transaction_getResultsError('internal error in extension "' . $this->extKey . '": method "tx_transactor_gateway::transaction_getResults" has not been overwritten');
+	public function transaction_getResults ($reference) {
+		$result = self::transaction_getResultsError('internal error in extension "' . $this->extKey . '": method "tx_transactor_gateway::transaction_getResults" has not been overwritten');
+		return $result;
 	}
 
 
@@ -444,8 +478,9 @@ abstract class tx_transactor_gateway implements tx_transactor_gateway_int {
 	 * @return	array		Results of an internal error
 	 * @access	public
 	 */
-	public function transaction_getResultsError ($message)	{
-		return self::transaction_getResultsMessage(TX_TRANSACTOR_TRANSACTION_STATE_INTERNAL_ERROR, $message);
+	public function transaction_getResultsError ($message) {
+		$result = self::transaction_getResultsMessage(TX_TRANSACTOR_TRANSACTION_STATE_INTERNAL_ERROR, $message);
+		return $result;
 	}
 
 
@@ -456,12 +491,12 @@ abstract class tx_transactor_gateway implements tx_transactor_gateway_int {
 	 * @return	array		Results of an internal error
 	 * @access	public
 	 */
-	public function transaction_getResultsSuccess ($message)	{
+	public function transaction_getResultsSuccess ($message) {
 		return self::transaction_getResultsMessage(TX_TRANSACTOR_TRANSACTION_STATE_INIT, $message);
 	}
 
 
-	protected function transaction_getResultsMessage ($state, $message)	{
+	protected function transaction_getResultsMessage ($state, $message) {
 		$resultsArray = array();
 		$resultsArray['message'] = $message;
 		$resultsArray['state'] = $state;
@@ -470,17 +505,17 @@ abstract class tx_transactor_gateway implements tx_transactor_gateway_int {
 	}
 
 
-	public function setResultsArray ($resultsArray)	{
+	public function setResultsArray ($resultsArray) {
 		$this->resultsArray = $resultsArray;
 	}
 
 
-	public function getResultsArray ()	{
+	public function getResultsArray () {
 		return $this->resultsArray;
 	}
 
 
-	public function transaction_succeded ($resultsArray)	{
+	public function transaction_succeded ($resultsArray) {
 
 		if (
 			in_array(
@@ -491,62 +526,67 @@ abstract class tx_transactor_gateway implements tx_transactor_gateway_int {
 				)
 			)
 		)	{
-			$rc = TRUE;
+			$result = TRUE;
 		} else {
-			$rc = FALSE;
+			$result = FALSE;
 		}
-		return $rc;
+		return $result;
 	}
 
 
-	public function transaction_failed ($resultsArray)	{
+	public function transaction_failed ($resultsArray) {
 
-		if ($resultsArray['state'] == TX_TRANSACTOR_TRANSACTION_STATE_APPROVE_NOK)	{
-			$rc = TRUE;
+		if ($resultsArray['state'] == TX_TRANSACTOR_TRANSACTION_STATE_APPROVE_NOK) {
+			$result = TRUE;
 		} else {
-			$rc = FALSE;
+			$result = FALSE;
 		}
 
-		return $rc;
+		return $result;
 	}
 
 
-	public function transaction_message ($resultsArray)	{
+	public function transaction_message ($resultsArray) {
 
-		if (isset($resultsArray['message']))	{
-			$rc = $resultsArray['message'];
+		if (isset($resultsArray['message'])) {
+			$result = $resultsArray['message'];
 		} else {
-			$rc = 'internal error in extension "' . $this->extKey . '": The resultsArray has not been filled for method transaction_message';
+			$result = 'internal error in extension "' . $this->extKey . '": The resultsArray has not been filled for method transaction_message';
 		}
-		return $rc;
+		return $result;
 	}
 
 
-	public function clearErrors ()	{
+	public function clearErrors () {
 		$this->errorStack = array();
 	}
 
 
-	public function addError ($error)	{
+	public function addError ($error) {
 		$this->errorStack[] = $error;
 	}
 
 
-	public function hasErrors ()	{
-		$rc = (count($this->errorStack) > 0);
+	public function hasErrors () {
+		$result = (count($this->errorStack) > 0);
 	}
 
 
-	public function getErrors ()	{
+	public function getErrors () {
 		return $this->errorStack;
 	}
 
 
-	public function usesBasket ()	{
+	public function usesBasket () {
 
 		$detailsArray = $this->getDetails();
-		$rc = (intval($this->bSendBasket) > 0) && isset($detailsArray['basket']) && is_array($detailsArray['basket']) && count($detailsArray['basket']);
-		return $rc;
+		$result = (
+			intval($this->bSendBasket) > 0) &&
+			isset($detailsArray['basket']) &&
+			is_array($detailsArray['basket']) &&
+			count($detailsArray['basket']
+		);
+		return $result;
 	}
 
 
@@ -554,25 +594,34 @@ abstract class tx_transactor_gateway implements tx_transactor_gateway_int {
 	// Helpers
 	// *****************************************************************************
 
-	public function getTransaction ($referenceId)	{
+	public function getTransaction ($referenceId) {
 		global $TYPO3_DB;
 
-		$rc = FALSE;
+		$result = FALSE;
 
-		if ($referenceId !='')	{
-			$res = $TYPO3_DB->exec_SELECTquery('*', 'tx_transactor_transactions', 'reference = ' . $TYPO3_DB->fullQuoteStr($referenceId, 'tx_transactor_transactions'));
-			if ($res)	{
-				$rc = $TYPO3_DB->sql_fetch_assoc($res);
+		if ($referenceId !='') {
+			$res =
+				$TYPO3_DB->exec_SELECTquery(
+					'*',
+					'tx_transactor_transactions',
+					'reference = ' .
+						$TYPO3_DB->fullQuoteStr(
+							$referenceId,
+							'tx_transactor_transactions'
+						)
+				);
+			if ($res) {
+				$result = $TYPO3_DB->sql_fetch_assoc($res);
 				$TYPO3_DB->sql_free_result($res);
 			}
 		}
-		return $rc;
+		return $result;
 	}
 
 
-	public function generateReferenceUid ($orderuid, $callingExtension)	{
-		$rc = $this->gatewayKey . '#' . md5($callingExtension . '-' . $orderuid);
-		return $rc;
+	public function generateReferenceUid ($orderuid, $callingExtension) {
+		$result = $this->gatewayKey . '#' . md5($callingExtension . '-' . $orderuid);
+		return $result;
 	}
 
 
@@ -583,7 +632,7 @@ abstract class tx_transactor_gateway implements tx_transactor_gateway_int {
 	 * @return	void
 	 * @access	public
 	 */
-	public function setReferenceUid ($reference)	{
+	public function setReferenceUid ($reference) {
 		$this->referenceId = $reference;
 	}
 
@@ -594,7 +643,7 @@ abstract class tx_transactor_gateway implements tx_transactor_gateway_int {
 	 * @return	void		unique reference
 	 * @access	public
 	 */
-	public function getReferenceUid ()	{
+	public function getReferenceUid () {
 		return $this->referenceId;
 	}
 
@@ -606,7 +655,7 @@ abstract class tx_transactor_gateway implements tx_transactor_gateway_int {
 	 * @return	void
 	 * @access	public
 	 */
-	public function setTransactionUid ($transUid)	{
+	public function setTransactionUid ($transUid) {
 		$this->transactionId = $transUid;
 	}
 
@@ -617,7 +666,7 @@ abstract class tx_transactor_gateway implements tx_transactor_gateway_int {
 	 * @return	void		unique transaction id
 	 * @access	public
 	 */
-	public function getTransactionUid ()	{
+	public function getTransactionUid () {
 		return $this->transactionId;
 	}
 }

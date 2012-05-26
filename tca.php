@@ -59,8 +59,8 @@ $TCA['tx_transactor_transactions'] = Array (
 			'config' => Array (
 				'type' => 'input',
 				'size' => '12',
-				'eval' => 'int',
-				'max' => '64'
+				'eval' => 'trim,double2',
+				'max' => '20'
 			)
 		),
 		'state' => Array (
