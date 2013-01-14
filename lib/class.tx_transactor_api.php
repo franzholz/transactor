@@ -234,11 +234,12 @@ class tx_transactor_api {
 		$orderUid,
 		$cardRow,
 		&$bFinalize,
+		&$bFinalVerify,
 		&$markerArray,
 		&$templateFilename,
 		&$localTemplateCode,
 		&$errorMessage
-	)	{
+	) {
 		global $TSFE;
 
 		$langObj = &t3lib_div::getUserObj('&tx_transactor_language');

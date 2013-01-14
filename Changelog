@@ -1,3 +1,6 @@
+2013-01-14	Franz Holzinger <franz@ttproducts.de>
+	* changed API: new parameter $bFinalVerify
+
 2012-05-26	Franz Holzinger <franz@ttproducts.de>
 	* make amount a double value
 	* add markers
