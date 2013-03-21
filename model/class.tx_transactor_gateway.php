@@ -3,7 +3,7 @@
 *
 *  Copyright notice
 *
-*  (c) 2012 Franz Holzinger (franz@ttproducts.de)
+*  (c) 2013 Franz Holzinger (franz@ttproducts.de)
 *  All rights reserved
 *
 *  This script is part of the TYPO3 project. The TYPO3 project is
@@ -23,8 +23,6 @@
 *  This copyright notice MUST APPEAR in all copies of the script!
 ***************************************************************/
 
-require_once(t3lib_extMgm::extPath('transactor') . 'interfaces/interface.tx_transactor_gateway_int.php');
-
 
 /**
  * Abstract class defining the interface for gateway implementations.
@@ -43,20 +41,23 @@ abstract class tx_transactor_gateway implements tx_transactor_gateway_int {
 	protected $gatewayKey = 'transactor';	// must be overridden
 	protected $extKey = 'transactor';		// must be overridden
 	protected $supportedGatewayArray = array();	// must be overridden
+	protected $bTaxIncluded = FALSE; 	// can be overridden
 	protected $conf;
-	protected $bSendBasket;
+	protected $bSendBasket = FALSE;	// Submit detailled basket informations like single products
 	protected $optionsArray;
 	protected $resultsArray = array();
 	protected $config = array();
 	protected $bMergeConf = TRUE;
+	protected $formActionURI = '';	// The action uri for the submit form
+
 	private $errorStack;
-	private	$action;
-	private	$paymentMethod;
-	private	$gatewayMode;
-	private	$callingExtension;
-	private $detailsArr;
+	private $action;
+	private $paymentMethod;
+	private $gatewayMode;
+	private $callingExtension;
+	private $detailsArray;
 	private $transactionId;
-	private $referenceId;
+	private $reference;
 	private $cookieArray = array();
 	private $internalArray = array(); // internal options
 
@@ -73,7 +74,7 @@ abstract class tx_transactor_gateway implements tx_transactor_gateway_int {
 
 		$this->clearErrors();
 		$this->conf = unserialize($GLOBALS['TYPO3_CONF_VARS']['EXT']['extConf']['transactor']);
-		$extManagerConf = unserialize($GLOBALS['TYPO3_CONF_VARS']['EXT']['extConf'][$this->extKey]);
+		$extManagerConf = unserialize($GLOBALS['TYPO3_CONF_VARS']['EXT']['extConf'][$this->getExtKey()]);
 
 		if ($this->bMergeConf && is_array($this->conf)) {
 			if (is_array($extManagerConf)) {
@@ -89,8 +90,13 @@ abstract class tx_transactor_gateway implements tx_transactor_gateway_int {
 	}
 
 
+	public function getExtKey () {
+		return $this->extKey;
+	}
+
+
 	public function getGatewayKey () {
-			return $this->gatewayKey;
+		return $this->gatewayKey;
 	}
 
 
@@ -123,8 +129,8 @@ abstract class tx_transactor_gateway implements tx_transactor_gateway_int {
 	 */
 	 public function getAvailablePaymentMethods () {
 
-		$filename = t3lib_extMgm::extPath($this->extKey) . 'paymentmethods.xml';
-		$filenamepath = t3lib_div::getUrl(t3lib_extMgm::extPath($this->extKey) . 'paymentmethods.xml');
+		$filename = t3lib_extMgm::extPath($this->getExtKey()) . 'paymentmethods.xml';
+		$filenamepath = t3lib_div::getUrl(t3lib_extMgm::extPath($this->getExtKey()) . 'paymentmethods.xml');
 
 		if ($filenamepath) {
 			$result = t3lib_div::xml2array($filenamepath);
@@ -134,7 +140,9 @@ abstract class tx_transactor_gateway implements tx_transactor_gateway_int {
 		}
 
 		if (!is_array($result)) {
-			$this->addError('tx_transactor_gateway::getAvailablePaymentMethods "' . $this->extKey . ':' . $errorIndices . ':' .  $result . '"');
+			$this->addError(
+				'tx_transactor_gateway::getAvailablePaymentMethods "' . $this->getExtKey() . ':' . $errorIndices . ':' .  $result . '"'
+			);
 			$result = FALSE;
 		}
 		return $result;
@@ -168,8 +176,13 @@ abstract class tx_transactor_gateway implements tx_transactor_gateway_int {
 	 * @return	void
 	 * @access	public
 	 */
-	public function transaction_init ($action, $paymentMethod, $gatewayMode, $callingExtKey, $conf=array()) {
-
+	public function transaction_init (
+		$action,
+		$paymentMethod,
+		$gatewayMode,
+		$callingExtKey,
+		$conf = array()
+	) {
 		if ($this->supportsGatewayMode($gatewayMode)) {
 			$this->action = $action;
 			$this->paymentMethod = $paymentMethod;
@@ -182,6 +195,7 @@ abstract class tx_transactor_gateway implements tx_transactor_gateway_int {
 		} else {
 			$result = FALSE;
 		}
+
 		return $result;
 	}
 
@@ -209,7 +223,13 @@ abstract class tx_transactor_gateway implements tx_transactor_gateway_int {
 	public function getLanguage () {
 		global $TSFE;
 
-		$result = (isset($TSFE->config['config']) && is_array($TSFE->config['config']) && $TSFE->config['config']['language'] ? $TSFE->config['config']['language'] : 'en');
+		$result = (
+			isset($TSFE->config['config']) &&
+			is_array($TSFE->config['config']) &&
+			$TSFE->config['config']['language'] ?
+				$TSFE->config['config']['language'] :
+				'en'
+		);
 
 		return $result;
 	}
@@ -220,32 +240,30 @@ abstract class tx_transactor_gateway implements tx_transactor_gateway_int {
 	 * chosen / supported gateway mode. TX_TRANSACTOR_GATEWAYMODE_FORM does not
 	 * allow setting credit card data for example.
 	 *
-	 * @param	array		$detailsArr: The payment details array
+	 * @param	array		$detailsArray: The payment details array
 	 * @return	boolean		Returns TRUE if all required details have been set
 	 * @access	public
 	 */
-	public function transaction_setDetails ($detailsArr) {
-		global $TYPO3_DB;
-
+	public function transaction_setDetails ($detailsArray) {
 		$result = TRUE;
-		$this->detailsArr = $detailsArr;
-		$referenceId = $detailsArr['reference'];
-		$this->setReferenceUid($referenceId);
+		$this->detailsArray = $detailsArray;
+		$reference = $detailsArray['reference'];
+		$this->setReferenceUid($reference);
 
 		if (
-			isset($detailsArr['options']) &&
-			is_array($detailsArr['options']) &&
+			isset($detailsArray['options']) &&
+			is_array($detailsArray['options']) &&
 			isset($this->optionsArray) &&
 			is_array($this->optionsArray)
 		) {
-			foreach ($detailsArr['options'] as $k => $v) {
+			foreach ($detailsArray['options'] as $k => $v) {
 				if (in_array($k, $this->optionsArray)) {
 					$this->config[$k] = $v;
 				}
 			}
 			$xmlOptions =
 				t3lib_div::array2xml_cs(
-					$this->config,
+					$this->getConfig(),
 					'phparray',
 					array(),
 					'utf-8'
@@ -253,65 +271,72 @@ abstract class tx_transactor_gateway implements tx_transactor_gateway_int {
 		}
 
 		// Store order id in database
-		$dataArr = array(
+		$dataArray = array(
 			'crdate' => time(),
 			'gatewayid' => $this->gatewayKey,
 			'ext_key' => $this->callingExtension,
-			'reference' => $referenceId,
+			'reference' => $reference,
 			'state' => TX_TRANSACTOR_TRANSACTION_STATE_NO_PROCESS,
-			'amount' => $detailsArr['transaction']['amount'],
-			'currency' => $detailsArr['transaction']['currency'],
+			'amount' => $detailsArray['transaction']['amount'],
+			'currency' => $detailsArray['transaction']['currency'],
 			'paymethod_key' => $this->gatewayKey,
 			'paymethod_method' => $this->paymentMethod,
 			'message' => TX_TRANSACTOR_TRANSACTION_MESSAGE_NOT_PROCESSED,
 			'config' => $xmlOptions,
-			'user' => $detailsArr['user']
+			'user' => $detailsArray['user']
 		);
 
 		$res =
-			$TYPO3_DB->exec_DELETEquery(
+			$GLOBALS['TYPO3_DB']->exec_DELETEquery(
 				'tx_transactor_transactions',
 				'gatewayid =' .
-					$TYPO3_DB->fullQuoteStr(
+					$GLOBALS['TYPO3_DB']->fullQuoteStr(
 						$this->getGatewayKey(),
 						'tx_transactor_transactions'
 					) .
-					' AND amount LIKE "0.00" AND message LIKE "' .
-					TX_TRANSACTOR_TRANSACTION_MESSAGE_NOT_PROCESSED . '"'
+					' AND amount LIKE "0.00"' .
+					' AND message LIKE "' . TX_TRANSACTOR_TRANSACTION_MESSAGE_NOT_PROCESSED . '"'
 			);
 
-		if (($row = $this->getTransaction($referenceId)) === FALSE) {
+		if (($row = $this->getTransaction($reference)) === FALSE) {
 			$res =
-				$TYPO3_DB->exec_INSERTquery(
+				$GLOBALS['TYPO3_DB']->exec_INSERTquery(
 					'tx_transactor_transactions',
-					$dataArr
+					$dataArray
 				);
-			$dbTransactionUid = $TYPO3_DB->sql_insert_id();
+			$dbTransactionUid = $GLOBALS['TYPO3_DB']->sql_insert_id();
 			$this->setTransactionUid($dbTransactionUid);
 		} else {
 			$this->setTransactionUid($row['uid']);
-			$res =
-				$TYPO3_DB->exec_UPDATEquery(
-					'tx_transactor_transactions',
-					'reference = ' .
-						$TYPO3_DB->fullQuoteStr(
-							$referenceId,
-							'tx_transactor_transactions'
-						),
-					$dataArr
-				);
+
+			if (
+				intval($row['amount'] * 100 + 0.001) != intval($dataArray['amount'] * 100 + 0.001) ||
+				$row['gatewayid'] != $dataArray['gatewayid'] ||
+				$row['paymethod_key'] != $dataArray['paymethod_key'] ||
+				$row['paymethod_method'] != $dataArray['paymethod_method']
+			) {
+				$res =
+					$GLOBALS['TYPO3_DB']->exec_UPDATEquery(
+						'tx_transactor_transactions',
+						'reference = ' .
+							$GLOBALS['TYPO3_DB']->fullQuoteStr(
+								$reference,
+								'tx_transactor_transactions'
+							),
+						$dataArray
+					);
+			}
 		}
 
 		if (!$res) {
 			$result = FALSE;
 		}
-
 		return $result;
 	}
 
 
 	public function getDetails () {
-		return $this->detailsArr;
+		return $this->detailsArray;
 	}
 
 
@@ -362,23 +387,39 @@ abstract class tx_transactor_gateway implements tx_transactor_gateway_int {
 
 
 	/**
-	 * Returns the form action URI to be used in mode TX_TRANSACTOR_GATEWAYMODE_FORM.
+	 * Displays the form on which the user will finally submit the transaction to the payment gateway
+	 * Only supported with TX_TRANSACTOR_GATEWAYMODE_AJAX
 	 *
-	 * @return	string		Form action URI
+	 * @return	string		HTML form and javascript
 	 * @access	public
 	 */
-	public function transaction_formGetActionURI () {
-		if ($this->getGatewayMode() == TX_TRANSACTOR_GATEWAYMODE_FORM) {
-			$result = $this->conf['formActionURI'];
-		} else {
-			$result = FALSE;
-		}
-		return $result;
+	public function transaction_getForm ($lConf) {
+		return '';
 	}
 
 
 	/**
-	* Returns any extra parameter for the form url to be used in mode TX_TRANSACTOR_GATEWAYMODE_FORM.
+	 * Returns the form action URI to be used in mode TX_TRANSACTOR_GATEWAYMODE_FORM.
+	 * This is used by PayPal and DIBS
+	 * @return	string		Form action URI
+	 * @access	public
+	 */
+	public function transaction_formGetActionURI () {
+		$formActionURI = FALSE;
+
+		if ($this->getGatewayMode() == TX_TRANSACTOR_GATEWAYMODE_FORM) {
+			$conf = $this->getConf();
+			$formActionURI = $conf['formActionURI'];
+		}
+
+		return $formActionURI;
+	}
+
+
+	/**
+	* Returns any extra parameter for the form url to be used in mode
+	* TX_TRANSACTOR_GATEWAYMODE_FORM.
+	* It can also add the form url in the front and set the '?' as separator
 	*
 	* @return  string      Form tag extra parameters
 	* @access  public
@@ -389,7 +430,8 @@ abstract class tx_transactor_gateway implements tx_transactor_gateway_int {
 
 
 	/**
-	* Returns any extra HTML attributes for the form tag to be used in mode TX_TRANSACTOR_GATEWAYMODE_FORM.
+	* Returns any extra HTML attributes for the form tag to be used in mode
+	* TX_TRANSACTOR_GATEWAYMODE_FORM.
 	*
 	* @return  string      Form submit button extra parameters
 	* @access  public
@@ -435,8 +477,8 @@ abstract class tx_transactor_gateway implements tx_transactor_gateway_int {
 	public function transaction_isInitState ($row) {
 		$result = TRUE;
 
-		if (is_array($row))	{
-			if ($row['message'] != TX_TRANSACTOR_TRANSACTION_MESSAGE_NOT_PROCESSED)	{
+		if (is_array($row)) {
+			if ($row['message'] != TX_TRANSACTOR_TRANSACTION_MESSAGE_NOT_PROCESSED) {
 				$result = FALSE;
 			}
 		}
@@ -466,7 +508,10 @@ abstract class tx_transactor_gateway implements tx_transactor_gateway_int {
 	 * @access	public
 	 */
 	public function transaction_getResults ($reference) {
-		$result = self::transaction_getResultsError('internal error in extension "' . $this->extKey . '": method "tx_transactor_gateway::transaction_getResults" has not been overwritten');
+		$result =
+			self::transaction_getResultsError(
+				'internal error in extension "' . $this->getExtKey() . '": method "tx_transactor_gateway::transaction_getResults" has not been overwritten'
+			);
 		return $result;
 	}
 
@@ -479,7 +524,11 @@ abstract class tx_transactor_gateway implements tx_transactor_gateway_int {
 	 * @access	public
 	 */
 	public function transaction_getResultsError ($message) {
-		$result = self::transaction_getResultsMessage(TX_TRANSACTOR_TRANSACTION_STATE_INTERNAL_ERROR, $message);
+		$result =
+			self::transaction_getResultsMessage(
+				TX_TRANSACTOR_TRANSACTION_STATE_INTERNAL_ERROR,
+				$message
+			);
 		return $result;
 	}
 
@@ -492,7 +541,12 @@ abstract class tx_transactor_gateway implements tx_transactor_gateway_int {
 	 * @access	public
 	 */
 	public function transaction_getResultsSuccess ($message) {
-		return self::transaction_getResultsMessage(TX_TRANSACTOR_TRANSACTION_STATE_INIT, $message);
+		$result =
+			self::transaction_getResultsMessage(
+				TX_TRANSACTOR_TRANSACTION_STATE_INIT,
+				$message
+			);
+		return $result;
 	}
 
 
@@ -525,7 +579,7 @@ abstract class tx_transactor_gateway implements tx_transactor_gateway_int {
 					TX_TRANSACTOR_TRANSACTION_STATE_APPROVE_DUPLICATE
 				)
 			)
-		)	{
+		) {
 			$result = TRUE;
 		} else {
 			$result = FALSE;
@@ -551,7 +605,7 @@ abstract class tx_transactor_gateway implements tx_transactor_gateway_int {
 		if (isset($resultsArray['message'])) {
 			$result = $resultsArray['message'];
 		} else {
-			$result = 'internal error in extension "' . $this->extKey . '": The resultsArray has not been filled for method transaction_message';
+			$result = 'Internal error in extension "' . $this->getExtKey() . '": The resultsArray has not been filled inside of method transaction_message';
 		}
 		return $result;
 	}
@@ -594,28 +648,52 @@ abstract class tx_transactor_gateway implements tx_transactor_gateway_int {
 	// Helpers
 	// *****************************************************************************
 
-	public function getTransaction ($referenceId) {
+	public function getTransaction ($reference) {
 		global $TYPO3_DB;
 
 		$result = FALSE;
 
-		if ($referenceId !='') {
+		if ($reference !='') {
 			$res =
 				$TYPO3_DB->exec_SELECTquery(
 					'*',
 					'tx_transactor_transactions',
 					'reference = ' .
 						$TYPO3_DB->fullQuoteStr(
-							$referenceId,
+							$reference,
 							'tx_transactor_transactions'
 						)
 				);
+
 			if ($res) {
 				$result = $TYPO3_DB->sql_fetch_assoc($res);
 				$TYPO3_DB->sql_free_result($res);
 			}
 		}
 		return $result;
+	}
+
+
+	/**
+	 * Sets the information that the tax is included in the amount of the transaction
+	 *
+	 * @param	boolean		if the tax is included
+	 * @return	void
+	 * @access	public
+	 */
+	public function setTaxIncluded ($bTaxIncluded) {
+		$this->bTaxIncluded = $bTaxIncluded;
+	}
+
+
+	/**
+	 * Fetches the information that the tax is included in the amount of the transaction
+	 *
+	 * @return	void		unique reference
+	 * @access	public
+	 */
+	public function getTaxIncluded () {
+		return $this->bTaxIncluded;
 	}
 
 
@@ -633,7 +711,7 @@ abstract class tx_transactor_gateway implements tx_transactor_gateway_int {
 	 * @access	public
 	 */
 	public function setReferenceUid ($reference) {
-		$this->referenceId = $reference;
+		$this->reference = $reference;
 	}
 
 
@@ -644,7 +722,7 @@ abstract class tx_transactor_gateway implements tx_transactor_gateway_int {
 	 * @access	public
 	 */
 	public function getReferenceUid () {
-		return $this->referenceId;
+		return $this->reference;
 	}
 
 
@@ -663,11 +741,45 @@ abstract class tx_transactor_gateway implements tx_transactor_gateway_int {
 	/**
 	 * Fetches the uid of the transaction table
 	 *
-	 * @return	void		unique transaction id
+	 * @return	string		unique transaction id
 	 * @access	public
 	 */
 	public function getTransactionUid () {
 		return $this->transactionId;
+	}
+
+
+	/**
+	 * Sets the form action URI
+	 *
+	 * @param	string		form action URI
+	 * @return	void
+	 * @access	public
+	 */
+	public function setFormActionURI ($formActionURI) {
+		$this->formActionURI = $formActionURI;
+	}
+
+
+	/**
+	 * Fetches the form action URI
+	 *
+	 * @return	string		form action URI
+	 * @access	public
+	 */
+	public function getFormActionURI () {
+		return $this->formActionURI;
+	}
+
+
+	/**
+	 * This gives the information if the order can only processed after a verification message has been received.
+	 *
+	 * @return	boolean		TRUE if a verification message needs to be sent
+	 * @access	public
+	 */
+	public function needsVerificationMessage () {
+		return FALSE;
 	}
 }
 

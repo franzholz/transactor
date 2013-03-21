@@ -34,7 +34,7 @@
  * @author	Robert Lemke <robert@typo3.org>
  */
 
-require_once(t3lib_extMgm::extPath('transactor') . 'model/class.tx_transactor_gatewayproxy.php');
+// require_once(t3lib_extMgm::extPath('transactor') . 'model/class.tx_transactor_gatewayproxy.php');
 
 
 final class tx_transactor_gatewayfactory {
@@ -53,6 +53,7 @@ final class tx_transactor_gatewayfactory {
 	 * @access		private
 	 */
 	private function __construct () {
+		// do nothing
 	}
 
 
@@ -85,11 +86,11 @@ final class tx_transactor_gatewayfactory {
 			$gatewayProxy = t3lib_div::getUserObj('tx_transactor_gatewayproxy');
 			$gatewayProxy->init($extKey);
 			self::$gatewayProxyObjects[$extKey] = $gatewayProxy;
-			$rc = self::$gatewayProxyObjects[$extKey];
+			$result = self::$gatewayProxyObjects[$extKey];
 		} else {
-			$rc = FALSE;
+			$result = FALSE;
 		}
-		return $rc;
+		return $result;
 	}
 
 
@@ -116,22 +117,28 @@ final class tx_transactor_gatewayfactory {
 	 * @access		public
 	 */
 	public static function getGatewayProxyObjectByPaymentMethod ($paymentMethod) {
-		$rc = FALSE;
+		$result = FALSE;
 
 		if (is_array (self::$gatewayProxyObjects)) {
 			foreach (self::$gatewayProxyObjects as $extKey => $gatewayProxyObject) {
 				$paymentMethodsArray = $gatewayProxyObject->getAvailablePaymentMethods();
-				if (is_array($paymentMethodsArray) && array_key_exists($paymentMethod, $paymentMethodsArray)) {
-					$rc = $gatewayProxyObject;
+
+				if (
+					is_array($paymentMethodsArray) &&
+					array_key_exists($paymentMethod, $paymentMethodsArray)
+				) {
+					$result = $gatewayProxyObject;
 					break;
 				} else {
 					if ($paymentMethodsArray != FALSE) {
-						self::addError('tx_transactor_gatewayfactory::getGatewayObjectByPaymentMethod ' . $paymentMethodsArray);
+						self::addError(
+							'tx_transactor_gatewayfactory::getGatewayObjectByPaymentMethod ' . $paymentMethodsArray
+						);
 					}
 				}
 			}
 		}
-		return $rc;
+		return $result;
 	}
 
 
@@ -147,7 +154,12 @@ final class tx_transactor_gatewayfactory {
 	 * @return		array		Array of transaction records, FALSE if no records where found or an error occurred.
 	 * @access		public
 	 */
-	public static function getTransactionsByExtKey ($ext_key, $gatewayid=NULL, $reference=NULL, $state=NULL) {
+	public static function getTransactionsByExtKey (
+		$ext_key,
+		$gatewayid = NULL,
+		$reference = NULL,
+		$state = NULL
+	) {
 		global $TYPO3_DB;
 
 		$transactionsArray = FALSE;
@@ -160,12 +172,12 @@ final class tx_transactor_gatewayfactory {
 		$res = $TYPO3_DB->exec_SELECTquery (
 			'*',
 			'tx_transactor_transactions',
-			'ext_key="'.$ext_key.'"'.$additionalWhere,
+			'ext_key="' . $ext_key . '"' . $additionalWhere,
 			'',
 			'crdate DESC'
 		);
 
-		if ($res && $TYPO3_DB->sql_num_rows ($res)) {
+		if ($res && $TYPO3_DB->sql_num_rows($res)) {
 			$transactionsArray = array();
 			while ($row = $TYPO3_DB->sql_fetch_assoc ($res)) {
 				$row['user'] = self::field2array($row['user']);
@@ -188,10 +200,12 @@ final class tx_transactor_gatewayfactory {
 		$res = $TYPO3_DB->exec_SELECTquery (
 			'*',
 			'tx_transactor_transactions',
-			'uid='.$uid
+			'uid=' . $uid
 		);
 
-		if (!$res || !$TYPO3_DB->sql_num_rows($res)) return FALSE;
+		if (!$res || !$TYPO3_DB->sql_num_rows($res)) {
+			return FALSE;
+		}
 
 		$row = $TYPO3_DB->sql_fetch_assoc($res);
 		$row['user'] = self::field2array($row['user']);
@@ -226,7 +240,7 @@ final class tx_transactor_gatewayfactory {
 
 
 	public static function hasErrors () {
-		$rc = (count(self::$errorStack) > 0);
+		$result = (count(self::$errorStack) > 0);
 	}
 
 

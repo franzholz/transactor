@@ -40,7 +40,7 @@
  */
 
 
-require_once(t3lib_extMgm::extPath('div2007') . 'class.tx_div2007_alpha_language_base.php');
+// require_once(t3lib_extMgm::extPath('div2007') . 'class.tx_div2007_alpha_language_base.php');
 
 
 class tx_transactor_language extends tx_div2007_alpha_language_base {
@@ -70,19 +70,23 @@ class tx_transactor_language extends tx_div2007_alpha_language_base {
 	public function getLanguage () {
 		global $TSFE;
 
-		if (isset($TSFE->config) && is_array($TSFE->config) && isset($TSFE->config['config']) && is_array($TSFE->config['config'])) {
-			$rc = $TSFE->config['config']['language'];
+		if (
+			isset($TSFE->config) &&
+			is_array($TSFE->config) &&
+			isset($TSFE->config['config']) &&
+			is_array($TSFE->config['config'])
+		) {
+			$result = $TSFE->config['config']['language'];
 		} else {
-			$rc = 'default';
+			$result = 'default';
 		}
-		return $rc;
+		return $result;
 	}
 }
 
 
-if (defined('TYPO3_MODE') && $GLOBALS['TYPO3_CONF_VARS'][TYPO3_MODE]['XCLASS']['ext/transactor/model/class.tx_transactor_language.php'])	{
+if (defined('TYPO3_MODE') && $GLOBALS['TYPO3_CONF_VARS'][TYPO3_MODE]['XCLASS']['ext/transactor/model/class.tx_transactor_language.php']) {
 	include_once($GLOBALS['TYPO3_CONF_VARS'][TYPO3_MODE]['XCLASS']['ext/transactor/model/class.tx_transactor_language.php']);
 }
-
 
 ?>

@@ -2,7 +2,7 @@
 /***************************************************************
 *  Copyright notice
 *
-*  (c) 2012 Franz Holzinger <franz@ttproducts.de>
+*  (c) 2013 Franz Holzinger <franz@ttproducts.de>
 *  All rights reserved
 *
 *  This script is part of the TYPO3 project. The TYPO3 project is
@@ -39,10 +39,6 @@
 
 
 
-require_once(t3lib_extMgm::extPath('transactor') . 'model/class.tx_transactor_language.php');
-require_once(t3lib_extMgm::extPath('div2007') . 'class.tx_div2007.php');
-require_once(t3lib_extMgm::extPath('div2007') . 'class.tx_div2007_alpha5.php');
-
 
 class tx_transactor_api {
 	protected static $cObj;
@@ -56,7 +52,11 @@ class tx_transactor_api {
 		$cObj,
 		$conf
 	) {
-		$langObj = &t3lib_div::getUserObj('&tx_transactor_language');
+		if (!is_object($cObj)) {
+			$cObj = t3lib_div::getUserObj('&tx_div2007_cobj');
+		}
+
+		$langObj = t3lib_div::getUserObj('&tx_transactor_language');
 		$langObj->init(
 			$pLangObj,
 			$cObj,
@@ -69,10 +69,6 @@ class tx_transactor_api {
 			'locallang.xml'
 		);
 
-		if (!is_object($cObj))	{
-			t3lib_div::requireOnce(PATH_tslib.'class.tslib_content.php');
-			$cObj = &t3lib_div::makeInstance('tslib_cObj');
-		}
 		self::$cObj = $cObj;
 	}
 
@@ -118,7 +114,6 @@ class tx_transactor_api {
 			}
 		}
 
-
 		$newMarkerArray = array();
 
 		if(isset($langArray) && is_array($langArray)) {
@@ -126,7 +121,8 @@ class tx_transactor_api {
 				if ($typoVersion >= 4006000 && is_array($value)) {
 					$value = $value[0]['target'];
 				}
-				$newMarkerArray['###' . strtoupper($key) . '###'] = $cObj->substituteMarkerArray($value, $markerArray);
+				$newMarkerArray['###' . strtoupper($key) . '###'] =
+					$cObj->substituteMarkerArray($value, $markerArray);
 			}
 		} else {
 			$langArray = array();
@@ -145,6 +141,7 @@ class tx_transactor_api {
 		$gatewayModeArray =
 			array(
 				'form' => TX_TRANSACTOR_GATEWAYMODE_FORM,
+				'ajax' => TX_TRANSACTOR_GATEWAYMODE_AJAX,
 				'webservice' => TX_TRANSACTOR_GATEWAYMODE_WEBSERVICE
 			);
 		$gatewayMode = $gatewayModeArray[$confScript['gatewaymode']];
@@ -165,12 +162,14 @@ class tx_transactor_api {
 		t3lib_div::requireOnce(t3lib_extMgm::extPath($handleLib) . 'model/class.tx_' . $handleLib . '_gatewayfactory.php');
 
 		if (is_array($confScript)) {
-			$gatewayExtName = $confScript['extName'];
-			$gatewayFactoryObj = ($handleLib == 'transactor' ? tx_transactor_gatewayfactory::getInstance() : tx_transactor2_gatewayfactory::getInstance());
-			$gatewayFactoryObj->registerGatewayExt($gatewayExtName);
-
+			$gatewayExtKey = $confScript['extName'];
+			$gatewayFactoryObj = tx_transactor_gatewayfactory::getInstance();
+			$gatewayFactoryObj->registerGatewayExt($gatewayExtKey);
 			$paymentMethod = $confScript['paymentMethod'];
-			$gatewayProxyObject = &$gatewayFactoryObj->getGatewayProxyObjectByPaymentMethod($paymentMethod);
+			$gatewayProxyObject =
+				$gatewayFactoryObj->getGatewayProxyObjectByPaymentMethod(
+					$paymentMethod
+				);
 		}
 
 		return $gatewayProxyObject;
@@ -181,7 +180,7 @@ class tx_transactor_api {
 		$confScript,
 		&$subpartArray,
 		&$wrappedSubpartArray
-	)	{
+	) {
 		$bUseTransactor = FALSE;
 		if (is_array($confScript)) {
 			$extKey = $confScript['extName'];
@@ -240,11 +239,12 @@ class tx_transactor_api {
 		&$localTemplateCode,
 		&$errorMessage
 	) {
-		global $TSFE;
+		$langObj = t3lib_div::getUserObj('&tx_transactor_language');
 
-		$langObj = &t3lib_div::getUserObj('&tx_transactor_language');
 		$bFinalize = FALSE;
-		$content = '';
+		$bFinalVerify = FALSE;
+		$gatewayExtKey = '';
+		$result = '';
 
 		if (!is_array($itemArray) || !is_array($calculatedArray)) {
 			$bValidParams = FALSE;
@@ -255,13 +255,13 @@ class tx_transactor_api {
 		if ($bValidParams) {
 			$lConf = $confScript;
 			if (is_array($confScript)) {
-				$gatewayExtName = $confScript['extName'];
+				$gatewayExtKey = $confScript['extName'];
 			}
 
-			if ($gatewayExtName != '' && t3lib_extMgm::isLoaded($gatewayExtName)) {
+			if ($gatewayExtKey != '' && t3lib_extMgm::isLoaded($gatewayExtKey)) {
 				// everything is ok
 			} else {
-				if ($gatewayExtName == '') {
+				if ($gatewayExtKey == '') {
 					$errorMessage =
 						tx_div2007_alpha5::getLL_fh002(
 							$langObj,
@@ -273,8 +273,9 @@ class tx_transactor_api {
 							$langObj,
 							'extension_missing'
 						);
+
 					$messageArray =  explode('|', $message);
-					$errorMessage = $messageArray[0] . $gatewayExtName . $messageArray[1];
+					$errorMessage = $messageArray[0] . $gatewayExtKey . $messageArray[1];
 				}
 			}
 
@@ -284,7 +285,11 @@ class tx_transactor_api {
 			if ($errorMessage == '') {
 				if (is_object($gatewayProxyObject)) {
 					$gatewayKey = $gatewayProxyObject->getGatewayKey();
-					$gatewayMode = self::getGatewayMode($handleLib, $confScript);
+					$gatewayMode =
+						self::getGatewayMode(
+							$handleLib,
+							$confScript
+						);
 					$ok = $gatewayProxyObject->transaction_init(
 						TX_TRANSACTOR_TRANSACTION_ACTION_AUTHORIZEANDTRANSFER,
 						$paymentMethod,
@@ -313,7 +318,14 @@ class tx_transactor_api {
 						$addressArray,
 						$paymentBasketArray
 					);
-					$referenceId = self::getReferenceUid($handleLib, $confScript, $extKey, $orderUid); // in the case of a callback, a former order than the current would have been read in
+
+					$referenceId =
+						self::getReferenceUid(
+							$handleLib,
+							$confScript,
+							$extKey,
+							$orderUid
+						); // in the case of a callback, a former order than the current would have been read in
 
 					if (!$referenceId) {
 						$errorMessage =
@@ -321,7 +333,6 @@ class tx_transactor_api {
 								$langObj,
 								'error_reference_id'
 							);
-
 						return '';
 					}
 
@@ -330,6 +341,7 @@ class tx_transactor_api {
 						$handleLib,
 						$confScript,
 						$extKey,
+						$gatewayExtKey,
 						$calculatedArray,
 						$paymentActivity,
 						$pidArray,
@@ -342,8 +354,11 @@ class tx_transactor_api {
 						$paymentBasketArray
 					);
 
-						// Set payment details and get the form data:
-					$ok = $gatewayProxyObject->transaction_setDetails($transactionDetailsArray);
+						// Set payment details:
+					$ok =
+						$gatewayProxyObject->transaction_setDetails(
+							$transactionDetailsArray
+						);
 
 					if (!$ok) {
 						$errorMessage =
@@ -372,30 +387,36 @@ class tx_transactor_api {
 					if (is_array($transactionResults)) {
 						if ($gatewayProxyObject->transaction_succeded($transactionResults)) {
 							$bFinalize = TRUE;
+							$bFinalVerify = $gatewayProxyObject->needsVerificationMessage();
 						} else if ($gatewayProxyObject->transaction_failed($transactionResults)) {
 							$errorMessage = $gatewayProxyObject->transaction_message($transactionResults);
 						} else {
 							$gatewayProxyObject->transaction_setOkPage($transactionDetailsArray['transaction']['successlink']);
 							$gatewayProxyObject->transaction_setErrorPage($transactionDetailsArray['transaction']['faillink']);
 
-							$compGatewayForm = ($handleLib == 'transactor' ? TX_TRANSACTOR_GATEWAYMODE_FORM : TX_TRANSACTOR2_GATEWAYMODE_FORM);
-							$compGatewayWebservice = ($handleLib == 'transactor' ? TX_TRANSACTOR_GATEWAYMODE_WEBSERVICE : TX_TRANSACTOR2_GATEWAYMODE_WEBSERVICE);
-
 							if (
-								$gatewayMode == $compGatewayWebservice ||
+								$gatewayMode == TX_TRANSACTOR_GATEWAYMODE_WEBSERVICE ||
 								$currentPaymentActivity == 'verify' ||
 								$currentPaymentActivity == 'finalize'
 							) {
-								$rc = $gatewayProxyObject->transaction_process();
+								$result = $gatewayProxyObject->transaction_process();
 								$resultsArray = $gatewayProxyObject->transaction_getResults($referenceId); //array holen mit allen daten
 
-								if ($paymentActivity == 'verify' && $gatewayProxyObject->transaction_succeded($resultsArray) == FALSE) {
+								if (
+									$paymentActivity == 'verify' &&
+									$gatewayProxyObject->transaction_succeded($resultsArray) == FALSE
+								) {
 									$errorMessage = htmlspecialchars($gatewayProxyObject->transaction_message($resultsArray)); // message auslesen
 								} else {
 									$bFinalize = TRUE;
 								}
-							} else if ($gatewayMode == $compGatewayForm && $currentPaymentActivity != 'verify') {
-
+							} else if (
+								$gatewayMode == TX_TRANSACTOR_GATEWAYMODE_AJAX
+							) {
+								$result = $gatewayProxyObject->transaction_getForm($lConf);
+							} else if (
+								$gatewayMode == TX_TRANSACTOR_GATEWAYMODE_FORM
+							) {
 								if (!$templateFilename) {
 									$templateFilename = ($lConf['templateFile'] ? $lConf['templateFile'] : 'EXT:transactor/template/transactor.tmpl');
 								}
@@ -421,18 +442,32 @@ class tx_transactor_api {
 									}
 								}
 								$formuri = $gatewayProxyObject->transaction_formGetActionURI();
-								$formAttributes = $gatewayProxyObject->transaction_formGetAttributes();
+								$gatewayProxyObject->setFormActionURI($formuri);
+								$formParams = $gatewayProxyObject->transaction_formGetFormParms();
 
-								if ($formAttributes) {
-									$formuri .= '?' . $formAttributes;
+								if (
+									$formParams != ''
+								) {
+									if (
+										$formuri != '' &&
+										strpos($formParams, 'https://') === FALSE &&
+										strpos($formParams, 'http://') === FALSE
+									) {
+
+											$formuri .= '?' . $formParams;
+									} else {
+										$formuri = $formParams;
+										$formParams = '';
+									}
 								}
 
-								if (strstr ($formuri, 'ERROR') != FALSE) {
+								if (
+									strpos($formuri, 'ERROR') !== FALSE
+								) {
 									$bError = TRUE;
 								}
 
 								if ($formuri && !$bError) {
-
 									$markerArray['###HIDDENFIELDS###'] .= $hiddenFields;
 									$markerArray['###REDIRECT_URL###'] = htmlspecialchars($formuri);
 									$markerArray['###TRANSACTOR_TITLE###'] = $lConf['extTitle'];
@@ -440,14 +475,17 @@ class tx_transactor_api {
 									$returnUrlArray = parse_url($transactionDetailsArray['transaction']['returi']);
 									$markerArray['###HOST###'] = $returnUrlArray['host'];
 
-									if ($lConf['extImage'] == 'IMAGE' && isset($lConf['extImage.']) && is_array($lConf['extImage.'])) {
+									if (
+										$lConf['extImage'] == 'IMAGE' &&
+										isset($lConf['extImage.']) &&
+										is_array($lConf['extImage.'])
+									) {
 										$imageOut = self::$cObj->IMAGE($lConf['extImage.']);
 									} else {
 										$imageOut = tx_div2007::resolvePathWithExtPrefix($lConf['extImage']);
 									}
 									$markerArray['###TRANSACTOR_IMAGE###'] = $imageOut;
 									$markerArray['###TRANSACTOR_WWW###'] = $lConf['extWww'];
-
 									self::getMarkers(
 										$langObj->getCObj(),
 										$langObj->getConf(),
@@ -497,7 +535,7 @@ class tx_transactor_api {
 				);
 		}
 
-		return $content;
+		return $result;
 	} // includeHandleLib
 
 
@@ -517,17 +555,21 @@ class tx_transactor_api {
 		$orderUid,
 		$cardRow
 	) {
-		$rc = '';
+		$result = '';
 
-		if (strpos($handleLib,'transactor') !== FALSE) {
-
-			$gatewayProxyObject = self::getGatewayProxyObject($handleLib, $confScript);
+		if (strpos($handleLib, 'transactor') !== FALSE) {
+			$gatewayProxyObject =
+				self::getGatewayProxyObject(
+					$handleLib,
+					$confScript
+				);
 
 			if (is_object($gatewayProxyObject)) {
 				$gatewayKey = $gatewayProxyObject->getGatewayKey();
 				$paymentBasketArray = array();
 				$addressArray = array();
 				$totalArray = array();
+
 				$transactionDetailsArray =
 					self::getTransactionDetails(
 						$referenceId,
@@ -549,21 +591,28 @@ class tx_transactor_api {
 				$ok = $gatewayProxyObject->transaction_validate();
 
 				if (!$ok) {
-					$langObj = &t3lib_div::getUserObj('&tx_transactor_language');
+					$langObj = t3lib_div::getUserObj('&tx_transactor_language');
+
 					$errorMessage =
 						tx_div2007_alpha5::getLL_fh002(
 							$langObj,
 							'error_invalid_data'
 						);
+
 					return $errorMessage;
 				}
 
 				if ($gatewayProxyObject->transaction_succeded() == FALSE) {
-					$rc = htmlspecialchars($gatewayProxyObject->transaction_message(array()));
+					$result =
+						htmlspecialchars(
+							$gatewayProxyObject->transaction_message(
+								array()
+							)
+						);
 				}
 			}
 		}
-		return $rc;
+		return $result;
 	} // checkRequired
 
 
@@ -572,10 +621,8 @@ class tx_transactor_api {
 		$pid,
 		$linkParamArray
 	) {
-		global $TSFE;
-
 		if (!$pid) {
-			$pid = $TSFE->id;
+			$pid = $GLOBLAS['TSFE']->id;
 		}
 		$target = '';
 		$linkParams = '';
@@ -601,23 +648,29 @@ class tx_transactor_api {
 	static public function getLanguage () {
 		global $TSFE;
 
-		if (isset($TSFE->config) && is_array($TSFE->config) && isset($TSFE->config['config']) && is_array($TSFE->config['config'])) {
-			$rc = strtolower($TSFE->config['config']['language']);
+		if (
+			isset($TSFE->config) &&
+			is_array($TSFE->config) &&
+			isset($TSFE->config['config']) &&
+			is_array($TSFE->config['config'])
+		) {
+			$result = strtolower($TSFE->config['config']['language']);
 		} else {
-			$rc = 'default';
+			$result = 'default';
 		}
-		return $rc;
+		return $result;
 	}
 
 
 	/**
 	 * Gets all the data needed for the transaction or the verification check
 	 */
-	static public function &getTransactionDetails (
+	static protected function getTransactionDetails (
 		$referenceId,
 		$handleLib,
 		$confScript,
 		$extKey,
+		$gatewayExtKey,
 		$calculatedArray,
 		$paymentActivity,
 		$pidArray,
@@ -629,10 +682,7 @@ class tx_transactor_api {
 		&$addressArray,
 		&$paymentBasketArray
 	) {
-		global $TSFE;
-
 		$paramNameActivity = $extKey . '[activity][' . $paymentActivity . ']';
-
 		$failLinkParams = array($paramNameActivity => '0');
 
 		if (isset($linkParams) && is_array($linkParams)) {
@@ -645,23 +695,39 @@ class tx_transactor_api {
 			$successLinkParams = array_merge($successLinkParams, $linkParams);
 		}
 
+		$notifyUrlParams = array('eID' => str_replace('transactor_', '', $gatewayExtKey));
+
+		if (isset($linkParams) && is_array($linkParams)) {
+			$notifyUrlParams = array_merge($notifyUrlParams, $linkParams);
+		}
+
 		$paramReturi = '';
 
 			// Prepare some values for the form fields:
-		$totalPrice = $calculatedArray['priceNoTax']['total'];
+		$totalPrice = $calculatedArray['priceTax']['total'];
 
 		if ($paymentActivity == 'finalize' && $confScript['returnPID']) {
 			$successPid = $confScript['returnPID'];
 		} else {
-			$successPid = ($paymentActivity == 'payment' || $paymentActivity == 'verify' ? ($pidArray['PIDthanks'] ? $pidArray['PIDthanks'] : $pidArray['PIDfinalize']) : $TSFE->id);
+			$successPid = ($pidArray['PIDthanks'] ? $pidArray['PIDthanks'] : $pidArray['PIDfinalize']);
+			if (!$successPid) {
+				$successPid = $GLOBALS['TSFE']->id;
+			}
 		}
+
+		$failPid = ($pidArray['PIDpayment'] ? $pidArray['PIDpayment'] : $pidArray['PIDbasket']);
+		if (!$failPid) {
+			$failPid = $GLOBALS['TSFE']->id;
+		}
+
 		$conf = array('returnLast' => 'url');
 		$urlDir = t3lib_div::getIndpEnv('TYPO3_REQUEST_DIR');
-		$retlink = $urlDir . self::getUrl($conf, $TSFE->id, $linkParams);
+		$retlink = $urlDir . self::getUrl($conf, $GLOBALS['TSFE']->id, $linkParams);
 		$returi = $retlink . $paramReturi;
 
-		$faillink = $urlDir . self::getUrl($conf, $pidArray['PIDpayment'], $failLinkParams);
+		$faillink = $urlDir . self::getUrl($conf, $failPid, $failLinkParams);
 		$successlink = $urlDir . self::getUrl($conf, $successPid, $successLinkParams);
+		$notifyurl = $urlDir . self::getUrl($conf, $GLOBALS['TSFE']->id, $notifyUrlParams);
 
 		$transactionDetailsArray = array (
 			'transaction' => array (
@@ -670,18 +736,21 @@ class tx_transactor_api {
 				'orderuid' => $orderUid,
 				'returi' => $returi,
 				'faillink' => $faillink,
-				'successlink' => $successlink
+				'successlink' => $successlink,
+				'notifyurl' => $notifyurl
 			),
 			'total' => $totalArray,
 			'tracking' => $trackingCode,
 			'address' => $addressArray,
 			'basket' => $paymentBasketArray,
 			'cc' => $cardRow,
-			'language' => self::getLanguage()
+			'language' => self::getLanguage(),
+			'calling_extension' => $extKey,
+			'confScript' => $confScript
 		);
 
 		if ($paymentActivity == 'verify') {
-			$verifyLink = $urlDir . self::getUrl($conf, $TSFE->id, $successLinkParams);
+			$verifyLink = $urlDir . self::getUrl($conf, $GLOBALS['TSFE']->id, $successLinkParams);
 			$transactionDetailsArray['transaction']['verifylink'] = $verifyLink;
 		}
 
@@ -694,7 +763,7 @@ class tx_transactor_api {
 	}
 
 
-	static public function &getPaymentBasket (
+	static protected function getPaymentBasket (
 		$itemArray,
 		$calculatedArray,
 		$infoArray,
@@ -707,7 +776,7 @@ class tx_transactor_api {
 		global $TYPO3_DB;
 
 		$bUseStaticInfo = FALSE;
-		$langObj = &t3lib_div::getUserObj('&tx_transactor_language');
+		$langObj = t3lib_div::getUserObj('&tx_transactor_language');
 
 		if (t3lib_extMgm::isLoaded('static_info_tables')) {
 			$eInfo = tx_div2007_alpha::getExtensionInfo_fh002('static_info_tables');
@@ -719,7 +788,7 @@ class tx_transactor_api {
 
 		if ($bUseStaticInfo) {
 			$path = t3lib_extMgm::extPath('static_info_tables');
-			include_once($path.'class.tx_staticinfotables_div.php');
+			include_once($path . 'class.tx_staticinfotables_div.php');
 		}
 
 		// Setting up total values
@@ -729,8 +798,10 @@ class tx_transactor_api {
 		$totalArray['goodstax'] = self::fFloat($calculatedArray['priceTax']['goodstotal']);
 
 		// new calculatedArray format?
-		if (isset($calculatedArray['shipping']) && is_array($calculatedArray['shipping'])) {
-
+		if (
+			isset($calculatedArray['shipping']) &&
+			is_array($calculatedArray['shipping'])
+		) {
 			$totalArray['paymentnotax'] = self::fFloat($calculatedArray['payment']['priceNoTax']);
 			$totalArray['paymenttax'] = self::fFloat($calculatedArray['payment']['priceTax']);
 			$totalArray['shippingnotax'] = self::fFloat($calculatedArray['shipping']['priceNoTax']);
@@ -772,8 +843,11 @@ class tx_transactor_api {
 			$addressArray[$key] = array();
 
 			// Correct firstname- and lastname-field if they have no value
-			if ($basketAddressArray['first_name'] == '' && $basketAddressArray['last_name'] == '') {
-				$tmpNameArr = explode(" ", $basketAddressArray['name'], 2);
+			if (
+				$basketAddressArray['first_name'] == '' &&
+				$basketAddressArray['last_name'] == ''
+			) {
+				$tmpNameArr = explode(' ', $basketAddressArray['name'], 2);
 				$basketAddressArray['first_name'] = $tmpNameArr[0];
 				$basketAddressArray['last_name'] = $tmpNameArr[1];
 			}
@@ -885,6 +959,7 @@ class tx_transactor_api {
 		if ($newTotalArray['shipping'] != $totalArray['shippingtax']) {
 			$basketArray[$lastSort][$lastKey]['shipping'] += $totalArray['shippingtax'] - $newTotalArray['shipping'];
 		}
+
 		// fix rounding errors
 		if ($newTotalArray['handling'] != $totalArray['handling']) {
 			$basketArray[$lastSort][$lastKey]['handling'] += $totalArray['handlingtax'] - $newTotalArray['handling'];
@@ -893,7 +968,7 @@ class tx_transactor_api {
 		if (
 			$calculatedArray['priceTax']['vouchertotal'] > 0 &&
 			$calculatedArray['priceTax']['vouchertotal'] != $calculatedArray['priceTax']['total']
-		)	{
+		) {
 			$voucherAmount = $calculatedArray['priceTax']['vouchertotal'] - $calculatedArray['priceTax']['total'];
 			$voucherText =
 				tx_div2007_alpha5::getLL_fh002(
@@ -911,7 +986,13 @@ class tx_transactor_api {
 				);
 
 			$totalArray['goodsnotax'] = self::fFloat($calculatedArray['priceNoTax']['goodstotal'] + $voucherAmount);
+			if (isset($calculatedArray['depositnotax'])) {
+				$totalArray['goodsnotax'] = self::fFloat($calculatedArray['priceNoTax']['goodstotal'] + $calculatedArray['depositnotax']['goodstotal']);
+			}
 			$totalArray['goodstax'] = self::fFloat($calculatedArray['priceTax']['goodstotal'] + $voucherAmount);
+			if (isset($calculatedArray['deposittax'])) {
+				$totalArray['goodstax'] = self::fFloat($calculatedArray['priceTax']['goodstotal'] + $calculatedArray['deposittax']['goodstotal']);
+			}
 		}
 	}
 
@@ -920,7 +1001,7 @@ class tx_transactor_api {
 		$value = 0,
 		$level = 2
 	) {
-		if (is_float($value))	{
+		if (is_float($value)) {
 			$float = $value;
 		} else {
 			$float = floatval($value);

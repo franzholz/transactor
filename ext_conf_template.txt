@@ -5,38 +5,38 @@ on0l = EAN
 # cat=basic/enable; type=text; label=first option name: First option field name. The os0 variable contains the corresponding value for this option field. For example, if on0 is size, os0 could be large.
 on0n = ean
 
-# cat=basic/enable; type=text; label=seconf option: Second option field name. The os1 variable contains the corresponding value for this option field. For example, if on1 is color then os1 could be blue.
+# cat=basic/enable; type=text; label=second option label: Second option field label. The os1 variable contains the corresponding value for this option field. For example, if on1 is color then os1 could be blue.
 on1l = Item Number
 
-# cat=basic/enable; type=text; label=seconf option: Second option field label. The os1 variable contains the corresponding value for this option field. For example, if on1 is color then os1 could be blue.
+# cat=basic/enable; type=text; label=second option label: Second option field name. The os1 variable contains the corresponding value for this option field. For example, if on1 is color then os1 could be blue.
 on1n = item_number
 
-# cat=basic/enable; type=text; label=seconf option: Third option field label.
+# cat=basic/enable; type=text; label=third option label: Third option field label.
 on2l = Subtitle
 
-# cat=basic/enable; type=text; label=seconf option: Third option field name.
+# cat=basic/enable; type=text; label=third option name: Third option field name.
 on2n = subtitle
 
-# cat=basic/enable; type=text; label=seconf option: Forth option field label.
+# cat=basic/enable; type=text; label=forth option label: Forth option field label.
 on3l = Note
 
-# cat=basic/enable; type=text; label=seconf option: Forth option field name.
+# cat=basic/enable; type=text; label=forth option name: Forth option field name.
 on3n = note
 
-# cat=basic/enable; type=text; label=seconf option: Fifth option field label.
+# cat=basic/enable; type=text; label=fifth option label: Fifth option field label.
 on4l = Color
 
-# cat=basic/enable; type=text; label=seconf option: Fifth option field name.
+# cat=basic/enable; type=text; label=fifth option name: Fifth option field name.
 on4n = color
 
-# cat=basic/enable; type=text; label=seconf option: Sixth option field label.
+# cat=basic/enable; type=text; label=sixth option label: Sixth option field label.
 on5l = Size
 
-# cat=basic/enable; type=text; label=seconf option: Sixth option field name.
+# cat=basic/enable; type=text; label=sixth option name: Sixth option field name.
 on5n = size
 
-# cat=basic/enable; type=text; label=seconf option: Seventh option field label.
+# cat=basic/enable; type=text; label=seventh option label: Seventh option field label.
 on6l = Description
 
-# cat=basic/enable; type=text; label=seconf option: Seventh option field name.
+# cat=basic/enable; type=text; label=seventh option name: Seventh option field name.
 on6n = description

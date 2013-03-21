@@ -1,3 +1,8 @@
+2013-03-21	Franz Holzinger <franz@ttproducts.de>
+	* add the file ext_autoload.php
+	* add marker functions
+	* add support for Ajax based gateway code
+
 2013-01-14	Franz Holzinger <franz@ttproducts.de>
 	* changed API: new parameter $bFinalVerify
 

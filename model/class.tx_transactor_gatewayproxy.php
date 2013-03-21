@@ -23,10 +23,10 @@
 *  This copyright notice MUST APPEAR in all copies of the script!
 ***************************************************************/
 
-
+/*
 require_once (t3lib_extMgM::extPath('transactor') . 'interfaces/interface.tx_transactor_gateway_int.php');
 
-require_once (t3lib_extMgM::extPath('transactor') . 'model/class.tx_transactor_gateway.php');
+require_once (t3lib_extMgM::extPath('transactor') . 'model/class.tx_transactor_gateway.php');*/
 
 /**
  * Proxy class implementing the interface for gateway implementations. This
@@ -74,11 +74,11 @@ class tx_transactor_gatewayproxy implements tx_transactor_gateway_int {
 
 
 	public function getGatewayObj () {
-		$rc = t3lib_div::getUserObj('&' . $this->gatewayClass);
-		if (!is_object($rc)) {
-			exit('internal ERROR in the usage of the Payment Transactor API (transactor) by the extension "' . $this->gatewayExt . '": no object exists for the class "' . $this->gatewayClass . '"');
+		$result = t3lib_div::getUserObj('&' . $this->gatewayClass);
+		if (!is_object($result)) {
+			throw new RuntimeException('ERROR in the Payment Transactor API (transactor) used by the extension "' . $this->gatewayExt . '": no object exists for the class "' . $this->gatewayClass . '"', 2020290000);
 		}
-		return $rc;
+		return $result;
 	}
 
 
@@ -90,17 +90,20 @@ class tx_transactor_gatewayproxy implements tx_transactor_gateway_int {
 	 * @access	public
 	 */
 	public function getGatewayKey () {
-		return $this->getGatewayObj()->getGatewayKey();
+		$result = $this->getGatewayObj()->getGatewayKey();
+		return $result;
 	}
 
 
 	public function getConf () {
-		return $this->getGatewayObj()->getConf();
+		$result = $this->getGatewayObj()->getConf();
+		return $result;
 	}
 
 
 	public function getConfig () {
-		return $this->getGatewayObj()->getConfig();
+		$result = $this->getGatewayObj()->getConfig();
+		return $result;
 	}
 
 
@@ -116,7 +119,8 @@ class tx_transactor_gatewayproxy implements tx_transactor_gateway_int {
 	 * @access	public
 	 */
 	public function getAvailablePaymentMethods () {
-		return $this->getGatewayObj()->getAvailablePaymentMethods();
+		$result = $this->getGatewayObj()->getAvailablePaymentMethods();
+		return $result;
 	}
 
 
@@ -133,7 +137,8 @@ class tx_transactor_gatewayproxy implements tx_transactor_gateway_int {
 	 * @access	public
 	 */
 	public function supportsGatewayMode ($gatewayMode) {
-		return $this->getGatewayObj()->supportsGatewayMode($gatewayMode);
+		$result = $this->getGatewayObj()->supportsGatewayMode($gatewayMode);
+		return $result;
 	}
 
 
@@ -150,14 +155,14 @@ class tx_transactor_gatewayproxy implements tx_transactor_gateway_int {
 	 */
 	public function transaction_init ($action, $method, $gatewaymode, $extKey, $config=array()) {
 		$this->getGatewayObj()->setTransactionUid(0);
-		$rc = $this->getGatewayObj()->transaction_init(
+		$result = $this->getGatewayObj()->transaction_init(
 			$action,
 			$method,
 			$gatewaymode,
 			$extKey,
 			$config
 		);
-		return $rc;
+		return $result;
 	}
 
 
@@ -171,7 +176,8 @@ class tx_transactor_gatewayproxy implements tx_transactor_gateway_int {
 	 * @access	public
 	 */
 	public function transaction_setDetails ($detailsArr) {
-		return $this->getGatewayObj()->transaction_setDetails($detailsArr);
+		$result = $this->getGatewayObj()->transaction_setDetails($detailsArr);
+		return $result;
 	}
 
 
@@ -188,7 +194,8 @@ class tx_transactor_gatewayproxy implements tx_transactor_gateway_int {
 	 * @access	public
 	 */
 	public function transaction_validate ($level=1) {
-		return $this->getGatewayObj()->transaction_validate($level);
+		$result = $this->getGatewayObj()->transaction_validate($level);
+		return $result;
 	}
 
 
@@ -200,7 +207,8 @@ class tx_transactor_gatewayproxy implements tx_transactor_gateway_int {
 	 * @access	public
 	 */
 	public function transaction_succeded ($resultsArr) {
-		return $this->getGatewayObj()->transaction_succeded($resultsArr);
+		$result = $this->getGatewayObj()->transaction_succeded($resultsArr);
+		return $result;
 	}
 
 
@@ -212,7 +220,8 @@ class tx_transactor_gatewayproxy implements tx_transactor_gateway_int {
 	 * @access	public
 	 */
 	public function transaction_failed ($resultsArr) {
-		return $this->getGatewayObj()->transaction_failed($resultsArr);
+		$result = $this->getGatewayObj()->transaction_failed($resultsArr);
+		return $result;
 	}
 
 
@@ -224,7 +233,8 @@ class tx_transactor_gatewayproxy implements tx_transactor_gateway_int {
 	 * @access	public
 	 */
 	public function transaction_message ($resultsArr) {
-		return $this->getGatewayObj()->transaction_message($resultsArr);
+		$result = $this->getGatewayObj()->transaction_message($resultsArr);
+		return $result;
 	}
 
 
@@ -242,10 +252,10 @@ class tx_transactor_gatewayproxy implements tx_transactor_gateway_int {
 
 		$gatewayObj = $this->getGatewayObj();
 		$processResult = $gatewayObj->transaction_process();
-		$referenceId = $this->getReferenceUid();
-		$resultsArr = $gatewayObj->transaction_getResults($referenceId);
+		$reference = $this->getReferenceUid();
+		$resultsArr = $gatewayObj->transaction_getResults($reference);
 
-		if (is_array ($resultsArr)) {
+		if (is_array($resultsArr)) {
 			$fields = $resultsArr;
 			$fields['crdate'] = time();
 			$fields['pid'] = intval($this->extensionManagerConf['pid']);
@@ -264,13 +274,26 @@ class tx_transactor_gatewayproxy implements tx_transactor_gateway_int {
 
 
 	/**
+	 * Displays the form on which the user will finally submit the transaction to the payment gateway
+	 * Only to be used in mode TX_TRANSACTOR_GATEWAYMODE_AJAX
+	 *
+	 * @return	string		HTML form and javascript
+	 * @access	public
+	 */	public function transaction_getForm ($lConf) {
+		$result = $this->getGatewayObj()->transaction_getForm($lConf);
+		return $result;
+	}
+
+
+	/**
 	 * Returns the form action URI to be used in mode TX_TRANSACTOR_GATEWAYMODE_FORM.
 	 *
 	 * @return	string		Form action URI
 	 * @access	public
 	 */
 	public function transaction_formGetActionURI () {
-		return $this->getGatewayObj()->transaction_formGetActionURI();
+		$result = $this->getGatewayObj()->transaction_formGetActionURI();
+		return $result;
 	}
 
 
@@ -312,7 +335,8 @@ class tx_transactor_gatewayproxy implements tx_transactor_gateway_int {
 	 * @access	public
 	 */
 	public function transaction_formGetHiddenFields () {
-		return $this->getGatewayObj()->transaction_formGetHiddenFields();
+		$result = $this->getGatewayObj()->transaction_formGetHiddenFields();
+		return $result;
 	}
 
 
@@ -347,7 +371,8 @@ class tx_transactor_gatewayproxy implements tx_transactor_gateway_int {
 	 * @access public
 	 */
 	public function transaction_isInitState ($row) {
-		return $this->getGatewayObj()->transaction_isInitState($row);
+		$result = $this->getGatewayObj()->transaction_isInitState($row);
+		return $result;
 	}
 
 
@@ -369,7 +394,7 @@ class tx_transactor_gatewayproxy implements tx_transactor_gateway_int {
 				$dbResult = $TYPO3_DB->exec_SELECTquery (
 					'gatewayid',
 					'tx_transactor_transactions',
-					'uid='.intval($dbTransactionUid)
+					'uid=' . intval($dbTransactionUid)
 				);
 			}
 
@@ -387,6 +412,7 @@ class tx_transactor_gatewayproxy implements tx_transactor_gateway_int {
 					$TYPO3_DB->sql_free_result($dbResult);
 
 					if ($fields['uid'] && $fields['reference']) {
+
 						$dbResult = $TYPO3_DB->exec_INSERTquery(
 							'tx_transactor_transactions',
 							$fields
@@ -401,12 +427,14 @@ class tx_transactor_gatewayproxy implements tx_transactor_gateway_int {
 
 
 	public function transaction_getResultsError ($message) {
-		return $this->getGatewayObj()->transaction_getResultsError($message);
+		$result = $this->getGatewayObj()->transaction_getResultsError($message);
+		return $result;
 	}
 
 
 	public function transaction_getResultsSuccess ($message) {
-		return $this->getGatewayObj()->transaction_getResultsSuccess($message);
+		$result = $this->getGatewayObj()->transaction_getResultsSuccess($message);
+		return $result;
 	}
 
 
@@ -422,13 +450,14 @@ class tx_transactor_gatewayproxy implements tx_transactor_gateway_int {
 	 * @access	public
 	 */
 	public function __call ($method, $params) {
+		$result = FALSE;
 		if (method_exists($this, $method)) {
-			$rc = call_user_func_array(array($this->getGatewayObj(), $method), $params);
+			$result = call_user_func_array(array($this->getGatewayObj(), $method), $params);
 		} else {
 			debug ('ERROR: unkown method "' . $method . '" in call of tx_transactor_gatewayproxy object');
-			$rc = FALSE;
+			throw new RuntimeException('ERROR in transactor: unkown method "' . $method . '" in call of tx_transactor_gatewayproxy object ' . $this->gatewayClass . '"', 2020290001);
 		}
-		return $rc;
+		return $result;
 	}
 
 
@@ -440,7 +469,8 @@ class tx_transactor_gatewayproxy implements tx_transactor_gateway_int {
 	 * @access	public
 	 */
 	public function __get ($property) {
-		return $this->getGatewayObj()->$property;
+		$result = $this->getGatewayObj()->$property;
+		return $result;
 	}
 
 
@@ -468,32 +498,42 @@ class tx_transactor_gatewayproxy implements tx_transactor_gateway_int {
 
 
 	public function hasErrors () {
-		$rc = $this->getGatewayObj()->hasErrors();
-		return $rc;
+		$result = $this->getGatewayObj()->hasErrors();
+		return $result;
 	}
 
 
 	public function getErrors () {
-		$rc = $this->getGatewayObj()->getErrors();
-		return $rc;
+		$result = $this->getGatewayObj()->getErrors();
+		return $result;
 	}
 
 
 	public function usesBasket () {
-		$rc = $this->getGatewayObj()->usesBasket();
-		return $rc;
+		$result = $this->getGatewayObj()->usesBasket();
+		return $result;
 	}
 
 
-	public function getTransaction ($referenceId) {
-		$rc = $this->getGatewayObj()->getTransaction($referenceId);
-		return $rc;
+	public function getTransaction ($reference) {
+		$result = $this->getGatewayObj()->getTransaction($reference);
+		return $result;
+	}
+
+
+	public function setTaxIncluded ($bTaxIncluded) {
+		$this->getGatewayObj()->setTaxIncluded($bTaxIncluded);
+	}
+
+
+	public function getTaxIncluded() {
+		return $this->getGatewayObj()->getTaxIncluded();
 	}
 
 
 	public function generateReferenceUid ($orderuid, $callingExtension) {
-		$rc = $this->getGatewayObj()->generateReferenceUid($orderuid, $callingExtension);
-		return $rc;
+		$result = $this->getGatewayObj()->generateReferenceUid($orderuid, $callingExtension);
+		return $result;
 	}
 
 
@@ -516,8 +556,8 @@ class tx_transactor_gatewayproxy implements tx_transactor_gateway_int {
 	 * @access	public
 	 */
 	public function getReferenceUid () {
-		$rc = $this->getGatewayObj()->getReferenceUid();
-		return $rc;
+		$result = $this->getGatewayObj()->getReferenceUid();
+		return $result;
 	}
 
 
@@ -542,7 +582,42 @@ class tx_transactor_gatewayproxy implements tx_transactor_gateway_int {
 	public function getTransactionUid () {
 		$this->getGatewayObj()->getTransactionUid();
 	}
-}
 
+
+	/**
+	 * Sets the form action URI
+	 *
+	 * @param	string		form action URI
+	 * @return	void
+	 * @access	public
+	 */
+	public function setFormActionURI ($formActionURI) {
+		$this->getGatewayObj()->setFormActionURI($formActionURI);
+	}
+
+
+	/**
+	 * Fetches the form action URI
+	 *
+	 * @return	string		form action URI
+	 * @access	public
+	 */
+	public function getFormActionURI () {
+		$result = $this->getGatewayObj()->getFormActionURI();
+		return $result;
+	}
+
+
+	/**
+	 * This gives the information if the order can only processed after a verification message has been received.
+	 *
+	 * @return	boolean		TRUE if a verification message needs to be sent
+	 * @access	public
+	 */
+	public function needsVerificationMessage () {
+		$result = $this->getGatewayObj()->needsVerificationMessage();
+		return $result;
+	}
+}
 
 ?>

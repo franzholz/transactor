@@ -35,6 +35,7 @@ define('TX_TRANSACTOR_TRANSACTION_ACTION_AUTHORIZEANDTRANSFERREFUND', 211);
 
 define('TX_TRANSACTOR_GATEWAYMODE_FORM', 400);
 define('TX_TRANSACTOR_GATEWAYMODE_WEBSERVICE', 401);
+define('TX_TRANSACTOR_GATEWAYMODE_AJAX', 402);
 
 
 define('TX_TRANSACTOR_TRANSACTION_LIMIT_STATE_OK', 500);
@@ -139,11 +140,11 @@ interface tx_transactor_gateway_int {
 	 * chosen / supported gateway mode. TX_TRANSACTOR_GATEWAYMODE_FORM does not
 	 * allow setting credit card data for example.
 	 *
-	 * @param	array		$detailsArr: The payment details array
+	 * @param	array		$detailsArray: The payment details array
 	 * @return	boolean		Returns TRUE if all required details have been set
 	 * @access	public
 	 */
-	 public function transaction_setDetails ($detailsArr);
+	 public function transaction_setDetails ($detailsArray);
 
 	/**
 	 * Validates the transaction data which was set by transaction_setDetails().
@@ -157,7 +158,7 @@ interface tx_transactor_gateway_int {
 	 * @return	boolean		Returns TRUE if validation was successful, FALSE if not
 	 * @access	public
 	 */
-	 public function transaction_validate ($level=1);
+	 public function transaction_validate ($level = 1);
 
 	/**
 	 * Submits the prepared transaction to the payment gateway
@@ -169,6 +170,15 @@ interface tx_transactor_gateway_int {
 	 * @access	public
 	 */
 	public function transaction_process ();
+
+	/**
+	 * Displays the form on which the user will finally submit the transaction to the payment gateway
+	 *
+	 *
+	 * @return	string		HTML form and javascript
+	 * @access	public
+	 */
+	public function transaction_getForm ($lConf);
 
 	/**
 	 * Returns the form action URI to be used in mode TX_TRANSACTOR_GATEWAYMODE_FORM.
@@ -300,7 +310,11 @@ interface tx_transactor_gateway_int {
 
 	public function usesBasket ();
 
-	public function getTransaction ($referenceId);
+	public function getTransaction ($reference);
+
+	public function setTaxIncluded ($bTaxIncluded);
+
+	public function getTaxIncluded();
 
 	public function generateReferenceUid ($orderuid, $callingExtension);
 
@@ -320,6 +334,32 @@ interface tx_transactor_gateway_int {
 	 * @access	public
 	 */
 	public function getTransactionUid ();
+
+	/**
+	 * Sets the form action URI
+	 *
+	 * @param	string		form action URI
+	 * @return	void
+	 * @access	public
+	 */
+	public function setFormActionURI ($formActionURI);
+
+	/**
+	 * Fetches the form action URI
+	 *
+	 * @return	string		form action URI
+	 * @access	public
+	 */
+	public function getFormActionURI ();
+
+
+	/**
+	 * This gives the information if the order can only processed after a verification message has been received.
+	 *
+	 * @return	boolean		TRUE if a verification message needs to be sent
+	 * @access	public
+	 */
+	public function needsVerificationMessage ();
 }
 
 ?>
