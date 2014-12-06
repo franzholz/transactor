@@ -7,6 +7,7 @@ return array(
 	'tx_transactor_basket_int' => $extensionPath . 'interfaces/interface.tx_transactor_basket_int.php',
 	'tx_transactor_gateway_int' => $extensionPath . 'interfaces/interface.tx_transactor_gateway_int.php',
 	'tx_transactor_api' => $extensionPath . 'lib/class.tx_transactor_api.php',
+	'tx_transactor_listener' => $extensionPath . 'lib/class.tx_transactor_listener.php',
 	'tx_transactor_gateway' => $extensionPath . 'model/class.tx_transactor_gateway.php',
 	'tx_transactor_gatewayfactory' => $extensionPath . 'model/class.tx_transactor_gatewayfactory.php',
 	'tx_transactor_gatewayproxy' => $extensionPath . 'model/class.tx_transactor_gatewayproxy.php',

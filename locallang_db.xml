@@ -15,6 +15,7 @@
 			<label index="tx_transactor_transactions">Transactions</label>
 			<label index="tx_transactor_transactions.gatewayid">Gateway identifier:</label>
 			<label index="tx_transactor_transactions.reference">Reference of transaction:</label>
+			<label index="tx_transactor_transactions.orderuid">Order number:</label>
 			<label index="tx_transactor_transactions.currency">Currency of amount:</label>
 			<label index="tx_transactor_transactions.amount">Amount:</label>
 			<label index="tx_transactor_transactions.state">State:</label>

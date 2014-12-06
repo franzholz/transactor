@@ -3,7 +3,7 @@
 *
 *  Copyright notice
 *
-*  (c) 2013 Franz Holzinger (franz@ttproducts.de)
+*  (c) 2014 Franz Holzinger (franz@ttproducts.de)
 *  All rights reserved
 *
 *  This script is part of the TYPO3 project. The TYPO3 project is
@@ -276,6 +276,7 @@ abstract class tx_transactor_gateway implements tx_transactor_gateway_int {
 			'gatewayid' => $this->gatewayKey,
 			'ext_key' => $this->callingExtension,
 			'reference' => $reference,
+			'orderuid' => $detailsArray['transaction']['orderuid'],
 			'state' => TX_TRANSACTOR_TRANSACTION_STATE_NO_PROCESS,
 			'amount' => $detailsArray['transaction']['amount'],
 			'currency' => $detailsArray['transaction']['currency'],
@@ -310,10 +311,13 @@ abstract class tx_transactor_gateway implements tx_transactor_gateway_int {
 			$this->setTransactionUid($row['uid']);
 
 			if (
-				intval($row['amount'] * 100 + 0.001) != intval($dataArray['amount'] * 100 + 0.001) ||
-				$row['gatewayid'] != $dataArray['gatewayid'] ||
-				$row['paymethod_key'] != $dataArray['paymethod_key'] ||
-				$row['paymethod_method'] != $dataArray['paymethod_method']
+				$row['state'] < TX_TRANSACTOR_TRANSACTION_STATE_APPROVE_OK &&
+				(
+					abs(round($row['amount'], 2) - round($dataArray['amount'], 2) > 1) ||
+					$row['gatewayid'] != $dataArray['gatewayid'] ||
+					$row['paymethod_key'] != $dataArray['paymethod_key'] ||
+					$row['paymethod_method'] != $dataArray['paymethod_method']
+				)
 			) {
 				$res =
 					$GLOBALS['TYPO3_DB']->exec_UPDATEquery(
@@ -378,10 +382,11 @@ abstract class tx_transactor_gateway implements tx_transactor_gateway_int {
 	 * This method is not available in mode TX_TRANSACTOR_GATEWAYMODE_FORM, you'll have
 	 * to render and submit a form instead.
 	 *
+	 * @param	string		an error message will be provided in case of error
 	 * @return	boolean		TRUE if transaction was successul, FALSE if not. The result can be accessed via transaction_getResults()
 	 * @access	public
 	 */
-	public function transaction_process () {
+	public function transaction_process (&$errorMessage) {
 		return FALSE;
 	}
 
@@ -698,7 +703,11 @@ abstract class tx_transactor_gateway implements tx_transactor_gateway_int {
 
 
 	public function generateReferenceUid ($orderuid, $callingExtension) {
-		$result = $this->gatewayKey . '#' . md5($callingExtension . '-' . $orderuid);
+		$result = FALSE;
+
+		if ($orderuid) {
+			$result = $this->gatewayKey . '#' . md5($callingExtension . '-' . $orderuid);
+		}
 		return $result;
 	}
 

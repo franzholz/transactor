@@ -1,24 +1,26 @@
 <?php
 // $Id$
 
-if (!defined ('TYPO3_MODE')) 	die ('Access denied.');
+if (!defined ('TYPO3_MODE')) {
+	die ('Access denied.');
+}
 
-$TCA['tx_transactor_transactions'] = Array (
+$TCA['tx_transactor_transactions'] = array (
 	'ctrl' => $TCA['tx_transactor_transactions']['ctrl'],
-	'interface' => Array (
-		'showRecordFieldList' => 'uid,reference,gatewayid,currency,amount,state,state_time,message,ext_key,paymethod_key,paymethod_method,config,user'
+	'interface' => array (
+		'showRecordFieldList' => 'uid,reference,gatewayid,orderuid,currency,amount,state,state_time,message,ext_key,paymethod_key,paymethod_method,config,user'
 	),
-	'columns' => Array (
-		'uid' => Array (
+	'columns' => array (
+		'uid' => array (
 			'label' => 'LLL:EXT:transactor/locallang_db.xml:tx_transactor_transactions_uid',
-			'config' => Array (
+			'config' => array (
 				'type' => 'none',
 			)
 		),
-		'crdate' => Array (
+		'crdate' => array (
 			'exclude' => 1,
 			'label' => 'LLL:EXT:transactor/locallang_db.xml:crdate',
-			'config' => Array (
+			'config' => array (
 				'type' => 'input',
 				'size' => '8',
 				'max' => '20',
@@ -26,57 +28,66 @@ $TCA['tx_transactor_transactions'] = Array (
 				'default' => '0'
 			)
 		),
-		'gatewayid' => Array (
-			'exclude' => 0,
-			'label' => 'LLL:EXT:transactor/locallang_db.xml:tx_transactor_transactions.gatewayid',
-			'config' => Array (
-				'type' => 'input',
-				'size' => '40',
-				'max' => '256'
-			)
-		),
-		'reference' => Array (
+		'reference' => array (
 			'exclude' => 0,
 			'label' => 'LLL:EXT:transactor/locallang_db.xml:tx_transactor_transactions.reference',
-			'config' => Array (
+			'config' => array (
 				'type' => 'input',
 				'size' => '100',
 				'max' => '256'
 			)
 		),
-		'currency' => Array (
+		'gatewayid' => array (
+			'exclude' => 0,
+			'label' => 'LLL:EXT:transactor/locallang_db.xml:tx_transactor_transactions.gatewayid',
+			'config' => array (
+				'type' => 'input',
+				'size' => '40',
+				'max' => '256'
+			)
+		),
+		'orderuid' => array (
+			'exclude' => 1,
+			'label' => 'LLL:EXT:transactor/locallang_db.xml:tx_transactor_transactions.orderuid',
+			'config' => array (
+				'type' => 'input',
+				'size' => '20',
+				'readOnly' => '1',
+			)
+		),
+		'currency' => array (
 			'exclude' => 0,
 			'label' => 'LLL:EXT:transactor/locallang_db.xml:tx_transactor_transactions.currency',
-			'config' => Array (
+			'config' => array (
 				'type' => 'input',
 				'size' => '3',
 				'max' => '3'
 			)
 		),
-		'amount' => Array (
+		'amount' => array (
 			'exclude' => 1,
 			'label' => 'LLL:EXT:transactor/locallang_db.xml:tx_transactor_transactions.amount',
-			'config' => Array (
+			'config' => array (
 				'type' => 'input',
 				'size' => '12',
 				'eval' => 'trim,double2',
 				'max' => '20'
 			)
 		),
-		'state' => Array (
+		'state' => array (
 			'exclude' => 1,
 			'label' => 'LLL:EXT:transactor/locallang_db.xml:tx_transactor_transactions.state',
-			'config' => Array (
+			'config' => array (
 				'type' => 'input',
 				'size' => '3',
 				'eval' => 'int',
 				'max' => '3'
 			)
 		),
-		'state_time' => Array (
+		'state_time' => array (
 			'exclude' => 1,
 			'label' => 'LLL:EXT:transactor/locallang_db.xml:tx_transactor_transactions.state_time',
-			'config' => Array (
+			'config' => array (
 				'type' => 'input',
 				'size' => '8',
 				'max' => '20',
@@ -84,66 +95,66 @@ $TCA['tx_transactor_transactions'] = Array (
 				'default' => '0'
 			)
 		),
-		'message' => Array (
+		'message' => array (
 			'exclude' => 0,
 			'label' => 'LLL:EXT:transactor/locallang_db.xml:tx_transactor_transactions.message',
-			'config' => Array (
+			'config' => array (
 				'type' => 'input',
 				'size' => '40',
 				'max' => '256'
 			)
 		),
-		'ext_key' => Array (
+		'ext_key' => array (
 			'exclude' => 0,
 			'label' => 'LLL:EXT:transactor/locallang_db.xml:tx_transactor_transactions.ext_key',
-			'config' => Array (
+			'config' => array (
 				'type' => 'input',
 				'size' => '40',
 				'max' => '100'
 			)
 		),
-		'paymethod_key' => Array (
+		'paymethod_key' => array (
 			'exclude' => 0,
 			'label' => 'LLL:EXT:transactor/locallang_db.xml:tx_transactor_transactions.paymethod_key',
-			'config' => Array (
+			'config' => array (
 				'type' => 'input',
 				'size' => '40',
 				'max' => '100'
 			)
 		),
-		'paymethod_method' => Array (
+		'paymethod_method' => array (
 			'exclude' => 0,
 			'label' => 'LLL:EXT:transactor/locallang_db.xml:tx_transactor_transactions.paymethod_method',
-			'config' => Array (
+			'config' => array (
 				'type' => 'input',
 				'size' => '40',
 				'max' => '100'
 			)
 		),
-		'config' => Array (
+		'config' => array (
 			'exclude' => 1,
 			'label' => 'LLL:EXT:transactor/locallang_db.xml:tx_transactor_transactions.config',
-			'config' => Array (
+			'config' => array (
 				'type' => 'text',
 				'cols' => '48',
 				'rows' => '15'
 			)
 		),
-		'user' => Array (
+		'user' => array (
 			'exclude' => 1,
 			'label' => 'LLL:EXT:transactor/locallang_db.xml:tx_transactor_transactions.user',
-			'config' => Array (
+			'config' => array (
 				'type' => 'text',
 				'cols' => '48',
 				'rows' => '5'
 			)
 		),
 	),
-	'types' => Array (
-		'0' => Array('showitem' => 'reference,gatewayid,currency,amount,state,state_time,message,ext_key,paymethod_key,paymethod_method,config,user')
+	'types' => array (
+		'0' => array('showitem' => 'reference,gatewayid,orderuid,currency,amount,state,state_time,message,ext_key,paymethod_key,paymethod_method,config,user')
 	),
-	'palettes' => Array (
-		'1' => Array('showitem' => '')
+	'palettes' => array (
+		'1' => array('showitem' => '')
 	)
 );
 

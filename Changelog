@@ -1,3 +1,7 @@
+2014-12-06	Franz Holzinger <franz@ttproducts.de>
+	* support for backend live search
+	* add listener hook
+
 2013-03-21	Franz Holzinger <franz@ttproducts.de>
 	* add the file ext_autoload.php
 	* add marker functions

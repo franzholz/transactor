@@ -2,12 +2,6 @@
 
 /***************************************************************
  * Extension Manager/Repository config file for ext "transactor".
- *
- * Auto generated 21-03-2013 14:01
- *
- * Manual updates:
- * Only the data in the array - everything else is removed by next
- * writing. "version" and "dependencies" must not be touched!
  ***************************************************************/
 
 $EM_CONF[$_EXTKEY] = array(
@@ -15,13 +9,13 @@ $EM_CONF[$_EXTKEY] = array(
 	'description' => 'This is a basic API to develop extensions which connect to different payment transaction gateways.',
 	'category' => 'misc',
 	'shy' => 0,
-	'version' => '0.2.2',
-	'dependencies' => 'cms,div2007',
+	'version' => '0.3.0',
+	'dependencies' => 'div2007',
 	'conflicts' => '',
 	'priority' => '',
 	'loadOrder' => '',
 	'module' => '',
-	'state' => 'alpha',
+	'state' => 'stable',
 	'uploadfolder' => 0,
 	'createDirs' => '',
 	'modify_tables' => '',
@@ -34,10 +28,9 @@ $EM_CONF[$_EXTKEY] = array(
 	'CGLcompliance_note' => '',
 	'constraints' => array(
 		'depends' => array(
-			'cms' => '',
-			'php' => '5.0.4-0.0.0',
-			'typo3' => '4.3.0-6.0.99',
-			'div2007' => '0.10.1-0.0.0',
+			'php' => '5.2.4-5.5.99',
+			'typo3' => '4.3.0-6.2.99',
+			'div2007' => '1.0.3-0.0.0',
 		),
 		'conflicts' => array(
 		),

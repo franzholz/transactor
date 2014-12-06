@@ -2,7 +2,7 @@
 /***************************************************************
 *  Copyright notice
 *
-*  (c) 2013 Franz Holzinger <franz@ttproducts.de>
+*  (c) 2014 Franz Holzinger <franz@ttproducts.de>
 *  All rights reserved
 *
 *  This script is part of the TYPO3 project. The TYPO3 project is
@@ -68,7 +68,6 @@ class tx_transactor_api {
 			$langObj,
 			'locallang.xml'
 		);
-
 		self::$cObj = $cObj;
 	}
 
@@ -93,10 +92,7 @@ class tx_transactor_api {
 
 		$locallang = $langObj->getLocallang();
 		$LLkey = $langObj->getLLkey();
-		$typoVersion =
-			class_exists('t3lib_utility_VersionNumber') ?
-				t3lib_utility_VersionNumber::convertVersionNumberToInteger(TYPO3_version) :
-				t3lib_div::int_from_ver(TYPO3_version);
+		$typoVersion = tx_div2007_core::getTypoVersion();
 
 		if (isset($locallang[$LLkey])) {
 			$langArray = array_merge($locallang['default'], $locallang[$LLkey]);
@@ -207,7 +203,10 @@ class tx_transactor_api {
 	) {
 		$referenceId = FALSE;
 		$gatewayProxyObject = self::getGatewayProxyObject($handleLib, $confScript);
-		if (method_exists($gatewayProxyObject, 'generateReferenceUid')) {
+		if (
+			$orderUid &&
+			method_exists($gatewayProxyObject, 'generateReferenceUid')
+		) {
 			$referenceId = $gatewayProxyObject->generateReferenceUid($orderUid, $extKey);
 		}
 		return $referenceId;
@@ -240,7 +239,6 @@ class tx_transactor_api {
 		&$errorMessage
 	) {
 		$langObj = t3lib_div::getUserObj('&tx_transactor_language');
-
 		$bFinalize = FALSE;
 		$bFinalVerify = FALSE;
 		$gatewayExtKey = '';
@@ -280,7 +278,11 @@ class tx_transactor_api {
 			}
 
 			$paymentMethod = $confScript['paymentMethod'];
-			$gatewayProxyObject = self::getGatewayProxyObject($handleLib, $confScript);
+			$gatewayProxyObject =
+				self::getGatewayProxyObject(
+					$handleLib,
+					$confScript
+				);
 
 			if ($errorMessage == '') {
 				if (is_object($gatewayProxyObject)) {
@@ -399,16 +401,24 @@ class tx_transactor_api {
 								$currentPaymentActivity == 'verify' ||
 								$currentPaymentActivity == 'finalize'
 							) {
-								$result = $gatewayProxyObject->transaction_process();
-								$resultsArray = $gatewayProxyObject->transaction_getResults($referenceId); //array holen mit allen daten
+								$result = $gatewayProxyObject->transaction_process($errorMessage);
+								if ($result) {
+									$resultsArray = $gatewayProxyObject->transaction_getResults($referenceId); //array holen mit allen daten
 
-								if (
-									$paymentActivity == 'verify' &&
-									$gatewayProxyObject->transaction_succeded($resultsArray) == FALSE
-								) {
-									$errorMessage = htmlspecialchars($gatewayProxyObject->transaction_message($resultsArray)); // message auslesen
-								} else {
-									$bFinalize = TRUE;
+									if (
+										$paymentActivity == 'verify' &&
+										$gatewayProxyObject->transaction_succeded($resultsArray) == FALSE
+									) {
+										$errorMessage = htmlspecialchars($gatewayProxyObject->transaction_message($resultsArray)); // message auslesen
+									} else {
+										$bFinalize = TRUE;
+									}
+								} else if ($errorMessage == '') {
+									$errorMessage =
+										tx_div2007_alpha5::getLL_fh002(
+											$langObj,
+											'error_gateway_unknown'
+										);
 								}
 							} else if (
 								$gatewayMode == TX_TRANSACTOR_GATEWAYMODE_AJAX
@@ -704,7 +714,7 @@ class tx_transactor_api {
 		$paramReturi = '';
 
 			// Prepare some values for the form fields:
-		$totalPrice = $calculatedArray['priceTax']['total'];
+		$totalPrice = round($calculatedArray['priceTax']['total'] + 0.001, 2);
 
 		if ($paymentActivity == 'finalize' && $confScript['returnPID']) {
 			$successPid = $confScript['returnPID'];
@@ -779,16 +789,7 @@ class tx_transactor_api {
 		$langObj = t3lib_div::getUserObj('&tx_transactor_language');
 
 		if (t3lib_extMgm::isLoaded('static_info_tables')) {
-			$eInfo = tx_div2007_alpha::getExtensionInfo_fh002('static_info_tables');
-			$sitVersion = $eInfo['version'];
-			if (version_compare($sitVersion, '2.0.5', '>=')) {
-				$bUseStaticInfo = TRUE;
-			}
-		}
-
-		if ($bUseStaticInfo) {
-			$path = t3lib_extMgm::extPath('static_info_tables');
-			include_once($path . 'class.tx_staticinfotables_div.php');
+			$bUseStaticInfo = TRUE;
 		}
 
 		// Setting up total values
@@ -806,8 +807,17 @@ class tx_transactor_api {
 			$totalArray['paymenttax'] = self::fFloat($calculatedArray['payment']['priceTax']);
 			$totalArray['shippingnotax'] = self::fFloat($calculatedArray['shipping']['priceNoTax']);
 			$totalArray['shippingtax'] = self::fFloat($calculatedArray['shipping']['priceTax']);
-			$totalArray['handlingnotax'] = self::fFloat($calculatedArray['handling']['0']['priceNoTax']);
-			$totalArray['handlingtax'] = self::fFloat($calculatedArray['handling']['0']['priceTax']['handling']);
+			if (
+				isset($calculatedArray['handling']) &&
+				is_array($calculatedArray['handling'])
+			) {
+				$totalArray['handlingnotax'] = 0;
+				$totalArray['handlingtax'] = 0;
+				foreach ($calculatedArray['handling'] as $key => $priceArray) {
+					$totalArray['handlingnotax'] += self::fFloat($priceArray['priceNoTax']);
+					$totalArray['handlingtax'] += self::fFloat($priceArray['priceTax']);
+				}
+			}
 		} else {
 			$totalArray['paymentnotax'] = self::fFloat($calculatedArray['priceNoTax']['payment']);
 			$totalArray['paymenttax'] = self::fFloat($calculatedArray['priceTax']['payment']);
@@ -864,7 +874,7 @@ class tx_transactor_api {
 				// guess country and language settings for invoice address. One of these vars has to be set: country, countryISO2, $countryISO3 or countryISONr
 				// you can also set 2 or more of these codes. The codes will be joined with 'OR' in the select-statement and only the first
 				// record which is found will be returned. If there is no record at all, the codes will be returned untouched
-				$countryArray = tx_staticinfotables_div::fetchCountries(
+				$countryArray = tx_div2007_staticinfotables::fetchCountries(
 					$addressArray[$key]['country'],
 					$addressArray[$key]['countryISO2'],
 					$addressArray[$key]['countryISO3'],
@@ -901,8 +911,8 @@ class tx_transactor_api {
 
 			foreach ($actItemArray as $key => $actItem) {
 				$row = $actItem['rec'];
-				$tax = $row['tax'];
-
+				// $tax = $row['tax']; NEU
+				$tax = $actItem['tax'];
 				$extArray = $row['ext'];
 				if (isset($extArray) && is_array($extArray)) {
 					$mergeRow = $extArray['mergeArticles'];

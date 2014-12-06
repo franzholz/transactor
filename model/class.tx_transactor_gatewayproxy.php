@@ -3,7 +3,7 @@
 *
 *  Copyright notice
 *
-*  (c) 2012 Franz Holzinger (franz@ttproducts.de)
+*  (c) 2014 Franz Holzinger (franz@ttproducts.de)
 *  All rights reserved
 *
 *  This script is part of the Typo3 project. The Typo3 project is
@@ -23,10 +23,6 @@
 *  This copyright notice MUST APPEAR in all copies of the script!
 ***************************************************************/
 
-/*
-require_once (t3lib_extMgM::extPath('transactor') . 'interfaces/interface.tx_transactor_gateway_int.php');
-
-require_once (t3lib_extMgM::extPath('transactor') . 'model/class.tx_transactor_gateway.php');*/
 
 /**
  * Proxy class implementing the interface for gateway implementations. This
@@ -244,31 +240,43 @@ class tx_transactor_gatewayproxy implements tx_transactor_gateway_int {
 	 * This method is not available in mode TX_TRANSACTOR_GATEWAYMODE_FORM, you'll have
 	 * to render and submit a form instead.
 	 *
+	 * @param	string		an error message will be provided in case of error
 	 * @return	boolean		TRUE if transaction was successul, FALSE if not. The result can be accessed via transaction_getResults()
 	 * @access	public
 	 */
-	public function transaction_process () {
+	public function transaction_process (&$errorMessage) {
 		global $TYPO3_DB;
 
 		$gatewayObj = $this->getGatewayObj();
-		$processResult = $gatewayObj->transaction_process();
+		$processResult = $gatewayObj->transaction_process($errorMessage);
 		$reference = $this->getReferenceUid();
 		$resultsArr = $gatewayObj->transaction_getResults($reference);
 
 		if (is_array($resultsArr)) {
 			$fields = $resultsArr;
-			$fields['crdate'] = time();
-			$fields['pid'] = intval($this->extensionManagerConf['pid']);
-			$fields['message'] = (is_array ($fields['message'])) ? serialize($fields['message']) : $fields['message'];
-			if ($fields['uid'] && $fields['reference']) {
+
+			if (
+				!$fields['uid'] &&
+				$fields['reference']
+			) {
+				$fields['crdate'] = time();
+				$fields['pid'] = intval($this->extensionManagerConf['pid']);
+				$fields['message'] = (is_array($fields['message'])) ? serialize($fields['message']) : $fields['message'];
+
 				$dbResult = $TYPO3_DB->exec_INSERTquery (
 					'tx_transactor_transactions',
 					$fields
 				);
 				$dbTransactionUid = $TYPO3_DB->sql_insert_id();
-				$gatewayObj->getTransactionUid($dbTransactionUid);
+				$gatewayObj->setTransactionUid($dbTransactionUid);
 			}
+
+			$processResult = TRUE;
+		} else {
+			$errorMessage = $resultsArr;
+			$processResult = FALSE;
 		}
+
 		return $processResult;
 	}
 
@@ -380,17 +388,20 @@ class tx_transactor_gatewayproxy implements tx_transactor_gateway_int {
 	 * Returns the results of a processed transaction
 	 *
 	 * @param	string		$orderid
+	 * @param	boolean		$create  if TRUE the results are inserted into the transactor table
 	 * @return	array		Results of a processed transaction
 	 * @access	public
 	 */
-	public function transaction_getResults ($reference) {
+	public function transaction_getResults ($reference, $create = TRUE) {
 		global $TYPO3_DB;
 
+		$dbResult = FALSE;
 		$resultsArr = $this->getGatewayObj()->transaction_getResults($reference);
 
 		if (is_array ($resultsArr)) {
 			$dbTransactionUid = $this->getGatewayObj()->getTransactionUid();
-			if ($dbTransactionUid)	{
+
+			if ($dbTransactionUid) {
 				$dbResult = $TYPO3_DB->exec_SELECTquery (
 					'gatewayid',
 					'tx_transactor_transactions',
@@ -400,25 +411,27 @@ class tx_transactor_gatewayproxy implements tx_transactor_gateway_int {
 
 			if ($dbResult) {
 				$row = $TYPO3_DB->sql_fetch_assoc($dbResult);
+				$TYPO3_DB->sql_free_result($dbResult);
 
 				if (is_array ($row) && $row['gatewayid'] === $resultsArr['gatewayid']) {
 					$resultsArr['internaltransactionuid'] = $dbTransactionUid;
-				} else {
-						// If the transaction doesn't exist yet in the database, create a transaction record.
-						// Usually the case with unsuccessful orders with gateway mode FORM.
-					$fields = $resultsArr;
-					$fields['crdate'] = time();
-					$fields['pid'] = $this->extensionManagerConf['pid'];
-					$TYPO3_DB->sql_free_result($dbResult);
+				}
+			} else if ($create) {
+					// If the transaction doesn't exist yet in the database, create a transaction record.
+					// Usually the case with unsuccessful orders with gateway mode FORM.
+				$fields = $resultsArr;
+				$fields['crdate'] = time();
+				$fields['pid'] = $this->extensionManagerConf['pid'];
 
-					if ($fields['uid'] && $fields['reference']) {
-
-						$dbResult = $TYPO3_DB->exec_INSERTquery(
-							'tx_transactor_transactions',
-							$fields
-						);
-						$resultsArr = $fields;
-					}
+				if (
+					$fields['uid'] &&
+					$fields['reference']
+				) {
+					$dbResult = $TYPO3_DB->exec_INSERTquery(
+						'tx_transactor_transactions',
+						$fields
+					);
+					$resultsArr = $fields;
 				}
 			}
 		}
@@ -454,7 +467,7 @@ class tx_transactor_gatewayproxy implements tx_transactor_gateway_int {
 		if (method_exists($this, $method)) {
 			$result = call_user_func_array(array($this->getGatewayObj(), $method), $params);
 		} else {
-			debug ('ERROR: unkown method "' . $method . '" in call of tx_transactor_gatewayproxy object');
+			debug ('ERROR: unkown method "' . $method . '" in call of tx_transactor_gatewayproxy object'); // keep this
 			throw new RuntimeException('ERROR in transactor: unkown method "' . $method . '" in call of tx_transactor_gatewayproxy object ' . $this->gatewayClass . '"', 2020290001);
 		}
 		return $result;
