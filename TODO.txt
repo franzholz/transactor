@@ -1,7 +1,0 @@
-
-TODOS FOR UPCOMMING RELEASES
-============================
-
-In no particular order:
-
-	* Better documentation
