@@ -166,10 +166,11 @@ interface tx_transactor_gateway_int {
 	 * This method is not available in mode TX_TRANSACTOR_GATEWAYMODE_FORM, you'll have
 	 * to render and submit a form instead.
 	 *
+	 * @param	string		an error message will be provided in case of error
 	 * @return	boolean		TRUE if transaction was successul, FALSE if not. The result can be accessed via transaction_getResults()
 	 * @access	public
 	 */
-	public function transaction_process ();
+	public function transaction_process (&$errorMessage);
 
 	/**
 	 * Displays the form on which the user will finally submit the transaction to the payment gateway
