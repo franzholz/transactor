@@ -1,3 +1,7 @@
+2015-05-21	Franz Holzinger <franz@ttproducts.de>
+	* bugfix: use returnPID even if the payment activity is verify
+	* new feature: add a cancelPID
+
 2014-12-06	Franz Holzinger <franz@ttproducts.de>
 	* support for backend live search
 	* add listener hook

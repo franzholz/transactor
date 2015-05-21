@@ -712,11 +712,19 @@ class tx_transactor_api {
 		}
 
 		$paramReturi = '';
+		$successPid = 0;
+		$failPid = 0;
 
 			// Prepare some values for the form fields:
 		$totalPrice = round($calculatedArray['priceTax']['total'] + 0.001, 2);
 
-		if ($paymentActivity == 'finalize' && $confScript['returnPID']) {
+		if (
+			(
+				$paymentActivity == 'finalize' ||
+				$paymentActivity == 'verify'
+			) &&
+			$confScript['returnPID']
+		) {
 			$successPid = $confScript['returnPID'];
 		} else {
 			$successPid = ($pidArray['PIDthanks'] ? $pidArray['PIDthanks'] : $pidArray['PIDfinalize']);
@@ -725,9 +733,20 @@ class tx_transactor_api {
 			}
 		}
 
-		$failPid = ($pidArray['PIDpayment'] ? $pidArray['PIDpayment'] : $pidArray['PIDbasket']);
-		if (!$failPid) {
-			$failPid = $GLOBALS['TSFE']->id;
+		if (
+			(
+				$paymentActivity == 'finalize' ||
+				$paymentActivity == 'verify'
+			) &&
+			$confScript['cancelPID']
+		) {
+			$failPid = $confScript['cancelPID'];
+		} else {
+			$failPid = ($pidArray['PIDpayment'] ? $pidArray['PIDpayment'] : $pidArray['PIDbasket']);
+
+			if (!$failPid) {
+				$failPid = $GLOBALS['TSFE']->id;
+			}
 		}
 
 		$conf = array('returnLast' => 'url');

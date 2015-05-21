@@ -28,7 +28,6 @@ if (
 	);
 }
 
-
 if (
 	isset($GLOBALS['TYPO3_CONF_VARS']['SYS']['livesearch']) &&
 	is_array($GLOBALS['TYPO3_CONF_VARS']['SYS']['livesearch'])
@@ -41,6 +40,5 @@ if (
 		)
 	);
 }
-
 
 ?>
