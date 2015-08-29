@@ -18,6 +18,7 @@ CREATE TABLE tx_transactor_transactions (
 
 	PRIMARY KEY (uid),
 	KEY parent (pid),
-	KEY reference (reference)
+	KEY reference (reference),
+	KEY orderuid (orderuid)
 );
 

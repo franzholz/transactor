@@ -17,39 +17,42 @@ This subpart is used to display the card number information dialog before the tr
 -->
 
 
-<table border="0" cellspacing="0" cellpadding="1" width=1>
-	<tr>
-		<td><img src="clear.gif" width=100 height=1></td>
-		<td><img src="clear.gif" width=5 height=1></td>
-		<td><img src="clear.gif" width=100 height=1></td>
-		<td colspan=3><img src="clear.gif" width=200 height=1></td>
-	</tr>
-	<tr>
-		<td colspan=6 bgcolor="###GC2###">###GW2B###<b>TOTAL:</b>###GW2E###</td>
-	</tr>
-	<tr>
-		<td valign=top colspan=3>###GW1B###
-			<strong>Total amount in EURO:</strong>
-		###GW1E###</td>
+<div class="transactor-table">
+	<div class="transactor-row">
+		<div class="transactor-cell transactor-total-header">
+		TOTAL:
+	</div>
+	</div>
+	<div class="transactor-row">
+		<div class="transactor-cell transactor-total-amount-header">
+			Total amount in EURO:
+		</div>
 
-		<td valign=top align=right colspan=3 nowrap>###GW1B###
-		<b>&euro; ###PRICE_TOTAL_TAX###</b><br>
-		###GW1E###</td>
-	</tr>
-</table>
+		<div class="transactor-cell transactor-total-amount">
+			&euro; ###PRICE_TOTAL_TAX###
+		</div>
+	</div>
+</div>
 
-<form action="###REDIRECT_URL###" method="post" autocomplete="off" name="connectForm">
-<input type="submit" name="pay" value="Connect to the ###TRANSACTOR_TITLE### server" />&nbsp;&nbsp;
-	###HIDDENFIELDS###
-</form>
+<div class="transactor-form">
+	<form action="###REDIRECT_URL###" method="post" autocomplete="off" name="connectForm">
+	<input type="submit" name="pay" value="Connect to the ###TRANSACTOR_TITLE### server" />&nbsp;&nbsp;
+		###HIDDENFIELDS###
+	</form>
+</div>
+
 <p class="important">###MESSAGE_REDIRECT###</p>
 
-<table BORDER="0" CELLPADDING="0" CELLSPACING="5">
-<tr>
-<td><a href="http://###TRANSACTOR_WWW###" target="_blank"><img src="###TRANSACTOR_IMAGE###"></a></td>
-<td><font FACE="Verdana, Arial, Helvetica" SIZE=1>###TRANSACTOR_INFO###</font></td>
-</tr>
-</table>
+<div class="transactor-table">
+	<div class="transactor-row">
+		<div class="transactor-cell">
+			<a href="http://###TRANSACTOR_WWW###" target="_blank"><img src="###TRANSACTOR_IMAGE###"></a>
+		</div>
+		<div class="transactor-cell transactor-info">
+			###TRANSACTOR_INFO###
+		</div>
+	</div>
+</div>
 
 <!-- ###TRANSACTOR_FORM_TEMPLATE###	 end -->
 

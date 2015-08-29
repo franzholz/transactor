@@ -2,7 +2,7 @@
 /***************************************************************
 *  Copyright notice
 *
-*  (c) 2014 Franz Holzinger <franz@ttproducts.de>
+*  (c) 2015 Franz Holzinger <franz@ttproducts.de>
 *  All rights reserved
 *
 *  This script is part of the TYPO3 project. The TYPO3 project is
@@ -965,20 +965,25 @@ class tx_transactor_api {
 
 				for ($i = 0; $i <= 7; ++$i) {
 
-					$fieldName = $gatewayConf['on' . $i . 'n'];
+					if (isset($gatewayConf['on' . $i . 'n'])) {
+						$fieldName = $gatewayConf['on' . $i . 'n'];
 
-					if ($fieldName == 'note' || $fieldName == 'note2') {
-						$value = strip_tags(nl2br($row[$fieldName]));
-						$value = str_replace ('&nbsp;', ' ', $value);
-					} else {
-						$value = $row[$fieldName];
-					}
-					if ($value != '') {
-						$basketRow['on' . $i] = $gatewayConf['on' . $i . 'l'];;
-						$basketRow['os' . $i] = $value;
+						if ($fieldName == 'note' || $fieldName == 'note2') {
+							$value = strip_tags(nl2br($row[$fieldName]));
+							$value = str_replace ('&nbsp;', ' ', $value);
+						} else if (
+							$fieldName != '' &&
+							isset($row[$fieldName])
+						) {
+							$value = $row[$fieldName];
+						}
+
+						if ($value != '') {
+							$basketRow['on' . $i] = $gatewayConf['on' . $i . 'l'];
+							$basketRow['os' . $i] = $value;
+						}
 					}
 				}
-
 				$basketArray[$sort][$key] = $basketRow;
 				$lastKey = $key;
 			}
