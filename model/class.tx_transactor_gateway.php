@@ -3,7 +3,7 @@
 *
 *  Copyright notice
 *
-*  (c) 2014 Franz Holzinger (franz@ttproducts.de)
+*  (c) 2016 Franz Holzinger (franz@ttproducts.de)
 *  All rights reserved
 *
 *  This script is part of the TYPO3 project. The TYPO3 project is
@@ -30,8 +30,6 @@
  * All implementations must implement this interface but depending on the
  * gatway modes they support, methods like transaction_validate won't
  * do anything.
- *
- * $Id$
  *
  * @author	Franz Holzinger <franz@ttproducts.de>
  * @package 	TYPO3
@@ -70,8 +68,6 @@ abstract class tx_transactor_gateway implements tx_transactor_gateway_int {
 	 * @access	public
 	 */
 	public function __construct () {
-		global $TSFE;
-
 		$this->clearErrors();
 		$this->conf = unserialize($GLOBALS['TYPO3_CONF_VARS']['EXT']['extConf']['transactor']);
 		$extManagerConf = unserialize($GLOBALS['TYPO3_CONF_VARS']['EXT']['extConf'][$this->getExtKey()]);
@@ -221,13 +217,11 @@ abstract class tx_transactor_gateway implements tx_transactor_gateway_int {
 
 
 	public function getLanguage () {
-		global $TSFE;
-
 		$result = (
-			isset($TSFE->config['config']) &&
-			is_array($TSFE->config['config']) &&
-			$TSFE->config['config']['language'] ?
-				$TSFE->config['config']['language'] :
+			isset($GLOBALS['TSFE']->config['config']) &&
+			is_array($GLOBALS['TSFE']->config['config']) &&
+			$GLOBALS['TSFE']->config['config']['language'] ?
+				$GLOBALS['TSFE']->config['config']['language'] :
 				'en'
 		);
 
@@ -410,14 +404,16 @@ abstract class tx_transactor_gateway implements tx_transactor_gateway_int {
 	 * @access	public
 	 */
 	public function transaction_formGetActionURI () {
-		$formActionURI = FALSE;
+		$result = FALSE;
 
 		if ($this->getGatewayMode() == TX_TRANSACTOR_GATEWAYMODE_FORM) {
 			$conf = $this->getConf();
-			$formActionURI = $conf['formActionURI'];
+			if (isset($conf['formActionURI'])) {
+				$result = $conf['formActionURI'];
+			}
 		}
 
-		return $formActionURI;
+		return $result;
 	}
 
 
@@ -792,4 +788,3 @@ abstract class tx_transactor_gateway implements tx_transactor_gateway_int {
 	}
 }
 
-?>

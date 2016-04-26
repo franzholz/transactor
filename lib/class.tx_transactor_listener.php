@@ -27,8 +27,6 @@
 /**
  * Called by the payment gateway after the payment has been made or an error has occured.
  *
- * $Id$
- *
  * @author	Franz Holzinger <franz@ttproducts.de>
  * @package TYPO3
  * @subpackage transactor
@@ -56,7 +54,10 @@ abstract class tx_transactor_listener {
 		if (is_array ($GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['transactor']['listener'])) {
 			foreach ($GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['transactor']['listener'] as $classRef) {
 				$hookObj = t3lib_div::makeInstance($classRef);
-				if (method_exists($hookObj, 'execute')) {
+				if (
+					is_object($hookObj) &&
+					method_exists($hookObj, 'execute')
+				) {
 					$hookObj->execute(
 						$this,
 						$params
@@ -72,5 +73,3 @@ if (defined('TYPO3_MODE') && $TYPO3_CONF_VARS[TYPO3_MODE]['XCLASS']['ext/transac
 	include_once($TYPO3_CONF_VARS[TYPO3_MODE]['XCLASS']['ext/transactor/class.tx_transactor_listener.php']);
 }
 
-
-?>

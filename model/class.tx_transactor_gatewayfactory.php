@@ -3,7 +3,7 @@
 *
 *  Copyright notice
 *
-*  (c) 2011 Franz Holzinger (franz@ttproducts.de)
+*  (c) 2016 Franz Holzinger (franz@ttproducts.de)
 *  All rights reserved
 *
 *  This script is part of the Typo3 project. The Typo3 project is
@@ -25,16 +25,11 @@
 
 /**
  *
- * $Id$
- *
- *
  * @package 	TYPO3
  * @subpackage	tx_transactor
  * @author	Franz Holzinger <franz@ttproducts.de>
  * @author	Robert Lemke <robert@typo3.org>
  */
-
-// require_once(t3lib_extMgm::extPath('transactor') . 'model/class.tx_transactor_gatewayproxy.php');
 
 
 final class tx_transactor_gatewayfactory {
@@ -160,8 +155,6 @@ final class tx_transactor_gatewayfactory {
 		$reference = NULL,
 		$state = NULL
 	) {
-		global $TYPO3_DB;
-
 		$transactionsArray = FALSE;
 
 		$additionalWhere = '';
@@ -169,7 +162,7 @@ final class tx_transactor_gatewayfactory {
 		$additionalWhere .= (isset ($invoiceid)) ? ' AND reference="'.$reference.'"' : '';
 		$additionalWhere .= (isset ($state)) ? ' AND state="'.$state.'"' : '';
 
-		$res = $TYPO3_DB->exec_SELECTquery (
+		$res = $GLOBALS['TYPO3_DB']->exec_SELECTquery(
 			'*',
 			'tx_transactor_transactions',
 			'ext_key="' . $ext_key . '"' . $additionalWhere,
@@ -177,9 +170,9 @@ final class tx_transactor_gatewayfactory {
 			'crdate DESC'
 		);
 
-		if ($res && $TYPO3_DB->sql_num_rows($res)) {
+		if ($res && $GLOBALS['TYPO3_DB']->sql_num_rows($res)) {
 			$transactionsArray = array();
-			while ($row = $TYPO3_DB->sql_fetch_assoc ($res)) {
+			while ($row = $GLOBALS['TYPO3_DB']->sql_fetch_assoc($res)) {
 				$row['user'] = self::field2array($row['user']);
 				$transactionsArray[$row['uid']] = $row;
 			}
@@ -195,19 +188,18 @@ final class tx_transactor_gatewayfactory {
 	 * @access		public
 	 */
 	public static function getTransactionByUid ($uid) {
-		global $TYPO3_DB;
 
-		$res = $TYPO3_DB->exec_SELECTquery (
+		$res = $GLOBALS['TYPO3_DB']->exec_SELECTquery (
 			'*',
 			'tx_transactor_transactions',
 			'uid=' . $uid
 		);
 
-		if (!$res || !$TYPO3_DB->sql_num_rows($res)) {
+		if (!$res || !$GLOBALS['TYPO3_DB']->sql_num_rows($res)) {
 			return FALSE;
 		}
 
-		$row = $TYPO3_DB->sql_fetch_assoc($res);
+		$row = $GLOBALS['TYPO3_DB']->sql_fetch_assoc($res);
 		$row['user'] = self::field2array($row['user']);
 
 		return $row;
@@ -249,4 +241,3 @@ final class tx_transactor_gatewayfactory {
 	}
 }
 
-?>

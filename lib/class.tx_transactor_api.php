@@ -2,7 +2,7 @@
 /***************************************************************
 *  Copyright notice
 *
-*  (c) 2015 Franz Holzinger <franz@ttproducts.de>
+*  (c) 2016 Franz Holzinger <franz@ttproducts.de>
 *  All rights reserved
 *
 *  This script is part of the TYPO3 project. The TYPO3 project is
@@ -29,8 +29,6 @@
  *
  * Transactor API functions
  *
- * $Id$
- *
  * @author  Franz Holzinger <franz@ttproducts.de>
  * @package TYPO3
  * @subpackage transactor
@@ -43,10 +41,7 @@
 class tx_transactor_api {
 	protected static $cObj;
 
-	/**
-	$scriptRelPath   Path to the plugin class script relative to extension directory, eg. 'pi1/class.tx_newfaq_pi1.php'
-	$extKey  		 Extension key.
-	 */
+
 	static public function init (
 		$pLangObj,
 		$cObj,
@@ -198,18 +193,22 @@ class tx_transactor_api {
 	static public function getReferenceUid (
 		$handleLib,
 		$confScript,
-		$extKey,
+		$callingExtensionKey,
 		$orderUid
 	) {
-		$referenceId = FALSE;
+		$referenceUid = FALSE;
 		$gatewayProxyObject = self::getGatewayProxyObject($handleLib, $confScript);
 		if (
 			$orderUid &&
 			method_exists($gatewayProxyObject, 'generateReferenceUid')
 		) {
-			$referenceId = $gatewayProxyObject->generateReferenceUid($orderUid, $extKey);
+			$referenceUid =
+				$gatewayProxyObject->generateReferenceUid(
+					$orderUid,
+					$callingExtensionKey
+				);
 		}
-		return $referenceId;
+		return $referenceUid;
 	}
 
 
@@ -244,7 +243,10 @@ class tx_transactor_api {
 		$gatewayExtKey = '';
 		$result = '';
 
-		if (!is_array($itemArray) || !is_array($calculatedArray)) {
+		if (
+			!is_array($itemArray) ||
+			!is_array($calculatedArray)
+		) {
 			$bValidParams = FALSE;
 		} else {
 			$bValidParams = TRUE;
@@ -256,7 +258,10 @@ class tx_transactor_api {
 				$gatewayExtKey = $confScript['extName'];
 			}
 
-			if ($gatewayExtKey != '' && t3lib_extMgm::isLoaded($gatewayExtKey)) {
+			if (
+				$gatewayExtKey != '' &&
+				t3lib_extMgm::isLoaded($gatewayExtKey)
+			) {
 				// everything is ok
 			} else {
 				if ($gatewayExtKey == '') {
@@ -472,7 +477,7 @@ class tx_transactor_api {
 								}
 
 								if (
-									strpos($formuri, 'ERROR') !== FALSE
+									stripos($formuri, 'ERROR') !== FALSE
 								) {
 									$bError = TRUE;
 								}
@@ -544,7 +549,6 @@ class tx_transactor_api {
 					'error_transaction_no'
 				);
 		}
-
 		return $result;
 	} // includeHandleLib
 
@@ -656,15 +660,14 @@ class tx_transactor_api {
 
 
 	static public function getLanguage () {
-		global $TSFE;
 
 		if (
-			isset($TSFE->config) &&
-			is_array($TSFE->config) &&
-			isset($TSFE->config['config']) &&
-			is_array($TSFE->config['config'])
+			isset($GLOBALS['TSFE']->config) &&
+			is_array($GLOBALS['TSFE']->config) &&
+			isset($GLOBALS['TSFE']->config['config']) &&
+			is_array($GLOBALS['TSFE']->config['config'])
 		) {
-			$result = strtolower($TSFE->config['config']['language']);
+			$result = strtolower($GLOBALS['TSFE']->config['config']['language']);
 		} else {
 			$result = 'default';
 		}
@@ -714,9 +717,25 @@ class tx_transactor_api {
 		$paramReturi = '';
 		$successPid = 0;
 		$failPid = 0;
+		$value = 0;
+		if (
+			isset($calculatedArray['priceTax']) &&
+			is_array($calculatedArray['priceTax']) &&
+			isset($calculatedArray['priceTax']['total'])
+		) {
+			if (
+				is_array($calculatedArray['priceTax']['total'])
+			) {
+				if (isset($calculatedArray['priceTax']['total']['ALL'])) {
+					$value = $calculatedArray['priceTax']['total']['ALL'];
+				}
+			} else {
+				$value = $calculatedArray['priceTax']['total'];
+			}
+		}
 
 			// Prepare some values for the form fields:
-		$totalPrice = round($calculatedArray['priceTax']['total'] + 0.001, 2);
+		$totalPrice = round($value + 0.001, 2);
 
 		if (
 			(
@@ -802,8 +821,6 @@ class tx_transactor_api {
 		&$addressArray,
 		&$basketArray
 	) {
-		global $TYPO3_DB;
-
 		$bUseStaticInfo = FALSE;
 		$langObj = t3lib_div::getUserObj('&tx_transactor_language');
 
@@ -813,9 +830,35 @@ class tx_transactor_api {
 
 		// Setting up total values
 		$totalArray = array();
+		$goodsTotalTax = 0;
+		$goodsTotalNoTax = 0;
+		$goodsTotalDepositTax = 0;
+		$goodsTotalDepositNoTax = 0;
 
-		$totalArray['goodsnotax'] = self::fFloat($calculatedArray['priceNoTax']['goodstotal']);
-		$totalArray['goodstax'] = self::fFloat($calculatedArray['priceTax']['goodstotal']);
+		if (
+			isset($calculatedArray['priceTax']) &&
+			is_array($calculatedArray['priceTax']) &&
+			isset($calculatedArray['priceTax']['goodstotal'])
+		) {
+			if (
+				is_array($calculatedArray['priceTax']['goodstotal'])
+			) {
+				if (isset($calculatedArray['priceTax']['goodstotal']['ALL'])) {
+					$goodsTotalTax = $calculatedArray['priceTax']['goodstotal']['ALL'];
+					$goodsTotalNoTax = $calculatedArray['priceNoTax']['goodstotal']['ALL'];
+					$goodsTotalDepositTax = $calculatedArray['deposittax']['goodstotal']['ALL'];
+					$goodsTotalDepositNoTax = $calculatedArray['depositnotax']['goodstotal']['ALL'];
+				}
+			} else {
+				$goodsTotalTax = $calculatedArray['priceTax']['goodstotal'];
+				$goodsTotalNoTax = $calculatedArray['priceNoTax']['goodstotal'];
+				$goodsTotalDepositTax = $calculatedArray['deposittax']['goodstotal'];
+				$goodsTotalDepositNoTax = $calculatedArray['depositnotax']['goodstotal'];
+			}
+		}
+
+		$totalArray['goodsnotax'] = self::fFloat($goodsTotalNoTax);
+		$totalArray['goodstax'] = self::fFloat($goodsTotalTax);
 
 		// new calculatedArray format?
 		if (
@@ -848,7 +891,26 @@ class tx_transactor_api {
 
 		$totalArray['amountnotax'] = self::fFloat($calculatedArray['priceNoTax']['vouchertotal']);
 		$totalArray['amounttax'] = self::fFloat($calculatedArray['priceTax']['vouchertotal']);
-		$totalArray['taxrate'] = $calculatedArray['maxtax']['goodstotal'];
+
+
+		$maxTax = 0;
+		if (
+			isset($calculatedArray['maxtax']) &&
+			is_array($calculatedArray['maxtax']) &&
+			isset($calculatedArray['maxtax']['goodstotal'])
+		) {
+			if (
+				is_array($calculatedArray['maxtax']['goodstotal'])
+			) {
+				if (isset($calculatedArray['maxtax']['goodstotal']['ALL'])) {
+					$maxTax = $calculatedArray['maxtax']['goodstotal']['ALL'];
+				}
+			} else {
+				$maxTax = $calculatedArray['maxtax']['goodstotal'];
+			}
+		}
+
+		$totalArray['taxrate'] = $maxTax;
 		$totalArray['totaltax'] = self::fFloat($totalArray['amounttax'] - $totalArray['amountnotax']);
 
 		// Setting up address info values
@@ -959,7 +1021,7 @@ class tx_transactor_api {
 					'handling' => $handling,
 					'taxpercent' => $tax,
 					'tax' => self::fFloat($actItem['priceTax'] - $actItem['priceNoTax']),
-					'totaltax' => self::fFloat($actItem['totalTax']) - self::fFloat($row['totalNoTax']),
+					'totaltax' => self::fFloat($actItem['totalTax'] - $actItem['totalNoTax']),
 					'item_number' => $row['itemnumber'],
 				);
 
@@ -1000,10 +1062,22 @@ class tx_transactor_api {
 		}
 
 		if (
-			$calculatedArray['priceTax']['vouchertotal'] > 0 &&
-			$calculatedArray['priceTax']['vouchertotal'] != $calculatedArray['priceTax']['total']
+			is_array($calculatedArray['priceTax']['vouchertotal'])
 		) {
-			$voucherAmount = $calculatedArray['priceTax']['vouchertotal'] - $calculatedArray['priceTax']['total'];
+			if (isset($calculatedArray['priceTax']['vouchertotal']['ALL'])) {
+				$value1 = $calculatedArray['priceTax']['vouchertotal']['ALL'];
+				$value2 = $calculatedArray['priceTax']['total']['ALL'];
+			}
+		} else {
+			$value1 = $calculatedArray['priceTax']['vouchertotal'];
+			$value2 = $calculatedArray['priceTax']['total'];
+		}
+
+		if (
+			$value1 > 0 &&
+			$value1 != $value2
+		) {
+			$voucherAmount = $value1 - $value2;
 			$voucherText =
 				tx_div2007_alpha5::getLL_fh002(
 					$langObj,
@@ -1019,13 +1093,13 @@ class tx_transactor_api {
 					'item_number' => 'VOUCHER'
 				);
 
-			$totalArray['goodsnotax'] = self::fFloat($calculatedArray['priceNoTax']['goodstotal'] + $voucherAmount);
+			$totalArray['goodsnotax'] = self::fFloat($goodsTotalNoTax + $voucherAmount);
 			if (isset($calculatedArray['depositnotax'])) {
-				$totalArray['goodsnotax'] = self::fFloat($calculatedArray['priceNoTax']['goodstotal'] + $calculatedArray['depositnotax']['goodstotal']);
+				$totalArray['goodsnotax'] = self::fFloat($goodsTotalNoTax + $goodsTotalDepositNoTax);
 			}
-			$totalArray['goodstax'] = self::fFloat($calculatedArray['priceTax']['goodstotal'] + $voucherAmount);
+			$totalArray['goodstax'] = self::fFloat($goodsTotalTax + $voucherAmount);
 			if (isset($calculatedArray['deposittax'])) {
-				$totalArray['goodstax'] = self::fFloat($calculatedArray['priceTax']['goodstotal'] + $calculatedArray['deposittax']['goodstotal']);
+				$totalArray['goodstax'] = self::fFloat($goodsTotalTax + $goodsTotalDepositTax);
 			}
 		}
 	}
@@ -1035,13 +1109,31 @@ class tx_transactor_api {
 		$value = 0,
 		$level = 2
 	) {
-		if (is_float($value)) {
-			$float = $value;
-		} else {
-			$float = floatval($value);
-		}
+		$float = floatval($value);
 
 		return round($float, $level);
+	}
+
+
+	static public function getListenerExtKey (
+	) {
+		$result = '';
+
+		if (
+			isset($GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['transactor']['listener']) &&
+			is_array($GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['transactor']['listener'])
+		) {
+			foreach ($GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['transactor']['listener'] as $extKey => $classRef) {
+				if ($extKey != '') {
+					$result = $extKey;
+					// Todo: Determine the extension key from the plugins of the current page and by Typoscript settings
+
+					break;
+				}
+			}
+		}
+
+		return $result;
 	}
 }
 
@@ -1050,4 +1142,3 @@ if (defined('TYPO3_MODE') && $GLOBALS['TYPO3_CONF_VARS'][TYPO3_MODE]['XCLASS']['
 	include_once($GLOBALS['TYPO3_CONF_VARS'][TYPO3_MODE]['XCLASS']['ext/transactor/lib/class.tx_transactor_api.php']);
 }
 
-?>

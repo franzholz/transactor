@@ -2,7 +2,7 @@
 /***************************************************************
 *  Copyright notice
 *
-*  (c) 2012 Franz Holzinger <franz@ttproducts.de>
+*  (c) 2016 Franz Holzinger <franz@ttproducts.de>
 *  All rights reserved
 *
 *  This script is part of the TYPO3 project. The TYPO3 project is
@@ -29,8 +29,6 @@
  *
  * language object
  *
- * $Id$
- *
  * @author	Franz Holzinger <franz@ttproducts.de>
  * @maintainer	Franz Holzinger <franz@ttproducts.de>
  * @package TYPO3
@@ -38,9 +36,6 @@
  *
  *
  */
-
-
-// require_once(t3lib_extMgm::extPath('div2007') . 'class.tx_div2007_alpha_language_base.php');
 
 
 class tx_transactor_language extends tx_div2007_alpha_language_base {
@@ -68,15 +63,14 @@ class tx_transactor_language extends tx_div2007_alpha_language_base {
 
 
 	public function getLanguage () {
-		global $TSFE;
 
 		if (
-			isset($TSFE->config) &&
-			is_array($TSFE->config) &&
-			isset($TSFE->config['config']) &&
-			is_array($TSFE->config['config'])
+			isset($GLOBALS['TSFE']->config) &&
+			is_array($GLOBALS['TSFE']->config) &&
+			isset($GLOBALS['TSFE']->config['config']) &&
+			is_array($GLOBALS['TSFE']->config['config'])
 		) {
-			$result = $TSFE->config['config']['language'];
+			$result = $GLOBALS['TSFE']->config['config']['language'];
 		} else {
 			$result = 'default';
 		}
@@ -89,4 +83,3 @@ if (defined('TYPO3_MODE') && $GLOBALS['TYPO3_CONF_VARS'][TYPO3_MODE]['XCLASS']['
 	include_once($GLOBALS['TYPO3_CONF_VARS'][TYPO3_MODE]['XCLASS']['ext/transactor/model/class.tx_transactor_language.php']);
 }
 
-?>

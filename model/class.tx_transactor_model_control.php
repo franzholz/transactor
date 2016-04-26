@@ -2,7 +2,7 @@
 /***************************************************************
 *  Copyright notice
 *
-*  (c) 2013 Franz Holzinger (franz@ttproducts.de)
+*  (c) 2016 Franz Holzinger (franz@ttproducts.de)
 *  All rights reserved
 *
 *  This script is part of the TYPO3 project. The TYPO3 project is
@@ -26,9 +26,6 @@
 ***************************************************************/
 /**
  * Part of the transactor (Payment Transactor API) extension.
- *
- *
- * $Id$
  *
  * @author	Franz Holzinger <franz@ttproducts.de>
  * @maintainer	Franz Holzinger <franz@ttproducts.de>
@@ -90,4 +87,3 @@ class tx_transactor_model_control {
 	}
 }
 
-?>

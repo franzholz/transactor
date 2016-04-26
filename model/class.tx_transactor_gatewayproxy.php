@@ -3,7 +3,7 @@
 *
 *  Copyright notice
 *
-*  (c) 2014 Franz Holzinger (franz@ttproducts.de)
+*  (c) 2016 Franz Holzinger (franz@ttproducts.de)
 *  All rights reserved
 *
 *  This script is part of the Typo3 project. The Typo3 project is
@@ -28,9 +28,6 @@
  * Proxy class implementing the interface for gateway implementations. This
  * class hangs between the real gateway implementation and the application
  * using it.
- *
- * $Id$
- *
  *
  * @package 	TYPO3
  * @subpackage	tx_transactor
@@ -63,7 +60,7 @@ class tx_transactor_gatewayproxy implements tx_transactor_gateway_int {
 				$this->extensionManagerConf = $newExtensionManagerConf;
 			}
 		}
-		$this->gatewayClass = 'tx_' . str_replace('_','',$extKey) . '_gateway';
+		$this->gatewayClass = 'tx_' . str_replace('_', '', $extKey) . '_gateway';
 		$this->gatewayExt = $extKey;
 		require_once(t3lib_extMgm::extPath($extKey) . 'model/class.' . $this->gatewayClass . '.php');
 	}
@@ -149,7 +146,7 @@ class tx_transactor_gatewayproxy implements tx_transactor_gateway_int {
 	 * @return	void
 	 * @access	public
 	 */
-	public function transaction_init ($action, $method, $gatewaymode, $extKey, $config=array()) {
+	public function transaction_init ($action, $method, $gatewaymode, $extKey, $config = array()) {
 		$this->getGatewayObj()->setTransactionUid(0);
 		$result = $this->getGatewayObj()->transaction_init(
 			$action,
@@ -189,7 +186,7 @@ class tx_transactor_gatewayproxy implements tx_transactor_gateway_int {
 	 * @return	boolean		Returns TRUE if validation was successful, FALSE if not
 	 * @access	public
 	 */
-	public function transaction_validate ($level=1) {
+	public function transaction_validate ($level = 1) {
 		$result = $this->getGatewayObj()->transaction_validate($level);
 		return $result;
 	}
@@ -245,8 +242,6 @@ class tx_transactor_gatewayproxy implements tx_transactor_gateway_int {
 	 * @access	public
 	 */
 	public function transaction_process (&$errorMessage) {
-		global $TYPO3_DB;
-
 		$gatewayObj = $this->getGatewayObj();
 		$processResult = $gatewayObj->transaction_process($errorMessage);
 		$reference = $this->getReferenceUid();
@@ -263,11 +258,11 @@ class tx_transactor_gatewayproxy implements tx_transactor_gateway_int {
 				$fields['pid'] = intval($this->extensionManagerConf['pid']);
 				$fields['message'] = (is_array($fields['message'])) ? serialize($fields['message']) : $fields['message'];
 
-				$dbResult = $TYPO3_DB->exec_INSERTquery (
+				$dbResult = $GLOBALS['TYPO3_DB']->exec_INSERTquery (
 					'tx_transactor_transactions',
 					$fields
 				);
-				$dbTransactionUid = $TYPO3_DB->sql_insert_id();
+				$dbTransactionUid = $GLOBALS['TYPO3_DB']->sql_insert_id();
 				$gatewayObj->setTransactionUid($dbTransactionUid);
 			}
 
@@ -393,8 +388,6 @@ class tx_transactor_gatewayproxy implements tx_transactor_gateway_int {
 	 * @access	public
 	 */
 	public function transaction_getResults ($reference, $create = TRUE) {
-		global $TYPO3_DB;
-
 		$dbResult = FALSE;
 		$resultsArr = $this->getGatewayObj()->transaction_getResults($reference);
 
@@ -402,7 +395,7 @@ class tx_transactor_gatewayproxy implements tx_transactor_gateway_int {
 			$dbTransactionUid = $this->getGatewayObj()->getTransactionUid();
 
 			if ($dbTransactionUid) {
-				$dbResult = $TYPO3_DB->exec_SELECTquery (
+				$dbResult = $GLOBALS['TYPO3_DB']->exec_SELECTquery (
 					'gatewayid',
 					'tx_transactor_transactions',
 					'uid=' . intval($dbTransactionUid)
@@ -410,8 +403,8 @@ class tx_transactor_gatewayproxy implements tx_transactor_gateway_int {
 			}
 
 			if ($dbResult) {
-				$row = $TYPO3_DB->sql_fetch_assoc($dbResult);
-				$TYPO3_DB->sql_free_result($dbResult);
+				$row = $GLOBALS['TYPO3_DB']->sql_fetch_assoc($dbResult);
+				$GLOBALS['TYPO3_DB']->sql_free_result($dbResult);
 
 				if (is_array ($row) && $row['gatewayid'] === $resultsArr['gatewayid']) {
 					$resultsArr['internaltransactionuid'] = $dbTransactionUid;
@@ -427,7 +420,7 @@ class tx_transactor_gatewayproxy implements tx_transactor_gateway_int {
 					$fields['uid'] &&
 					$fields['reference']
 				) {
-					$dbResult = $TYPO3_DB->exec_INSERTquery(
+					$dbResult = $GLOBALS['TYPO3_DB']->exec_INSERTquery(
 						'tx_transactor_transactions',
 						$fields
 					);
@@ -544,8 +537,8 @@ class tx_transactor_gatewayproxy implements tx_transactor_gateway_int {
 	}
 
 
-	public function generateReferenceUid ($orderuid, $callingExtension) {
-		$result = $this->getGatewayObj()->generateReferenceUid($orderuid, $callingExtension);
+	public function generateReferenceUid ($orderuid, $callingExtensionKey) {
+		$result = $this->getGatewayObj()->generateReferenceUid($orderuid, $callingExtensionKey);
 		return $result;
 	}
 
@@ -633,4 +626,3 @@ class tx_transactor_gatewayproxy implements tx_transactor_gateway_int {
 	}
 }
 
-?>
