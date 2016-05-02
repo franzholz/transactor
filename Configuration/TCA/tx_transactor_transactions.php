@@ -4,7 +4,7 @@ if (!defined ('TYPO3_MODE')) {
 }
 
 // ******************************************************************
-// This is the standard TypoScript products category table, tt_products_cat
+// transactions table
 // ******************************************************************
 $result = array (
 	'ctrl' => array (
@@ -13,7 +13,7 @@ $result = array (
 		'crdate' => 'crdate',
 		'default_sortby' => 'ORDER BY crdate',
 		'dividers2tabs' => TRUE,
-		'iconfile' => \TYPO3\CMS\Core\Utility\ExtensionManagementUtility::extRelPath($_EXTKEY) . 'ext_icon.gif',
+		'iconfile' => \TYPO3\CMS\Core\Utility\ExtensionManagementUtility::extRelPath('transactor') . 'ext_icon.gif',
 		'searchFields' => 'uid,reference,orderuid,message,user',
 	),
 	'interface' => array (

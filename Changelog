@@ -1,3 +1,6 @@
+2016-05-02	Franz Holzinger <franz@ttproducts.de>
+	* Bugfix: TYPO3 does not know any more the $_EXTKEY variable
+
 2016-04-26	Franz Holzinger <franz@ttproducts.de>
 	* add support for tt_products 2.12.0 which has a calculatedArray with multiple country specific tax rates
 	* add support for TYPO3 7.6.2
