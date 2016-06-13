@@ -52,7 +52,7 @@ class tx_transactor_api {
 		}
 
 		$langObj = t3lib_div::getUserObj('&tx_transactor_language');
-		$langObj->init(
+		$langObj->init1(
 			$pLangObj,
 			$cObj,
 			$conf,
@@ -73,7 +73,7 @@ class tx_transactor_api {
 		&$markerArray
 	) {
 		$langObj = t3lib_div::getUserObj('tx_transactor_language');
-		$langObj->init(
+		$langObj->init1(
 			'',
 			$cObj,
 			$conf['marks.'],
@@ -144,6 +144,8 @@ class tx_transactor_api {
 
 
 	/**
+	 * deprecated: use \JambageCom\Transactor\Api\PaymentApi::getGatewayProxyObject instead
+	 *
 	 * returns the gateway proxy object
 	 */
 	static public function getGatewayProxyObject (
@@ -173,7 +175,11 @@ class tx_transactor_api {
 		&$wrappedSubpartArray
 	) {
 		$bUseTransactor = FALSE;
-		if (is_array($confScript)) {
+		if (
+			isset($confScript) &&
+			is_array($confScript) &&
+			isset($confScript['extName'])
+		) {
 			$extKey = $confScript['extName'];
 			if (t3lib_extMgm::isLoaded($extKey)) {
 				$bUseTransactor = TRUE;
@@ -197,7 +203,7 @@ class tx_transactor_api {
 		$orderUid
 	) {
 		$referenceUid = FALSE;
-		$gatewayProxyObject = self::getGatewayProxyObject($handleLib, $confScript);
+		$gatewayProxyObject = \JambageCom\Transactor\Api\PaymentApi::getGatewayProxyObject($handleLib, $confScript);
 		if (
 			$orderUid &&
 			method_exists($gatewayProxyObject, 'generateReferenceUid')
@@ -284,7 +290,7 @@ class tx_transactor_api {
 
 			$paymentMethod = $confScript['paymentMethod'];
 			$gatewayProxyObject =
-				self::getGatewayProxyObject(
+				\JambageCom\Transactor\Api\PaymentApi::getGatewayProxyObject(
 					$handleLib,
 					$confScript
 				);
@@ -573,7 +579,7 @@ class tx_transactor_api {
 
 		if (strpos($handleLib, 'transactor') !== FALSE) {
 			$gatewayProxyObject =
-				self::getGatewayProxyObject(
+				\JambageCom\Transactor\Api\PaymentApi::getGatewayProxyObject(
 					$handleLib,
 					$confScript
 				);

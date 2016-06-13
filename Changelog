@@ -1,3 +1,7 @@
+2016-06-13 Franz Holzinger <franz@ttproducts.de>
+	* bugfix for PHP 7.x: The method init of tx_ttproducts_language cannot overload init of tx_div2007_alpha_language_base. init1 must be used instead.
+	* add new class PaymentApi for TYPO3 7.x.
+
 2016-05-02	Franz Holzinger <franz@ttproducts.de>
 	* Bugfix: TYPO3 does not know any more the $_EXTKEY variable
 

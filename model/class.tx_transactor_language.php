@@ -39,7 +39,7 @@
 
 
 class tx_transactor_language extends tx_div2007_alpha_language_base {
-	public function init ($pObj, $cObj, $conf, $scriptRelPath) {
+	public function init1 ($pObj, $cObj, $conf, $scriptRelPath) {
 
 		parent::init(
 			$cObj,
