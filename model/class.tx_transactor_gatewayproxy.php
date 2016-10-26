@@ -624,5 +624,39 @@ class tx_transactor_gatewayproxy implements tx_transactor_gateway_int {
 		$result = $this->getGatewayObj()->needsVerificationMessage();
 		return $result;
 	}
+
+
+	/**
+	 * Calculates the payment costs
+	 *
+	 * @param	array		configuration
+	 * @param	float		total amount to pay
+	 * @param	string		ISO3 code of seller
+	 * @param	string		ISO3 code of buyer
+	 * @return	float		payment costs
+	 * @access	public
+	 */
+	public function getCosts (
+		$confScript,
+		$amount,
+		$iso3Seller,
+		$iso3Buyer
+	) {
+		$result = FALSE;
+		$gatewayObject = $this->getGatewayObj();
+			// this method is not mandatory
+		if (
+			method_exists($gatewayObject, 'getCosts')
+		) {
+			$result =
+				$this->getGatewayObj()->getCosts(
+					$confScript,
+					$amount,
+					$iso3Seller,
+					$iso3Buyer
+				);
+		}
+		return $result;
+	}
 }
 

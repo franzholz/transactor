@@ -25,4 +25,5 @@ return array(
 	'tx_transactor_gatewayproxy' => $extensionPath . 'model/class.tx_transactor_gatewayproxy.php',
 	'tx_transactor_language' => $extensionPath . 'model/class.tx_transactor_language.php',
 	'tx_transactor_model_control' => $extensionPath . 'model/class.tx_transactor_model_control.php',
+	'JambageCom\\Transactor\\Api\\PaymentApi' => $extensionPath . 'Classes/Api/PaymentApi.php',
 );

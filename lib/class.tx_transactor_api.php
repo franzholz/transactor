@@ -203,7 +203,7 @@ class tx_transactor_api {
 		$orderUid
 	) {
 		$referenceUid = FALSE;
-		$gatewayProxyObject = \JambageCom\Transactor\Api\PaymentApi::getGatewayProxyObject($handleLib, $confScript);
+		$gatewayProxyObject = \JambageCom\Transactor\Api\PaymentApi::getGatewayProxyObject($confScript);
 		if (
 			$orderUid &&
 			method_exists($gatewayProxyObject, 'generateReferenceUid')
@@ -291,7 +291,6 @@ class tx_transactor_api {
 			$paymentMethod = $confScript['paymentMethod'];
 			$gatewayProxyObject =
 				\JambageCom\Transactor\Api\PaymentApi::getGatewayProxyObject(
-					$handleLib,
 					$confScript
 				);
 
@@ -413,6 +412,7 @@ class tx_transactor_api {
 								$currentPaymentActivity == 'finalize'
 							) {
 								$result = $gatewayProxyObject->transaction_process($errorMessage);
+
 								if ($result) {
 									$resultsArray = $gatewayProxyObject->transaction_getResults($referenceId); //array holen mit allen daten
 
@@ -580,7 +580,6 @@ class tx_transactor_api {
 		if (strpos($handleLib, 'transactor') !== FALSE) {
 			$gatewayProxyObject =
 				\JambageCom\Transactor\Api\PaymentApi::getGatewayProxyObject(
-					$handleLib,
 					$confScript
 				);
 
@@ -866,7 +865,7 @@ class tx_transactor_api {
 		$totalArray['goodsnotax'] = self::fFloat($goodsTotalNoTax);
 		$totalArray['goodstax'] = self::fFloat($goodsTotalTax);
 
-		// new calculatedArray format?
+		// is the new calculatedArray format used?
 		if (
 			isset($calculatedArray['shipping']) &&
 			is_array($calculatedArray['shipping'])
@@ -985,7 +984,12 @@ class tx_transactor_api {
 
 		// Fill the basket array
 		$basketArray = array();
-		$newTotalArray = array('handling' => '0', 'shipping' => '0');
+		$newTotalArray =
+			array(
+				'payment'  => '0',
+				'shipping' => '0',
+				'handling' => '0'
+			);
 		$lastSort = '';
 		$lastKey = 0;
 
@@ -1012,6 +1016,8 @@ class tx_transactor_api {
 					}
 				}
 
+				$payment = self::fFloat($count * $totalArray['paymenttax'] / $totalCount, 2);
+				$newTotalArray['payment'] += $payment;
 				$shipping = self::fFloat($count * $totalArray['shippingtax'] / $totalCount, 2);
 				$newTotalArray['shipping'] += $shipping;
 				$handling = self::fFloat($actItem['handling'], 2);
@@ -1020,11 +1026,12 @@ class tx_transactor_api {
 				$count = intval($actItem['count']);
 
 				$basketRow = array(
-					'item_name' => $row['title'],
-					'quantity' => $count,
-					'amount' => self::fFloat($actItem['priceNoTax']),
-					'shipping' => $shipping,
-					'handling' => $handling,
+					'item_name'  => $row['title'],
+					'quantity'   => $count,
+					'amount'     => self::fFloat($actItem['priceNoTax']),
+					'payment'    => $payment,
+					'shipping'   => $shipping,
+					'handling'   => $handling,
 					'taxpercent' => $tax,
 					'tax' => self::fFloat($actItem['priceTax'] - $actItem['priceNoTax']),
 					'totaltax' => self::fFloat($actItem['totalTax'] - $actItem['totalNoTax']),
@@ -1058,23 +1065,27 @@ class tx_transactor_api {
 		}
 
 		// fix rounding errors
-		if ($newTotalArray['shipping'] != $totalArray['shippingtax']) {
-			$basketArray[$lastSort][$lastKey]['shipping'] += $totalArray['shippingtax'] - $newTotalArray['shipping'];
+		foreach ($newTotalArray as $newType => $newAmount) {
+			if ($newTotalArray[$newType] != $totalArray[$newType . 'tax']) {
+				$basketArray[$lastSort][$lastKey][$newType] += $totalArray[$newType . 'tax'] - $newTotalArray[$newType];
+			}
 		}
 
-		// fix rounding errors
-		if ($newTotalArray['handling'] != $totalArray['handling']) {
-			$basketArray[$lastSort][$lastKey]['handling'] += $totalArray['handlingtax'] - $newTotalArray['handling'];
-		}
+		$value1 = 0;
+		$value2 = 0;
 
 		if (
+			isset($calculatedArray['priceTax']['vouchertotal']) &&
 			is_array($calculatedArray['priceTax']['vouchertotal'])
 		) {
 			if (isset($calculatedArray['priceTax']['vouchertotal']['ALL'])) {
 				$value1 = $calculatedArray['priceTax']['vouchertotal']['ALL'];
 				$value2 = $calculatedArray['priceTax']['total']['ALL'];
 			}
-		} else {
+		} else if (
+			isset($calculatedArray['priceTax']['vouchertotal']) &&
+			isset($calculatedArray['priceTax']['total'])
+		) {
 			$value1 = $calculatedArray['priceTax']['vouchertotal'];
 			$value2 = $calculatedArray['priceTax']['total'];
 		}

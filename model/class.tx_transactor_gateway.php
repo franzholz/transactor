@@ -69,17 +69,18 @@ abstract class tx_transactor_gateway implements tx_transactor_gateway_int {
 	 */
 	public function __construct () {
 		$this->clearErrors();
-		$this->conf = unserialize($GLOBALS['TYPO3_CONF_VARS']['EXT']['extConf']['transactor']);
+		$conf = unserialize($GLOBALS['TYPO3_CONF_VARS']['EXT']['extConf']['transactor']);
 		$extManagerConf = unserialize($GLOBALS['TYPO3_CONF_VARS']['EXT']['extConf'][$this->getExtKey()]);
 
 		if ($this->bMergeConf && is_array($this->conf)) {
 			if (is_array($extManagerConf)) {
-				$this->conf = array_merge($this->conf, $extManagerConf);
+				$conf = array_merge($this->conf, $extManagerConf);
 			}
 		} else if (is_array($extManagerConf)) {
-			$this->conf = $extManagerConf;
+			$conf = $extManagerConf;
 		}
 
+		$this->setConf($conf);
 		$this->setCookieArray(
 			array('fe_typo_user' => $_COOKIE['fe_typo_user'])
 		);
@@ -101,13 +102,22 @@ abstract class tx_transactor_gateway implements tx_transactor_gateway_int {
 	}
 
 
+	public function setConf ($conf) {
+		$this->conf = $conf;
+	}
+
+
 	public function getConfig () {
 		return $this->config;
 	}
 
 
-	public function setConfig ($config) {
-		$this->config = $config;
+	public function setConfig ($config, $index = '') {
+		if ($index != '') {
+			$this->config[$index] = $config;
+		} else {
+			$this->config = $config;
+		}
 	}
 
 
@@ -184,8 +194,10 @@ abstract class tx_transactor_gateway implements tx_transactor_gateway_int {
 			$this->paymentMethod = $paymentMethod;
 			$this->gatewayMode = $gatewayMode;
 			$this->callingExtension = $callingExtKey;
-			if (is_array($this->conf) && is_array($conf)) {
-				$this->conf = array_merge($this->conf, $conf);
+			$theConf = $this->getConf();
+			if (is_array($theConf) && is_array($conf)) {
+				$theConf = array_merge($theConf, $conf);
+				$this->setConf($theConf);
 			}
 			$result = TRUE;
 		} else {
@@ -252,7 +264,7 @@ abstract class tx_transactor_gateway implements tx_transactor_gateway_int {
 		) {
 			foreach ($detailsArray['options'] as $k => $v) {
 				if (in_array($k, $this->optionsArray)) {
-					$this->config[$k] = $v;
+					$this->setConfig($v, $k);
 				}
 			}
 			$xmlOptions =
@@ -330,6 +342,11 @@ abstract class tx_transactor_gateway implements tx_transactor_gateway_int {
 			$result = FALSE;
 		}
 		return $result;
+	}
+
+
+	public function setDetails ($detailsArray) {
+		$this->detailsArray = $detailsArray;
 	}
 
 
@@ -650,25 +667,23 @@ abstract class tx_transactor_gateway implements tx_transactor_gateway_int {
 	// *****************************************************************************
 
 	public function getTransaction ($reference) {
-		global $TYPO3_DB;
-
 		$result = FALSE;
 
-		if ($reference !='') {
+		if ($reference != '') {
 			$res =
-				$TYPO3_DB->exec_SELECTquery(
+				$GLOBALS['TYPO3_DB']->exec_SELECTquery(
 					'*',
 					'tx_transactor_transactions',
 					'reference = ' .
-						$TYPO3_DB->fullQuoteStr(
+						$GLOBALS['TYPO3_DB']->fullQuoteStr(
 							$reference,
 							'tx_transactor_transactions'
 						)
 				);
 
 			if ($res) {
-				$result = $TYPO3_DB->sql_fetch_assoc($res);
-				$TYPO3_DB->sql_free_result($res);
+				$result = $GLOBALS['TYPO3_DB']->sql_fetch_assoc($res);
+				$GLOBALS['TYPO3_DB']->sql_free_result($res);
 			}
 		}
 		return $result;
