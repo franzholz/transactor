@@ -2,7 +2,7 @@
 /***************************************************************
 *  Copyright notice
 *
-*  (c) 2016 Franz Holzinger <franz@ttproducts.de>
+*  (c) 2017 Franz Holzinger <franz@ttproducts.de>
 *  All rights reserved
 *
 *  This script is part of the TYPO3 project. The TYPO3 project is
@@ -63,6 +63,7 @@ class tx_transactor_api {
 			$langObj,
 			'locallang.xml'
 		);
+
 		self::$cObj = $cObj;
 	}
 
@@ -365,7 +366,8 @@ class tx_transactor_api {
 						$addressArray,
 						$paymentBasketArray
 					);
-						// Set payment details:
+
+                        // Set payment details:
 					$ok =
 						$gatewayProxyObject->transaction_setDetails(
 							$transactionDetailsArray
@@ -496,13 +498,13 @@ class tx_transactor_api {
 									$markerArray['###HOST###'] = $returnUrlArray['host'];
 
 									if (
-										$lConf['extImage'] == 'IMAGE' &&
+										$lConf['extImage'] != '' &&
 										isset($lConf['extImage.']) &&
 										is_array($lConf['extImage.'])
 									) {
-										$imageOut = self::$cObj->IMAGE($lConf['extImage.']);
+										$imageOut = self::$cObj->getContentObject($lConf['extImage'])->render($lConf['extImage.']);
 									} else {
-										$imageOut = tx_div2007::resolvePathWithExtPrefix($lConf['extImage']);
+										$imageOut = self::$cObj->fileResource($lConf['extImage']);
 									}
 									$markerArray['###TRANSACTOR_IMAGE###'] = $imageOut;
 									$markerArray['###TRANSACTOR_WWW###'] = $lConf['extWww'];

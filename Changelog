@@ -3,6 +3,9 @@
     * bugfix: replace getLL_fh002 by getLL_fh003
     * bugfix: a new orderuid must lead to an update of the transactor record
     * add a file composer.json
+    * bugfix: change marker ###TRANSACTOR_IMAGE### to contain the full image html like
+        <img src="typo3conf/ext/transactor_paypal/res/paypal_euro.gif" width="88" height="33" border="0" alt="" title="" />
+    * bugfix: use $cObj->fileResource instead of tx_div2007::resolvePathWithExtPrefix for a path like EXT:transactor_paypal/res/paypal_euro.gif
 
 2016-10-26 Franz Holzinger <franz@ttproducts.de>
 	* remove the parameter handleLib from the PaymentApi because it must always be set to transactor
