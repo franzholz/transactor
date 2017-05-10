@@ -1,3 +1,9 @@
+2017-05-10 Franz Holzinger <franz@ttproducts.de>
+    * works with TYPO3 8.x
+    * bugfix: replace getLL_fh002 by getLL_fh003
+    * bugfix: a new orderuid must lead to an update of the transactor record
+    * add a file composer.json
+
 2016-10-26 Franz Holzinger <franz@ttproducts.de>
 	* remove the parameter handleLib from the PaymentApi because it must always be set to transactor
 	* new feature: determine the payment costs. An addon to this extension can add the payment costs to the handling costs.

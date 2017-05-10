@@ -50,7 +50,6 @@ abstract class tx_transactor_listener {
 	 * @return	void
 	 */
 	public function execute ($params) {
-
 		if (is_array ($GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['transactor']['listener'])) {
 			foreach ($GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['transactor']['listener'] as $classRef) {
 				$hookObj = t3lib_div::makeInstance($classRef);

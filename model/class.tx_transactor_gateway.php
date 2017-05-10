@@ -3,7 +3,7 @@
 *
 *  Copyright notice
 *
-*  (c) 2016 Franz Holzinger (franz@ttproducts.de)
+*  (c) 2017 Franz Holzinger (franz@ttproducts.de)
 *  All rights reserved
 *
 *  This script is part of the TYPO3 project. The TYPO3 project is
@@ -292,7 +292,6 @@ abstract class tx_transactor_gateway implements tx_transactor_gateway_int {
 			'config' => $xmlOptions,
 			'user' => $detailsArray['user']
 		);
-
 		$res =
 			$GLOBALS['TYPO3_DB']->exec_DELETEquery(
 				'tx_transactor_transactions',
@@ -319,10 +318,11 @@ abstract class tx_transactor_gateway implements tx_transactor_gateway_int {
 			if (
 				$row['state'] < TX_TRANSACTOR_TRANSACTION_STATE_APPROVE_OK &&
 				(
-					abs(round($row['amount'], 2) - round($dataArray['amount'], 2) > 1) ||
+					abs(round($row['amount'], 2) - round($dataArray['amount'], 2) > 0.1) ||
 					$row['gatewayid'] != $dataArray['gatewayid'] ||
 					$row['paymethod_key'] != $dataArray['paymethod_key'] ||
-					$row['paymethod_method'] != $dataArray['paymethod_method']
+					$row['paymethod_method'] != $dataArray['paymethod_method'] ||
+                    $row['orderuid'] != $dataArray['orderuid']
 				)
 			) {
 				$res =

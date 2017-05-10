@@ -3,7 +3,7 @@
 *
 *  Copyright notice
 *
-*  (c) 2016 Franz Holzinger (franz@ttproducts.de)
+*  (c) 2017 Franz Holzinger (franz@ttproducts.de)
 *  All rights reserved
 *
 *  This script is part of the Typo3 project. The Typo3 project is
@@ -67,7 +67,7 @@ class tx_transactor_gatewayproxy implements tx_transactor_gateway_int {
 
 
 	public function getGatewayObj () {
-		$result = t3lib_div::getUserObj('&' . $this->gatewayClass);
+		$result = t3lib_div::getUserObj($this->gatewayClass);
 		if (!is_object($result)) {
 			throw new RuntimeException('ERROR in the Payment Transactor API (transactor) used by the extension "' . $this->gatewayExt . '": no object exists for the class "' . $this->gatewayClass . '"', 2020290000);
 		}

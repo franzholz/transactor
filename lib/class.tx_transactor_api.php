@@ -48,10 +48,10 @@ class tx_transactor_api {
 		$conf
 	) {
 		if (!is_object($cObj)) {
-			$cObj = t3lib_div::getUserObj('&tx_div2007_cobj');
+			$cObj = \JambageCom\Div2007\Utility\FrontendUtility::getContentObjectRenderer();
 		}
 
-		$langObj = t3lib_div::getUserObj('&tx_transactor_language');
+		$langObj = t3lib_div::getUserObj('tx_transactor_language');
 		$langObj->init1(
 			$pLangObj,
 			$cObj,
@@ -59,7 +59,7 @@ class tx_transactor_api {
 			'lib/class.tx_transactor_api.php'
 		);
 		$langObj->scriptRelPath = '';
-		tx_div2007_alpha5::loadLL_fh002(
+		tx_div2007_alpha5::loadLL_fh003(
 			$langObj,
 			'locallang.xml'
 		);
@@ -80,7 +80,7 @@ class tx_transactor_api {
 			'lib/class.tx_transactor_api.php'
 		);
 
-		tx_div2007_alpha5::loadLL_fh002(
+		tx_div2007_alpha5::loadLL_fh003(
 			$langObj,
 			'locallang.xml'
 		);
@@ -243,7 +243,7 @@ class tx_transactor_api {
 		&$localTemplateCode,
 		&$errorMessage
 	) {
-		$langObj = t3lib_div::getUserObj('&tx_transactor_language');
+		$langObj = t3lib_div::getUserObj('tx_transactor_language');
 		$bFinalize = FALSE;
 		$bFinalVerify = FALSE;
 		$gatewayExtKey = '';
@@ -272,13 +272,13 @@ class tx_transactor_api {
 			} else {
 				if ($gatewayExtKey == '') {
 					$errorMessage =
-						tx_div2007_alpha5::getLL_fh002(
+						tx_div2007_alpha5::getLL_fh003(
 							$langObj,
 							'extension_payment_missing'
 						);
 				} else {
 					$message =
-						tx_div2007_alpha5::getLL_fh002(
+						tx_div2007_alpha5::getLL_fh003(
 							$langObj,
 							'extension_missing'
 						);
@@ -312,7 +312,7 @@ class tx_transactor_api {
 
 					if (!$ok) {
 						$errorMessage =
-							tx_div2007_alpha5::getLL_fh002(
+							tx_div2007_alpha5::getLL_fh003(
 								$langObj,
 								'error_transaction_init'
 							);
@@ -341,7 +341,7 @@ class tx_transactor_api {
 
 					if (!$referenceId) {
 						$errorMessage =
-							tx_div2007_alpha5::getLL_fh002(
+							tx_div2007_alpha5::getLL_fh003(
 								$langObj,
 								'error_reference_id'
 							);
@@ -365,7 +365,6 @@ class tx_transactor_api {
 						$addressArray,
 						$paymentBasketArray
 					);
-
 						// Set payment details:
 					$ok =
 						$gatewayProxyObject->transaction_setDetails(
@@ -374,7 +373,7 @@ class tx_transactor_api {
 
 					if (!$ok) {
 						$errorMessage =
-							tx_div2007_alpha5::getLL_fh002(
+							tx_div2007_alpha5::getLL_fh003(
 								$langObj,
 								'error_transaction_details'
 							);
@@ -426,7 +425,7 @@ class tx_transactor_api {
 									}
 								} else if ($errorMessage == '') {
 									$errorMessage =
-										tx_div2007_alpha5::getLL_fh002(
+										tx_div2007_alpha5::getLL_fh003(
 											$langObj,
 											'error_gateway_unknown'
 										);
@@ -445,7 +444,7 @@ class tx_transactor_api {
 
 								if (!$localTemplateCode && $templateFilename != '') {
 									$errorMessage =
-										tx_div2007_alpha5::getLL_fh002(
+										tx_div2007_alpha5::getLL_fh003(
 											$langObj,
 											'error_no_template'
 										);
@@ -517,7 +516,7 @@ class tx_transactor_api {
 										$errorMessage = $formuri;
 									} else {
 										$errorMessage =
-											tx_div2007_alpha5::getLL_fh002(
+											tx_div2007_alpha5::getLL_fh003(
 												$langObj,
 												'error_relay_url'
 											);
@@ -530,7 +529,7 @@ class tx_transactor_api {
 					}
 				} else {
 					$message =
-						tx_div2007_alpha5::getLL_fh002(
+						tx_div2007_alpha5::getLL_fh003(
 							$langObj,
 							'error_gateway_missing'
 						);
@@ -540,7 +539,7 @@ class tx_transactor_api {
 			}
 		} else {
 			$message =
-				tx_div2007_alpha5::getLL_fh002(
+				tx_div2007_alpha5::getLL_fh003(
 					$langObj,
 					'error_api_parameters'
 				);
@@ -550,7 +549,7 @@ class tx_transactor_api {
 
 		if ($errorMessage == TX_TRANSACTOR_TRANSACTION_MESSAGE_NOT_PROCESSED) {
 			$errorMessage =
-				tx_div2007_alpha5::getLL_fh002(
+				tx_div2007_alpha5::getLL_fh003(
 					$langObj,
 					'error_transaction_no'
 				);
@@ -610,10 +609,10 @@ class tx_transactor_api {
 				$ok = $gatewayProxyObject->transaction_validate();
 
 				if (!$ok) {
-					$langObj = t3lib_div::getUserObj('&tx_transactor_language');
+					$langObj = t3lib_div::getUserObj('tx_transactor_language');
 
 					$errorMessage =
-						tx_div2007_alpha5::getLL_fh002(
+						tx_div2007_alpha5::getLL_fh003(
 							$langObj,
 							'error_invalid_data'
 						);
@@ -723,6 +722,7 @@ class tx_transactor_api {
 		$successPid = 0;
 		$failPid = 0;
 		$value = 0;
+
 		if (
 			isset($calculatedArray['priceTax']) &&
 			is_array($calculatedArray['priceTax']) &&
@@ -827,7 +827,7 @@ class tx_transactor_api {
 		&$basketArray
 	) {
 		$bUseStaticInfo = FALSE;
-		$langObj = t3lib_div::getUserObj('&tx_transactor_language');
+		$langObj = t3lib_div::getUserObj('tx_transactor_language');
 
 		if (t3lib_extMgm::isLoaded('static_info_tables')) {
 			$bUseStaticInfo = TRUE;
@@ -1096,7 +1096,7 @@ class tx_transactor_api {
 		) {
 			$voucherAmount = $value1 - $value2;
 			$voucherText =
-				tx_div2007_alpha5::getLL_fh002(
+				tx_div2007_alpha5::getLL_fh003(
 					$langObj,
 					'voucher_payment_article'
 				);
