@@ -60,22 +60,6 @@ class tx_transactor_language extends tx_div2007_alpha_language_base implements t
 			}
 		}
 	}
-
-
-	public function getLanguage () {
-
-		if (
-			isset($GLOBALS['TSFE']->config) &&
-			is_array($GLOBALS['TSFE']->config) &&
-			isset($GLOBALS['TSFE']->config['config']) &&
-			is_array($GLOBALS['TSFE']->config['config'])
-		) {
-			$result = $GLOBALS['TSFE']->config['config']['language'];
-		} else {
-			$result = 'default';
-		}
-		return $result;
-	}
 }
 
 
