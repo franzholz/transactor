@@ -59,7 +59,7 @@ class tx_transactor_api {
 			'lib/class.tx_transactor_api.php'
 		);
 		$langObj->scriptRelPath = '';
-		tx_div2007_alpha5::loadLL_fh003(
+		tx_div2007_alpha5::loadLL_fh002(
 			$langObj,
 			'locallang.xml'
 		);
@@ -80,7 +80,7 @@ class tx_transactor_api {
 			'lib/class.tx_transactor_api.php'
 		);
 
-		tx_div2007_alpha5::loadLL_fh003(
+		tx_div2007_alpha5::loadLL_fh002(
 			$langObj,
 			'locallang.xml'
 		);
