@@ -35,7 +35,7 @@
  * @package 	TYPO3
  * @subpackage	tx_transactor
 **/
-abstract class tx_transactor_gateway implements tx_transactor_gateway_int {
+abstract class tx_transactor_gateway implements tx_transactor_gateway_int, t3lib_Singleton {
 	protected $gatewayKey = 'transactor';	// must be overridden
 	protected $extKey = 'transactor';		// must be overridden
 	protected $supportedGatewayArray = array();	// must be overridden
