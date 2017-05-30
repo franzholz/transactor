@@ -654,7 +654,7 @@ class tx_transactor_api {
 		}
 		$linkParams = implode('&', $linkArray);
 		$url =
-			tx_div2007_alpha::getTypoLink_URL_fh002(
+			tx_div2007_alpha5::getTypoLink_fh003(
 				self::$cObj,
 				$pid,
 				$linkParamArray,

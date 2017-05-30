@@ -1,3 +1,7 @@
+
+2017-05-30 Franz Holzinger <franz@ttproducts.de>
+    * bugfix: replace tx_div2007_alpha::getTypoLink_fh002 by tx_div2007_alpha5::getTypoLink_fh003
+
 2017-05-10 Franz Holzinger <franz@ttproducts.de>
     * works with TYPO3 8.x
     * bugfix: replace getLL_fh002 by getLL_fh003
