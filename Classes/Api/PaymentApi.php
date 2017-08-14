@@ -40,82 +40,82 @@ namespace JambageCom\Transactor\Api;
 
 class PaymentApi {
 
-	/**
-	 * returns the gateway proxy object
-	 */
-	static public function getGatewayProxyObject (
-		$confScript
-	) {
-		$result = FALSE;
+    /**
+    * returns the gateway proxy object
+    */
+    static public function getGatewayProxyObject (
+        $confScript
+    ) {
+        $result = FALSE;
 
-		if (
-			is_array($confScript) &&
-			$confScript['extName'] != '' &&
-			$confScript['paymentMethod'] != ''
-		) {
-			$gatewayExtKey = $confScript['extName'];
+        if (
+            is_array($confScript) &&
+            $confScript['extName'] != '' &&
+            $confScript['paymentMethod'] != ''
+        ) {
+            $gatewayExtKey = $confScript['extName'];
 
-			if (\TYPO3\CMS\Core\Utility\ExtensionManagementUtility::isLoaded($gatewayExtKey)) {
-				$gatewayFactoryObj = \tx_transactor_gatewayfactory::getInstance();
-				$gatewayFactoryObj->registerGatewayExt($gatewayExtKey);
-				$paymentMethod = $confScript['paymentMethod'];
-				$result =
-					$gatewayFactoryObj->getGatewayProxyObjectByPaymentMethod(
-						$paymentMethod
-					);
-			}
-		}
+            if (\TYPO3\CMS\Core\Utility\ExtensionManagementUtility::isLoaded($gatewayExtKey)) {
+                $gatewayFactoryObj = \tx_transactor_gatewayfactory::getInstance();
+                $gatewayFactoryObj->registerGatewayExt($gatewayExtKey);
+                $paymentMethod = $confScript['paymentMethod'];
+                $result =
+                    $gatewayFactoryObj->getGatewayProxyObjectByPaymentMethod(
+                        $paymentMethod
+                    );
+            }
+        }
 
-		return $result;
-	}
+        return $result;
+    }
 
-	/**
-	 * Calculates the payment costs
-	 *
-	 * @param	array		configuration
-	 * @param	float		total amount to pay
-	 * @param	string		ISO3 code of seller
-	 * @param	string		ISO3 code of buyer
-	 * @return	float		payment costs
-	 * @access	public
-	 */
-	static public function getCosts (
-		$confScript,
-		$amount,
-		$iso3Seller,
-		$iso3Buyer
-	) {
-		$gatewayProxyObject = self::getGatewayProxyObject($confScript);
-		$costs = $gatewayProxyObject->getCosts(
-			$confScript,
-			$amount,
-			$iso3Seller,
-			$iso3Buyer
-		);
-		return $costs;
-	}
+    /**
+    * Calculates the payment costs
+    *
+    * @param	array		configuration
+    * @param	float		total amount to pay
+    * @param	string		ISO3 code of seller
+    * @param	string		ISO3 code of buyer
+    * @return	float		payment costs
+    * @access	public
+    */
+    static public function getCosts (
+        $confScript,
+        $amount,
+        $iso3Seller,
+        $iso3Buyer
+    ) {
+        $gatewayProxyObject = self::getGatewayProxyObject($confScript);
+        $costs = $gatewayProxyObject->getCosts(
+            $confScript,
+            $amount,
+            $iso3Seller,
+            $iso3Buyer
+        );
+        return $costs;
+    }
 
 
-	static public function sendErrorEmail (
-		$fromEMail,
-		$fromName,
-		$toEMail,
-		$subject,
-		array $fields,
-		$extKey = ''
-	) {
-		$PLAINContent = 'The TYPO3 Transactor extension transfers to you an error message coming from extension "' . $extKey . '".';
-		$PLAINContent .= chr(13) . implode('|', $fields);
-		$HTMLContent = '';
+    static public function sendErrorEmail (
+        $fromEMail,
+        $fromName,
+        $toEMail,
+        $subject,
+        array $fields,
+        $extKey = ''
+    ) {
+        $PLAINContent = 'The TYPO3 Transactor extension transfers to you an error message coming from extension "' . $extKey . '".';
+        $PLAINContent .= chr(13) . implode('|', $fields);
+        $HTMLContent = '';
 
-		\tx_div2007_email::sendMail(
-			$toEMail,
-			$subject,
-			$PLAINContent,
-			$HTMLContent,
-			$fromEMail,
-			$fromName
-		);
-	}
+        \tx_div2007_email::sendMail(
+            $toEMail,
+            $subject,
+            $PLAINContent,
+            $HTMLContent,
+            $fromEMail,
+            $fromName
+        );
+    }
 }
 

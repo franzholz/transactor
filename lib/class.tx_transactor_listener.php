@@ -36,35 +36,35 @@
 
 abstract class tx_transactor_listener {
 
-	/**
-	 * Main function which creates the transaction record
-	 * This must be overridden
-	 * @return	void
-	 */
-	abstract public function main ();
+    /**
+    * Main function which creates the transaction record
+    * This must be overridden
+    * @return	void
+    */
+    abstract public function main ();
 
-	/**
-	 * Main function which processes the tasks connected to the listener.
-	 * E.g an order in the shop is finalized.
-	 *
-	 * @return	void
-	 */
-	public function execute ($params) {
-		if (is_array ($GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['transactor']['listener'])) {
-			foreach ($GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['transactor']['listener'] as $classRef) {
-				$hookObj = t3lib_div::makeInstance($classRef);
-				if (
-					is_object($hookObj) &&
-					method_exists($hookObj, 'execute')
-				) {
-					$hookObj->execute(
-						$this,
-						$params
-					);
-				}
-			}
-		}
-	}
+    /**
+    * Main function which processes the tasks connected to the listener.
+    * E.g an order in the shop is finalized.
+    *
+    * @return	void
+    */
+    public function execute ($params) {
+        if (is_array ($GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['transactor']['listener'])) {
+            foreach ($GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['transactor']['listener'] as $classRef) {
+                $hookObj = t3lib_div::makeInstance($classRef);
+                if (
+                    is_object($hookObj) &&
+                    method_exists($hookObj, 'execute')
+                ) {
+                    $hookObj->execute(
+                        $this,
+                        $params
+                    );
+                }
+            }
+        }
+    }
 }
 
 

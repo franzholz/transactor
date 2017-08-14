@@ -25,65 +25,65 @@
 *  This copyright notice MUST APPEAR in all copies of the script!
 ***************************************************************/
 /**
- * Part of the transactor (Payment Transactor API) extension.
- *
- * @author	Franz Holzinger <franz@ttproducts.de>
- * @maintainer	Franz Holzinger <franz@ttproducts.de>
- * @package TYPO3
- * @subpackage transactor
- *
- */
+* Part of the transactor (Payment Transactor API) extension.
+*
+* @author	Franz Holzinger <franz@ttproducts.de>
+* @maintainer	Franz Holzinger <franz@ttproducts.de>
+* @package TYPO3
+* @subpackage transactor
+*
+*/
 
 
 
 class tx_transactor_model_control {
 
-	static private $prefixId = '';
-	static private $piVars = array();
-	static private $callingExtensionVar = 'calling_extension';
-	static private $orderVar = 'order';
-	static private $returiVar = 'returi';
-	static private $faillinkVar = 'faillink';
-	static private $successlinkVar = 'successlink';
+    static private $prefixId = '';
+    static private $piVars = array();
+    static private $callingExtensionVar = 'calling_extension';
+    static private $orderVar = 'order';
+    static private $returiVar = 'returi';
+    static private $faillinkVar = 'faillink';
+    static private $successlinkVar = 'successlink';
 
 
-	static public function getCallingExtensionVar () {
-		return self::$callingExtensionVar;
-	}
+    static public function getCallingExtensionVar () {
+        return self::$callingExtensionVar;
+    }
 
-	static public function getOrderVar () {
-		return self::$orderVar;
-	}
+    static public function getOrderVar () {
+        return self::$orderVar;
+    }
 
-	static public function getReturiVar () {
-		return self::$returiVar;
-	}
+    static public function getReturiVar () {
+        return self::$returiVar;
+    }
 
-	static public function getFaillinkVar () {
-		return self::$faillinkVar;
-	}
+    static public function getFaillinkVar () {
+        return self::$faillinkVar;
+    }
 
-	static public function getSuccesslinkVar () {
-		return self::$successlinkVar;
-	}
+    static public function getSuccesslinkVar () {
+        return self::$successlinkVar;
+    }
 
-	static public function setPrefixId ($prefixId) {
-		self::$prefixId = $prefixId;
-	}
+    static public function setPrefixId ($prefixId) {
+        self::$prefixId = $prefixId;
+    }
 
-	static public function getPrefixId () {
-		return self::$prefixId;
-	}
+    static public function getPrefixId () {
+        return self::$prefixId;
+    }
 
-	static public function getPiVars () {
-		if (
-			self::$prefixId &&
-			!isset(self::$piVars[self::$prefixId])
-		) {
-			self::$piVars = t3lib_div::_GPmerged(self::$prefixId);
-		}
-		$result = self::$piVars;
-		return $result;
-	}
+    static public function getPiVars () {
+        if (
+            self::$prefixId &&
+            !isset(self::$piVars[self::$prefixId])
+        ) {
+            self::$piVars = t3lib_div::_GPmerged(self::$prefixId);
+        }
+        $result = self::$piVars;
+        return $result;
+    }
 }
 

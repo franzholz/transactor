@@ -25,45 +25,45 @@
 *  This copyright notice MUST APPEAR in all copies of the script!
 ***************************************************************/
 /**
- * Part of the transactor (Shop System) extension.
- *
- * language object
- *
- * @author	Franz Holzinger <franz@ttproducts.de>
- * @maintainer	Franz Holzinger <franz@ttproducts.de>
- * @package TYPO3
- * @subpackage transactor
- *
- *
- */
+* Part of the transactor (Shop System) extension.
+*
+* language object
+*
+* @author	Franz Holzinger <franz@ttproducts.de>
+* @maintainer	Franz Holzinger <franz@ttproducts.de>
+* @package TYPO3
+* @subpackage transactor
+*
+*
+*/
 
 
 class tx_transactor_language extends tx_div2007_alpha_language_base implements t3lib_Singleton {
-	public function init1 ($pObj, $cObj, $conf, $scriptRelPath) {
+    public function init1 ($pObj, $cObj, $conf, $scriptRelPath) {
 
-		parent::init(
-			$cObj,
-			'transactor',
-			$conf,
-			$scriptRelPath
-		);
+        parent::init(
+            $cObj,
+            'transactor',
+            $conf,
+            $scriptRelPath
+        );
 
-		if (isset($pObj) && is_object($pObj)) {
-			if (isset($pObj->LOCAL_LANG) && is_array($pObj->LOCAL_LANG)) {
-				$this->LOCAL_LANG = $pObj->LOCAL_LANG;
-			}
-			if (isset($pObj->LOCAL_LANG_charset) && is_array($pObj->LOCAL_LANG_charset)) {
-				$this->LOCAL_LANG_charset = $pObj->LOCAL_LANG_charset;
-			}
-			if (isset($pObj->LOCAL_LANG_loaded) && is_array($pObj->LOCAL_LANG_loaded)) {
-				$this->LOCAL_LANG_loaded = $pObj->LOCAL_LANG_loaded;
-			}
-		}
-	}
+        if (isset($pObj) && is_object($pObj)) {
+            if (isset($pObj->LOCAL_LANG) && is_array($pObj->LOCAL_LANG)) {
+                $this->LOCAL_LANG = $pObj->LOCAL_LANG;
+            }
+            if (isset($pObj->LOCAL_LANG_charset) && is_array($pObj->LOCAL_LANG_charset)) {
+                $this->LOCAL_LANG_charset = $pObj->LOCAL_LANG_charset;
+            }
+            if (isset($pObj->LOCAL_LANG_loaded) && is_array($pObj->LOCAL_LANG_loaded)) {
+                $this->LOCAL_LANG_loaded = $pObj->LOCAL_LANG_loaded;
+            }
+        }
+    }
 }
 
 
 if (defined('TYPO3_MODE') && $GLOBALS['TYPO3_CONF_VARS'][TYPO3_MODE]['XCLASS']['ext/transactor/model/class.tx_transactor_language.php']) {
-	include_once($GLOBALS['TYPO3_CONF_VARS'][TYPO3_MODE]['XCLASS']['ext/transactor/model/class.tx_transactor_language.php']);
+    include_once($GLOBALS['TYPO3_CONF_VARS'][TYPO3_MODE]['XCLASS']['ext/transactor/model/class.tx_transactor_language.php']);
 }
 

@@ -2,7 +2,7 @@
 
 <html>
 <head>
-	<title>Template for the Payment Transactor Extension</title>
+    <title>Template for the Payment Transactor Extension</title>
 </head>
 
 <body>
@@ -17,40 +17,40 @@ This subpart is used to display the card number information dialog before the tr
 
 
 <div class="transactor-table">
-	<div class="transactor-row">
-		<div class="transactor-cell transactor-total-header">
-		TOTAL:
-	</div>
-	</div>
-	<div class="transactor-row">
-		<div class="transactor-cell transactor-total-amount-header">
-			Total amount in EURO:
-		</div>
+    <div class="transactor-row">
+        <div class="transactor-cell transactor-total-header">
+        TOTAL:
+    </div>
+    </div>
+    <div class="transactor-row">
+        <div class="transactor-cell transactor-total-amount-header">
+            Total amount in EURO:
+        </div>
 
-		<div class="transactor-cell transactor-total-amount">
-			&euro; ###PRICE_TOTAL_TAX###
-		</div>
-	</div>
+        <div class="transactor-cell transactor-total-amount">
+            &euro; ###PRICE_TOTAL_TAX###
+        </div>
+    </div>
 </div>
 
 <div class="transactor-form">
-	<form action="###REDIRECT_URL###" method="post" autocomplete="off" name="connectForm">
-	<input type="submit" name="pay" value="Connect to the ###TRANSACTOR_TITLE### server" />&nbsp;&nbsp;
-		###HIDDENFIELDS###
-	</form>
+    <form action="###REDIRECT_URL###" method="post" autocomplete="off" name="connectForm">
+    <input type="submit" name="pay" value="Connect to the ###TRANSACTOR_TITLE### server" />&nbsp;&nbsp;
+        ###HIDDENFIELDS###
+    </form>
 </div>
 
 <p class="important">###MESSAGE_REDIRECT###</p>
 
 <div class="transactor-table">
-	<div class="transactor-row">
-		<div class="transactor-cell">
-			<a href="http://###TRANSACTOR_WWW###" target="_blank">###TRANSACTOR_IMAGE###</a>
-		</div>
-		<div class="transactor-cell transactor-info">
-			###TRANSACTOR_INFO###
-		</div>
-	</div>
+    <div class="transactor-row">
+        <div class="transactor-cell">
+            <a href="http://###TRANSACTOR_WWW###" target="_blank">###TRANSACTOR_IMAGE###</a>
+        </div>
+        <div class="transactor-cell transactor-info">
+            ###TRANSACTOR_INFO###
+        </div>
+    </div>
 </div>
 
 <!-- ###TRANSACTOR_FORM_TEMPLATE###	 end -->
@@ -93,10 +93,10 @@ Has the standard fields of the normal BASKET-templates
 
 -->
 ###GW1B###
-	Du omdirigeres nu til en sikker betalingsserver.
-	<script>
-		document.location = '###REDIRECT_URL###';
-	</script>
+    Du omdirigeres nu til en sikker betalingsserver.
+    <script>
+        document.location = '###REDIRECT_URL###';
+    </script>
 ###GW1E###
 
 <!-- ###TRANSACTOR_REDIRECT_TEMPLATE###	 end -->

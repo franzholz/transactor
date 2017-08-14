@@ -24,220 +24,220 @@
 ***************************************************************/
 
 /**
- *
- * @package 	TYPO3
- * @subpackage	tx_transactor
- * @author	Franz Holzinger <franz@ttproducts.de>
- * @author	Robert Lemke <robert@typo3.org>
- */
+*
+* @package 	TYPO3
+* @subpackage	tx_transactor
+* @author	Franz Holzinger <franz@ttproducts.de>
+* @author	Robert Lemke <robert@typo3.org>
+*/
 
 
 final class tx_transactor_gatewayfactory {
 
-	private static $instance = FALSE;					// Holds an instance of this class
-	private static $gatewayProxyObjects = array();		// An array of proxy objects, each pointing to a registered gateway object
-	private static $errorMessage = '';
-	private static $errorStack;
+    private static $instance = FALSE;					// Holds an instance of this class
+    private static $gatewayProxyObjects = array();		// An array of proxy objects, each pointing to a registered gateway object
+    private static $errorMessage = '';
+    private static $errorStack;
 
 
-	/**
-	 * This constructor is private because you may only instantiate this class by calling
-	 * the function getInstance() which returns a unique instance of this class (Singleton).
-	 *
-	 * @return		void
-	 * @access		private
-	 */
-	private function __construct () {
-		// do nothing
-	}
+    /**
+    * This constructor is private because you may only instantiate this class by calling
+    * the function getInstance() which returns a unique instance of this class (Singleton).
+    *
+    * @return		void
+    * @access		private
+    */
+    private function __construct () {
+        // do nothing
+    }
 
 
-	/**
-	 * Returns a unique instance of this class. Call this function instead of creating a new
-	 * instance manually!
-	 *
-	 * @return		object		Unique instance of tx_transactor_factory
-	 * @access		public
-	 */
-	public static function getInstance () {
-		if (self::$instance === FALSE) {
-			self::$instance = new tx_transactor_gatewayfactory;
-		}
-		return self::$instance;
-	}
+    /**
+    * Returns a unique instance of this class. Call this function instead of creating a new
+    * instance manually!
+    *
+    * @return		object		Unique instance of tx_transactor_factory
+    * @access		public
+    */
+    public static function getInstance () {
+        if (self::$instance === FALSE) {
+            self::$instance = new tx_transactor_gatewayfactory;
+        }
+        return self::$instance;
+    }
 
 
-	/**
-	 * Registers the given extension as a payment gateway (concrete product). This method will
-	 * be called by the gateway implementation itself.
-	 *
-	 * @param		string		$extKey: Extension key of the payment implementation.
-	 * @return		mixed		Proxied instance of the given extension or FALSE if an error occurred.
-	 * @access		public
-	 */
-	public static function registerGatewayExt ($extKey) {
+    /**
+    * Registers the given extension as a payment gateway (concrete product). This method will
+    * be called by the gateway implementation itself.
+    *
+    * @param		string		$extKey: Extension key of the payment implementation.
+    * @return		mixed		Proxied instance of the given extension or FALSE if an error occurred.
+    * @access		public
+    */
+    public static function registerGatewayExt ($extKey) {
 
-		if (t3lib_extMgm::isLoaded($extKey)) {
-			$gatewayProxy = t3lib_div::getUserObj('tx_transactor_gatewayproxy');
-			$gatewayProxy->init($extKey);
-			self::$gatewayProxyObjects[$extKey] = $gatewayProxy;
-			$result = self::$gatewayProxyObjects[$extKey];
-		} else {
-			$result = FALSE;
-		}
-		return $result;
-	}
-
-
-	/**
-	 * Returns an array of instantiated payment implementations wrapped by a proxy
-	 * object. We use this proxy as a smart reference: All function calls and access
-	 * to variables are redirected to the real gateway object but in some cases
-	 * some additional operation is done.
-	 *
-	 * @return		array		Array of payment implementations (objects)
-	 * @access		public
-	 */
-	public static function getGatewayProxyObjects () {
-		return self::$gatewayProxyObjects;
-	}
+        if (t3lib_extMgm::isLoaded($extKey)) {
+            $gatewayProxy = t3lib_div::getUserObj('tx_transactor_gatewayproxy');
+            $gatewayProxy->init($extKey);
+            self::$gatewayProxyObjects[$extKey] = $gatewayProxy;
+            $result = self::$gatewayProxyObjects[$extKey];
+        } else {
+            $result = FALSE;
+        }
+        return $result;
+    }
 
 
-	/**
-	 * Returns instance of the payment implementations (wrapped by a proxy
-	 * object) which offers the specified payment method.
-	 *
-	 * @param		string		$paymentMethod: Payment method key
-	 * @return		mixed		Reference to payment proxy object or FALSE if no matching object was found
-	 * @access		public
-	 */
-	public static function getGatewayProxyObjectByPaymentMethod ($paymentMethod) {
-		$result = FALSE;
-
-		if (is_array (self::$gatewayProxyObjects)) {
-			foreach (self::$gatewayProxyObjects as $extKey => $gatewayProxyObject) {
-				$paymentMethodsArray = $gatewayProxyObject->getAvailablePaymentMethods();
-
-				if (
-					is_array($paymentMethodsArray) &&
-					array_key_exists($paymentMethod, $paymentMethodsArray)
-				) {
-					$result = $gatewayProxyObject;
-					break;
-				} else {
-					if ($paymentMethodsArray != FALSE) {
-						self::addError(
-							'tx_transactor_gatewayfactory::getGatewayObjectByPaymentMethod ' . $paymentMethodsArray
-						);
-					}
-				}
-			}
-		}
-		return $result;
-	}
+    /**
+    * Returns an array of instantiated payment implementations wrapped by a proxy
+    * object. We use this proxy as a smart reference: All function calls and access
+    * to variables are redirected to the real gateway object but in some cases
+    * some additional operation is done.
+    *
+    * @return		array		Array of payment implementations (objects)
+    * @access		public
+    */
+    public static function getGatewayProxyObjects () {
+        return self::$gatewayProxyObjects;
+    }
 
 
-	/**
-	 * Returns an array of transaction records which match the given extension key
-	 * and optionally the given extension reference string and or booking status.
-	 * Use this function instead accessing the transaction records directly.
-	 *
-	 * @param		string		$ext_key: Extension key
-	 * @param		int			$gatewayid: (optional) Filter by gateway id
-	 * @param		string		$reference: (optional) Filter by reference
-	 * @param		string		$state: (optional) Filter by transaction state
-	 * @return		array		Array of transaction records, FALSE if no records where found or an error occurred.
-	 * @access		public
-	 */
-	public static function getTransactionsByExtKey (
-		$ext_key,
-		$gatewayid = NULL,
-		$reference = NULL,
-		$state = NULL
-	) {
-		$transactionsArray = FALSE;
+    /**
+    * Returns instance of the payment implementations (wrapped by a proxy
+    * object) which offers the specified payment method.
+    *
+    * @param		string		$paymentMethod: Payment method key
+    * @return		mixed		Reference to payment proxy object or FALSE if no matching object was found
+    * @access		public
+    */
+    public static function getGatewayProxyObjectByPaymentMethod ($paymentMethod) {
+        $result = FALSE;
 
-		$additionalWhere = '';
-		$additionalWhere .= (isset ($gatewayid)) ? ' AND gatewayid="'.$gatewayid.'"' : '';
-		$additionalWhere .= (isset ($invoiceid)) ? ' AND reference="'.$reference.'"' : '';
-		$additionalWhere .= (isset ($state)) ? ' AND state="'.$state.'"' : '';
+        if (is_array (self::$gatewayProxyObjects)) {
+            foreach (self::$gatewayProxyObjects as $extKey => $gatewayProxyObject) {
+                $paymentMethodsArray = $gatewayProxyObject->getAvailablePaymentMethods();
 
-		$res = $GLOBALS['TYPO3_DB']->exec_SELECTquery(
-			'*',
-			'tx_transactor_transactions',
-			'ext_key="' . $ext_key . '"' . $additionalWhere,
-			'',
-			'crdate DESC'
-		);
-
-		if ($res && $GLOBALS['TYPO3_DB']->sql_num_rows($res)) {
-			$transactionsArray = array();
-			while ($row = $GLOBALS['TYPO3_DB']->sql_fetch_assoc($res)) {
-				$row['user'] = self::field2array($row['user']);
-				$transactionsArray[$row['uid']] = $row;
-			}
-		}
-		return $transactionsArray;
-	}
+                if (
+                    is_array($paymentMethodsArray) &&
+                    array_key_exists($paymentMethod, $paymentMethodsArray)
+                ) {
+                    $result = $gatewayProxyObject;
+                    break;
+                } else {
+                    if ($paymentMethodsArray != FALSE) {
+                        self::addError(
+                            'tx_transactor_gatewayfactory::getGatewayObjectByPaymentMethod ' . $paymentMethodsArray
+                        );
+                    }
+                }
+            }
+        }
+        return $result;
+    }
 
 
-	/**
-	 * Returns a single transaction record which matches the given uid
-	 *
-	 * @param		integer		$uid: UID of the transaction
-	 * @access		public
-	 */
-	public static function getTransactionByUid ($uid) {
+    /**
+    * Returns an array of transaction records which match the given extension key
+    * and optionally the given extension reference string and or booking status.
+    * Use this function instead accessing the transaction records directly.
+    *
+    * @param		string		$ext_key: Extension key
+    * @param		int			$gatewayid: (optional) Filter by gateway id
+    * @param		string		$reference: (optional) Filter by reference
+    * @param		string		$state: (optional) Filter by transaction state
+    * @return		array		Array of transaction records, FALSE if no records where found or an error occurred.
+    * @access		public
+    */
+    public static function getTransactionsByExtKey (
+        $ext_key,
+        $gatewayid = NULL,
+        $reference = NULL,
+        $state = NULL
+    ) {
+        $transactionsArray = FALSE;
 
-		$res = $GLOBALS['TYPO3_DB']->exec_SELECTquery (
-			'*',
-			'tx_transactor_transactions',
-			'uid=' . $uid
-		);
+        $additionalWhere = '';
+        $additionalWhere .= (isset ($gatewayid)) ? ' AND gatewayid="'.$gatewayid.'"' : '';
+        $additionalWhere .= (isset ($invoiceid)) ? ' AND reference="'.$reference.'"' : '';
+        $additionalWhere .= (isset ($state)) ? ' AND state="'.$state.'"' : '';
 
-		if (!$res || !$GLOBALS['TYPO3_DB']->sql_num_rows($res)) {
-			return FALSE;
-		}
+        $res = $GLOBALS['TYPO3_DB']->exec_SELECTquery(
+            '*',
+            'tx_transactor_transactions',
+            'ext_key="' . $ext_key . '"' . $additionalWhere,
+            '',
+            'crdate DESC'
+        );
 
-		$row = $GLOBALS['TYPO3_DB']->sql_fetch_assoc($res);
-		$row['user'] = self::field2array($row['user']);
-
-		return $row;
-	}
-
-
-	/**
-	 * Return an array with either a single value or an unserialized array
-	 *
-	 * @param		mixed		$field: some value from a database field
-	 * @return 	array
-	 * @access		private
-	 */
-	private static function field2array ($field) {
-		if (!$field = @unserialize ($field)) {
-		    $field = array($field);
-		}
-		return $field;
-	}
-
-
-	public static function clearErrors () {
-		self::$errorStack = array();
-	}
-
-
-	public static function addError ($error) {
-		self::$errorStack[] = $error;
-	}
+        if ($res && $GLOBALS['TYPO3_DB']->sql_num_rows($res)) {
+            $transactionsArray = array();
+            while ($row = $GLOBALS['TYPO3_DB']->sql_fetch_assoc($res)) {
+                $row['user'] = self::field2array($row['user']);
+                $transactionsArray[$row['uid']] = $row;
+            }
+        }
+        return $transactionsArray;
+    }
 
 
-	public static function hasErrors () {
-		$result = (count(self::$errorStack) > 0);
-	}
+    /**
+    * Returns a single transaction record which matches the given uid
+    *
+    * @param		integer		$uid: UID of the transaction
+    * @access		public
+    */
+    public static function getTransactionByUid ($uid) {
+
+        $res = $GLOBALS['TYPO3_DB']->exec_SELECTquery (
+            '*',
+            'tx_transactor_transactions',
+            'uid=' . $uid
+        );
+
+        if (!$res || !$GLOBALS['TYPO3_DB']->sql_num_rows($res)) {
+            return FALSE;
+        }
+
+        $row = $GLOBALS['TYPO3_DB']->sql_fetch_assoc($res);
+        $row['user'] = self::field2array($row['user']);
+
+        return $row;
+    }
 
 
-	public static function getErrors () {
-		return self::$errorStack;
-	}
+    /**
+    * Return an array with either a single value or an unserialized array
+    *
+    * @param		mixed		$field: some value from a database field
+    * @return 	array
+    * @access		private
+    */
+    private static function field2array ($field) {
+        if (!$field = @unserialize ($field)) {
+            $field = array($field);
+        }
+        return $field;
+    }
+
+
+    public static function clearErrors () {
+        self::$errorStack = array();
+    }
+
+
+    public static function addError ($error) {
+        self::$errorStack[] = $error;
+    }
+
+
+    public static function hasErrors () {
+        $result = (count(self::$errorStack) > 0);
+    }
+
+
+    public static function getErrors () {
+        return self::$errorStack;
+    }
 }
 
