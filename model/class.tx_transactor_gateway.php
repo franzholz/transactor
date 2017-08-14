@@ -39,13 +39,13 @@ abstract class tx_transactor_gateway implements tx_transactor_gateway_int, t3lib
     protected $gatewayKey = 'transactor';	// must be overridden
     protected $extKey = 'transactor';		// must be overridden
     protected $supportedGatewayArray = array();	// must be overridden
-    protected $bTaxIncluded = FALSE; 	// can be overridden
+    protected $bTaxIncluded = false; 	// can be overridden
     protected $conf;
-    protected $bSendBasket = FALSE;	// Submit detailled basket informations like single products
+    protected $bSendBasket = false;	// Submit detailled basket informations like single products
     protected $optionsArray;
     protected $resultsArray = array();
     protected $config = array();
-    protected $bMergeConf = TRUE;
+    protected $bMergeConf = true;
     protected $formActionURI = '';	// The action uri for the submit form
 
     private $errorStack;
@@ -122,7 +122,7 @@ abstract class tx_transactor_gateway implements tx_transactor_gateway_int, t3lib
 
 
     /**
-    * Returns TRUE if the payment implementation supports the given gateway mode.
+    * Returns true if the payment implementation supports the given gateway mode.
     * All implementations should at least support the mode
     * TX_TRANSACTOR_GATEWAYMODE_FORM.
     *
@@ -130,7 +130,7 @@ abstract class tx_transactor_gateway implements tx_transactor_gateway_int, t3lib
     * the whole application to be certified if used with certain credit cards.
     *
     * @param	integer		$gatewayMode: The gateway mode to check for. One of the constants TX_TRANSACTOR_GATEWAYMODE_*
-    * @return	boolean		TRUE if the given gateway mode is supported
+    * @return	boolean		true if the given gateway mode is supported
     * @access	public
     */
     public function getAvailablePaymentMethods () {
@@ -149,7 +149,7 @@ abstract class tx_transactor_gateway implements tx_transactor_gateway_int, t3lib
             $this->addError(
                 'tx_transactor_gateway::getAvailablePaymentMethods "' . $this->getExtKey() . ':' . $errorIndices . ':' .  $result . '"'
             );
-            $result = FALSE;
+            $result = false;
         }
         return $result;
     }
@@ -199,9 +199,9 @@ abstract class tx_transactor_gateway implements tx_transactor_gateway_int, t3lib
                 $theConf = array_merge($theConf, $conf);
                 $this->setConf($theConf);
             }
-            $result = TRUE;
+            $result = true;
         } else {
-            $result = FALSE;
+            $result = false;
         }
 
         return $result;
@@ -247,11 +247,11 @@ abstract class tx_transactor_gateway implements tx_transactor_gateway_int, t3lib
     * allow setting credit card data for example.
     *
     * @param	array		$detailsArray: The payment details array
-    * @return	boolean		Returns TRUE if all required details have been set
+    * @return	boolean		Returns true if all required details have been set
     * @access	public
     */
     public function transaction_setDetails ($detailsArray) {
-        $result = TRUE;
+        $result = true;
         $this->detailsArray = $detailsArray;
         $reference = $detailsArray['reference'];
         $this->setReferenceUid($reference);
@@ -304,7 +304,7 @@ abstract class tx_transactor_gateway implements tx_transactor_gateway_int, t3lib
                     ' AND message LIKE "' . TX_TRANSACTOR_TRANSACTION_MESSAGE_NOT_PROCESSED . '"'
             );
 
-        if (($row = $this->getTransaction($reference)) === FALSE) {
+        if (($row = $this->getTransaction($reference)) === false) {
             $res =
                 $GLOBALS['TYPO3_DB']->exec_INSERTquery(
                     'tx_transactor_transactions',
@@ -339,7 +339,7 @@ abstract class tx_transactor_gateway implements tx_transactor_gateway_int, t3lib
         }
 
         if (!$res) {
-            $result = FALSE;
+            $result = false;
         }
         return $result;
     }
@@ -379,11 +379,11 @@ abstract class tx_transactor_gateway implements tx_transactor_gateway_int, t3lib
     * This method is not available in mode TX_TRANSACTOR_GATEWAYMODE_FORM!
     *
     * @param	integer		$level: Level of validation, depends on implementation
-    * @return	boolean		Returns TRUE if validation was successful, FALSE if not
+    * @return	boolean		Returns true if validation was successful, false if not
     * @access	public
     */
     public function transaction_validate ($level=1) {
-        return FALSE;
+        return false;
     }
 
 
@@ -394,11 +394,11 @@ abstract class tx_transactor_gateway implements tx_transactor_gateway_int, t3lib
     * to render and submit a form instead.
     *
     * @param	string		an error message will be provided in case of error
-    * @return	boolean		TRUE if transaction was successul, FALSE if not. The result can be accessed via transaction_getResults()
+    * @return	boolean		true if transaction was successul, false if not. The result can be accessed via transaction_getResults()
     * @access	public
     */
     public function transaction_process (&$errorMessage) {
-        return FALSE;
+        return false;
     }
 
 
@@ -421,7 +421,7 @@ abstract class tx_transactor_gateway implements tx_transactor_gateway_int, t3lib
     * @access	public
     */
     public function transaction_formGetActionURI () {
-        $result = FALSE;
+        $result = false;
 
         if ($this->getGatewayMode() == TX_TRANSACTOR_GATEWAYMODE_FORM) {
             $conf = $this->getConf();
@@ -467,7 +467,7 @@ abstract class tx_transactor_gateway implements tx_transactor_gateway_int, t3lib
     * @access	public
     */
     public function transaction_formGetHiddenFields () {
-        return FALSE;
+        return false;
     }
 
 
@@ -493,11 +493,11 @@ abstract class tx_transactor_gateway implements tx_transactor_gateway_int, t3lib
     * @access public
     */
     public function transaction_isInitState ($row) {
-        $result = TRUE;
+        $result = true;
 
         if (is_array($row)) {
             if ($row['message'] != TX_TRANSACTOR_TRANSACTION_MESSAGE_NOT_PROCESSED) {
-                $result = FALSE;
+                $result = false;
             }
         }
 
@@ -598,9 +598,9 @@ abstract class tx_transactor_gateway implements tx_transactor_gateway_int, t3lib
                 )
             )
         ) {
-            $result = TRUE;
+            $result = true;
         } else {
-            $result = FALSE;
+            $result = false;
         }
         return $result;
     }
@@ -609,9 +609,9 @@ abstract class tx_transactor_gateway implements tx_transactor_gateway_int, t3lib
     public function transaction_failed ($resultsArray) {
 
         if ($resultsArray['state'] == TX_TRANSACTOR_TRANSACTION_STATE_APPROVE_NOK) {
-            $result = TRUE;
+            $result = true;
         } else {
-            $result = FALSE;
+            $result = false;
         }
 
         return $result;
@@ -667,7 +667,7 @@ abstract class tx_transactor_gateway implements tx_transactor_gateway_int, t3lib
     // *****************************************************************************
 
     public function getTransaction ($reference) {
-        $result = FALSE;
+        $result = false;
 
         if ($reference != '') {
             $res =
@@ -714,7 +714,7 @@ abstract class tx_transactor_gateway implements tx_transactor_gateway_int, t3lib
 
 
     public function generateReferenceUid ($orderuid, $callingExtension) {
-        $result = FALSE;
+        $result = false;
 
         if ($orderuid) {
             $result = $this->gatewayKey . '#' . md5($callingExtension . '-' . $orderuid);
@@ -795,11 +795,11 @@ abstract class tx_transactor_gateway implements tx_transactor_gateway_int, t3lib
     /**
     * This gives the information if the order can only processed after a verification message has been received.
     *
-    * @return	boolean		TRUE if a verification message needs to be sent
+    * @return	boolean		true if a verification message needs to be sent
     * @access	public
     */
     public function needsVerificationMessage () {
-        return FALSE;
+        return false;
     }
 }
 

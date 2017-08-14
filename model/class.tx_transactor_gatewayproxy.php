@@ -34,7 +34,7 @@
 * @author	Robert Lemke <robert@typo3.org>
 * @author	Franz Holzinger <franz@ttproducts.de>
 */
-class tx_transactor_gatewayproxy implements tx_transactor_gateway_int {
+class tx_transactor_gatewayproxy implements tx_transactor_gateway_int, t3lib_Singleton {
     private $gatewayExt;
     private $gatewayClass;
     protected $extensionManagerConf;
@@ -118,7 +118,7 @@ class tx_transactor_gatewayproxy implements tx_transactor_gateway_int {
 
 
     /**
-    * Returns TRUE if the payment implementation supports the given gateway mode.
+    * Returns true if the payment implementation supports the given gateway mode.
     * All implementations should at least support the mode
     * TX_TRANSACTOR_GATEWAYMODE_FORM.
     *
@@ -126,7 +126,7 @@ class tx_transactor_gatewayproxy implements tx_transactor_gateway_int {
     * the whole application to be certified if used with certain credit cards.
     *
     * @param	integer		$gatewayMode: The gateway mode to check for. One of the constants TX_TRANSACTOR_GATEWAYMODE_*
-    * @return	boolean		TRUE if the given gateway mode is supported
+    * @return	boolean		true if the given gateway mode is supported
     * @access	public
     */
     public function supportsGatewayMode ($gatewayMode) {
@@ -165,7 +165,7 @@ class tx_transactor_gatewayproxy implements tx_transactor_gateway_int {
     * allow setting credit card data for example.
     *
     * @param	array		$detailsArr: The payment details array
-    * @return	boolean		Returns TRUE if all required details have been set
+    * @return	boolean		Returns true if all required details have been set
     * @access	public
     */
     public function transaction_setDetails ($detailsArr) {
@@ -183,7 +183,7 @@ class tx_transactor_gatewayproxy implements tx_transactor_gateway_int {
     * This method is not available in mode TX_TRANSACTOR_GATEWAYMODE_FORM!
     *
     * @param	integer		$level: Level of validation, depends on implementation
-    * @return	boolean		Returns TRUE if validation was successful, FALSE if not
+    * @return	boolean		Returns true if validation was successful, false if not
     * @access	public
     */
     public function transaction_validate ($level = 1) {
@@ -196,7 +196,7 @@ class tx_transactor_gatewayproxy implements tx_transactor_gateway_int {
     * Returns if the transaction has been successfull
     *
     * @param	array		results from transaction_getResults
-    * @return	boolean		TRUE if the transaction went fine
+    * @return	boolean		true if the transaction went fine
     * @access	public
     */
     public function transaction_succeded ($resultsArr) {
@@ -209,7 +209,7 @@ class tx_transactor_gatewayproxy implements tx_transactor_gateway_int {
     * Returns if the transaction has been unsuccessfull
     *
     * @param	array		results from transaction_getResults
-    * @return	boolean		TRUE if the transaction went wrong
+    * @return	boolean		true if the transaction went wrong
     * @access	public
     */
     public function transaction_failed ($resultsArr) {
@@ -222,7 +222,7 @@ class tx_transactor_gatewayproxy implements tx_transactor_gateway_int {
     * Returns if the message of the transaction
     *
     * @param	array		results from transaction_getResults
-    * @return	boolean		TRUE if the transaction went wrong
+    * @return	boolean		true if the transaction went wrong
     * @access	public
     */
     public function transaction_message ($resultsArr) {
@@ -238,7 +238,7 @@ class tx_transactor_gatewayproxy implements tx_transactor_gateway_int {
     * to render and submit a form instead.
     *
     * @param	string		an error message will be provided in case of error
-    * @return	boolean		TRUE if transaction was successul, FALSE if not. The result can be accessed via transaction_getResults()
+    * @return	boolean		true if transaction was successul, false if not. The result can be accessed via transaction_getResults()
     * @access	public
     */
     public function transaction_process (&$errorMessage) {
@@ -266,10 +266,10 @@ class tx_transactor_gatewayproxy implements tx_transactor_gateway_int {
                 $gatewayObj->setTransactionUid($dbTransactionUid);
             }
 
-            $processResult = TRUE;
+            $processResult = true;
         } else {
             $errorMessage = $resultsArr;
-            $processResult = FALSE;
+            $processResult = false;
         }
 
         return $processResult;
@@ -383,12 +383,12 @@ class tx_transactor_gatewayproxy implements tx_transactor_gateway_int {
     * Returns the results of a processed transaction
     *
     * @param	string		$orderid
-    * @param	boolean		$create  if TRUE the results are inserted into the transactor table
+    * @param	boolean		$create  if true the results are inserted into the transactor table
     * @return	array		Results of a processed transaction
     * @access	public
     */
-    public function transaction_getResults ($reference, $create = TRUE) {
-        $dbResult = FALSE;
+    public function transaction_getResults ($reference, $create = true) {
+        $dbResult = false;
         $resultsArr = $this->getGatewayObj()->transaction_getResults($reference);
 
         if (is_array ($resultsArr)) {
@@ -456,7 +456,7 @@ class tx_transactor_gatewayproxy implements tx_transactor_gateway_int {
     * @access	public
     */
     public function __call ($method, $params) {
-        $result = FALSE;
+        $result = false;
         if (method_exists($this, $method)) {
             $result = call_user_func_array(array($this->getGatewayObj(), $method), $params);
         } else {
@@ -617,7 +617,7 @@ class tx_transactor_gatewayproxy implements tx_transactor_gateway_int {
     /**
     * This gives the information if the order can only processed after a verification message has been received.
     *
-    * @return	boolean		TRUE if a verification message needs to be sent
+    * @return	boolean		true if a verification message needs to be sent
     * @access	public
     */
     public function needsVerificationMessage () {
@@ -642,7 +642,7 @@ class tx_transactor_gatewayproxy implements tx_transactor_gateway_int {
         $iso3Seller,
         $iso3Buyer
     ) {
-        $result = FALSE;
+        $result = false;
         $gatewayObject = $this->getGatewayObj();
             // this method is not mandatory
         if (

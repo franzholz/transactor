@@ -34,7 +34,7 @@
 
 final class tx_transactor_gatewayfactory {
 
-    private static $instance = FALSE;					// Holds an instance of this class
+    private static $instance = false;					// Holds an instance of this class
     private static $gatewayProxyObjects = array();		// An array of proxy objects, each pointing to a registered gateway object
     private static $errorMessage = '';
     private static $errorStack;
@@ -60,7 +60,7 @@ final class tx_transactor_gatewayfactory {
     * @access		public
     */
     public static function getInstance () {
-        if (self::$instance === FALSE) {
+        if (self::$instance === false) {
             self::$instance = new tx_transactor_gatewayfactory;
         }
         return self::$instance;
@@ -72,7 +72,7 @@ final class tx_transactor_gatewayfactory {
     * be called by the gateway implementation itself.
     *
     * @param		string		$extKey: Extension key of the payment implementation.
-    * @return		mixed		Proxied instance of the given extension or FALSE if an error occurred.
+    * @return		mixed		Proxied instance of the given extension or false if an error occurred.
     * @access		public
     */
     public static function registerGatewayExt ($extKey) {
@@ -83,7 +83,7 @@ final class tx_transactor_gatewayfactory {
             self::$gatewayProxyObjects[$extKey] = $gatewayProxy;
             $result = self::$gatewayProxyObjects[$extKey];
         } else {
-            $result = FALSE;
+            $result = false;
         }
         return $result;
     }
@@ -108,11 +108,11 @@ final class tx_transactor_gatewayfactory {
     * object) which offers the specified payment method.
     *
     * @param		string		$paymentMethod: Payment method key
-    * @return		mixed		Reference to payment proxy object or FALSE if no matching object was found
+    * @return		mixed		Reference to payment proxy object or false if no matching object was found
     * @access		public
     */
     public static function getGatewayProxyObjectByPaymentMethod ($paymentMethod) {
-        $result = FALSE;
+        $result = false;
 
         if (is_array (self::$gatewayProxyObjects)) {
             foreach (self::$gatewayProxyObjects as $extKey => $gatewayProxyObject) {
@@ -125,7 +125,7 @@ final class tx_transactor_gatewayfactory {
                     $result = $gatewayProxyObject;
                     break;
                 } else {
-                    if ($paymentMethodsArray != FALSE) {
+                    if ($paymentMethodsArray != false) {
                         self::addError(
                             'tx_transactor_gatewayfactory::getGatewayObjectByPaymentMethod ' . $paymentMethodsArray
                         );
@@ -146,16 +146,16 @@ final class tx_transactor_gatewayfactory {
     * @param		int			$gatewayid: (optional) Filter by gateway id
     * @param		string		$reference: (optional) Filter by reference
     * @param		string		$state: (optional) Filter by transaction state
-    * @return		array		Array of transaction records, FALSE if no records where found or an error occurred.
+    * @return		array		Array of transaction records, false if no records where found or an error occurred.
     * @access		public
     */
     public static function getTransactionsByExtKey (
         $ext_key,
-        $gatewayid = NULL,
-        $reference = NULL,
-        $state = NULL
+        $gatewayid = null,
+        $reference = null,
+        $state = null
     ) {
-        $transactionsArray = FALSE;
+        $transactionsArray = false;
 
         $additionalWhere = '';
         $additionalWhere .= (isset ($gatewayid)) ? ' AND gatewayid="'.$gatewayid.'"' : '';
@@ -196,7 +196,7 @@ final class tx_transactor_gatewayfactory {
         );
 
         if (!$res || !$GLOBALS['TYPO3_DB']->sql_num_rows($res)) {
-            return FALSE;
+            return false;
         }
 
         $row = $GLOBALS['TYPO3_DB']->sql_fetch_assoc($res);

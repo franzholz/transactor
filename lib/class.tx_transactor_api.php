@@ -175,7 +175,7 @@ class tx_transactor_api {
         &$subpartArray,
         &$wrappedSubpartArray
     ) {
-        $bUseTransactor = FALSE;
+        $bUseTransactor = false;
         if (
             isset($confScript) &&
             is_array($confScript) &&
@@ -183,7 +183,7 @@ class tx_transactor_api {
         ) {
             $extKey = $confScript['extName'];
             if (t3lib_extMgm::isLoaded($extKey)) {
-                $bUseTransactor = TRUE;
+                $bUseTransactor = true;
             }
         }
 
@@ -203,7 +203,7 @@ class tx_transactor_api {
         $callingExtensionKey,
         $orderUid
     ) {
-        $referenceUid = FALSE;
+        $referenceUid = false;
         $gatewayProxyObject = \JambageCom\Transactor\Api\PaymentApi::getGatewayProxyObject($confScript);
         if (
             $orderUid &&
@@ -245,8 +245,8 @@ class tx_transactor_api {
         &$errorMessage
     ) {
         $langObj = t3lib_div::getUserObj('tx_transactor_language');
-        $bFinalize = FALSE;
-        $bFinalVerify = FALSE;
+        $bFinalize = false;
+        $bFinalVerify = false;
         $gatewayExtKey = '';
         $result = '';
 
@@ -254,9 +254,9 @@ class tx_transactor_api {
             !is_array($itemArray) ||
             !is_array($calculatedArray)
         ) {
-            $bValidParams = FALSE;
+            $bValidParams = false;
         } else {
-            $bValidParams = TRUE;
+            $bValidParams = true;
         }
 
         if ($bValidParams) {
@@ -399,7 +399,7 @@ class tx_transactor_api {
 
                     if (is_array($transactionResults)) {
                         if ($gatewayProxyObject->transaction_succeded($transactionResults)) {
-                            $bFinalize = TRUE;
+                            $bFinalize = true;
                             $bFinalVerify = $gatewayProxyObject->needsVerificationMessage();
                         } else if ($gatewayProxyObject->transaction_failed($transactionResults)) {
                             $errorMessage = $gatewayProxyObject->transaction_message($transactionResults);
@@ -419,11 +419,11 @@ class tx_transactor_api {
 
                                     if (
                                         $paymentActivity == 'verify' &&
-                                        $gatewayProxyObject->transaction_succeded($resultsArray) == FALSE
+                                        $gatewayProxyObject->transaction_succeded($resultsArray) == false
                                     ) {
                                         $errorMessage = htmlspecialchars($gatewayProxyObject->transaction_message($resultsArray)); // message auslesen
                                     } else {
-                                        $bFinalize = TRUE;
+                                        $bFinalize = true;
                                     }
                                 } else if ($errorMessage == '') {
                                     $errorMessage =
@@ -472,8 +472,8 @@ class tx_transactor_api {
                                 ) {
                                     if (
                                         $formuri != '' &&
-                                        strpos($formParams, 'https://') === FALSE &&
-                                        strpos($formParams, 'http://') === FALSE
+                                        strpos($formParams, 'https://') === false &&
+                                        strpos($formParams, 'http://') === false
                                     ) {
 
                                             $formuri .= '?' . $formParams;
@@ -484,9 +484,9 @@ class tx_transactor_api {
                                 }
 
                                 if (
-                                    stripos($formuri, 'ERROR') !== FALSE
+                                    stripos($formuri, 'ERROR') !== false
                                 ) {
-                                    $bError = TRUE;
+                                    $bError = true;
                                 }
 
                                 if ($formuri && !$bError) {
@@ -578,7 +578,7 @@ class tx_transactor_api {
     ) {
         $result = '';
 
-        if (strpos($handleLib, 'transactor') !== FALSE) {
+        if (strpos($handleLib, 'transactor') !== false) {
             $gatewayProxyObject =
                 \JambageCom\Transactor\Api\PaymentApi::getGatewayProxyObject(
                     $confScript
@@ -622,7 +622,7 @@ class tx_transactor_api {
                     return $errorMessage;
                 }
 
-                if ($gatewayProxyObject->transaction_succeded() == FALSE) {
+                if ($gatewayProxyObject->transaction_succeded() == false) {
                     $result =
                         htmlspecialchars(
                             $gatewayProxyObject->transaction_message(
@@ -828,11 +828,11 @@ class tx_transactor_api {
         &$addressArray,
         &$basketArray
     ) {
-        $bUseStaticInfo = FALSE;
+        $bUseStaticInfo = false;
         $langObj = t3lib_div::getUserObj('tx_transactor_language');
 
         if (t3lib_extMgm::isLoaded('static_info_tables')) {
-            $bUseStaticInfo = TRUE;
+            $bUseStaticInfo = true;
         }
 
         // Setting up total values
