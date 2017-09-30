@@ -1,3 +1,6 @@
+2017-09-30  Franz Holzinger <franz@ttproducts.de>
+    * readd the file ext_autoload.php
+
 2017-08-14 Franz Holzinger <franz@ttproducts.de>
     * replace TABs by 4 blanks
     * write TRUE, FALSE and NULL in lower case letters: true, false, null
