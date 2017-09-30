@@ -1,71 +1,19 @@
 <?php
-/***************************************************************
-*
-*  Copyright notice
-*
-*  (c) 2016 Franz Holzinger (franz@ttproducts.de)
-*  All rights reserved
-*
-*  This script is part of the TYPO3 project. The TYPO3 project is
-*  free software; you can redistribute it and/or modify
-*  it under the terms of the GNU General Public License as published by
-*  the Free Software Foundation; either version 2 of the License, or
-*  (at your option) any later version.
-*
-*  The GNU General Public License can be found at
-*  http://www.gnu.org/copyleft/gpl.html.
-*
-*  This script is distributed in the hope that it will be useful,
-*  but WITHOUT ANY WARRANTY; without even the implied warranty of
-*  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-*  GNU General Public License for more details.
-*
-*  This copyright notice MUST APPEAR in all copies of the script!
-***************************************************************/
 
-define('TX_TRANSACTOR_TRANSACTION_ACTION_AUTHORIZEANDTRANSFER', 200);
-define('TX_TRANSACTOR_TRANSACTION_ACTION_AUTHORIZE', 201);
-define('TX_TRANSACTOR_TRANSACTION_ACTION_TRANSFER', 202);
-define('TX_TRANSACTOR_TRANSACTION_ACTION_REAUTHORIZEANDTRANSFER', 203);
-define('TX_TRANSACTOR_TRANSACTION_ACTION_REAUTHORIZE', 204);
-define('TX_TRANSACTOR_TRANSACTION_ACTION_CANCELAUTHORIZED', 205);
-define('TX_TRANSACTOR_TRANSACTION_ACTION_AUTHORIZEREFUND', 210);
-define('TX_TRANSACTOR_TRANSACTION_ACTION_AUTHORIZEANDTRANSFERREFUND', 211);
+namespace JambageCom\Transactor\Domain;
 
-define('TX_TRANSACTOR_GATEWAYMODE_FORM', 400);
-define('TX_TRANSACTOR_GATEWAYMODE_WEBSERVICE', 401);
-define('TX_TRANSACTOR_GATEWAYMODE_AJAX', 402);
-
-
-define('TX_TRANSACTOR_TRANSACTION_LIMIT_STATE_OK', 500);
-define('TX_TRANSACTOR_TRANSACTION_LIMIT_STATE_NOK', 600);
-define('TX_TRANSACTOR_TRANSACTION_LIMIT_STATE_INTERNAL_NOK', 650);
-
-define('TX_TRANSACTOR_TRANSACTION_STATE_NO_PROCESS', 0);
-
-// ok constants
-// @see the TX_TRANSACTOR_TRANSACTION_LIMIT constants
-define('TX_TRANSACTOR_TRANSACTION_STATE_IDLE', 0);
-define('TX_TRANSACTOR_TRANSACTION_STATE_INIT', 400);
-define('TX_TRANSACTOR_TRANSACTION_STATE_APPROVE_OK', 500);
-define('TX_TRANSACTOR_TRANSACTION_STATE_APPROVE_DUPLICATE', 501);
-define('TX_TRANSACTOR_TRANSACTION_STATE_CAPTURE_OK', 502);
-define('TX_TRANSACTOR_TRANSACTION_STATE_REVERSE_OK', 503);
-define('TX_TRANSACTOR_TRANSACTION_STATE_CREDIT_OK', 504);
-define('TX_TRANSACTOR_TRANSACTION_STATE_RENEW_OK', 505);
-
-// nok constants
-// @see the TX_TRANSACTOR_TRANSACTION_LIMIT constants
-define('TX_TRANSACTOR_TRANSACTION_STATE_APPROVE_NOK', 601);
-define('TX_TRANSACTOR_TRANSACTION_STATE_CAPTURE_NOK', 602);
-define('TX_TRANSACTOR_TRANSACTION_STATE_REVERSE_NOK', 603);
-define('TX_TRANSACTOR_TRANSACTION_STATE_CREDIT_NOK', 604);
-define('TX_TRANSACTOR_TRANSACTION_STATE_RENEW_NOK', 605);
-define('TX_TRANSACTOR_TRANSACTION_STATE_INTERNAL_ERROR', 651);
-
-
-define('TX_TRANSACTOR_TRANSACTION_MESSAGE_NOT_PROCESSED', '-');
-
+/*
+ * This file is part of the TYPO3 CMS project.
+ *
+ * It is free software; you can redistribute it and/or modify it under
+ * the terms of the GNU General Public License, either version 2
+ * of the License, or any later version.
+ *
+ * For the full copyright and license information, please read the
+ * LICENSE.txt file that was distributed with this source code.
+ *
+ * The TYPO3 project - inspiring people to share!
+ */
 
 
 /**
@@ -76,10 +24,11 @@ define('TX_TRANSACTOR_TRANSACTION_MESSAGE_NOT_PROCESSED', '-');
 * do anything.
 *
 * @package 	TYPO3
-* @subpackage	tx_transactor
+* @subpackage	transactor
 * @author		Franz Holzinger <franz@ttproducts.de>
 */
-interface tx_transactor_gateway_int {
+interface GatewayInterface
+{
 
     /**
     * Returns the gateway key. Each gateway implementation should have such
@@ -120,7 +69,7 @@ interface tx_transactor_gateway_int {
     * @return	boolean		true if the given gateway mode is supported
     * @access	public
     */
-    public function supportsGatewayMode ($gatewayMode);
+    public function validGatewayMode ($gatewayMode);
 
     /**
     * Initializes a transaction.
@@ -128,11 +77,11 @@ interface tx_transactor_gateway_int {
     * @param	integer		$action: Type of the transaction, one of the constants TX_TRANSACTOR_TRANSACTION_ACTION_*
     * @param	string		$paymentMethod: Payment method, one of the values of getSupportedMethods()
     * @param	integer		$gatewayMode: Gateway mode for this transaction, one of the constants TX_TRANSACTOR_GATEWAYMODE_*
-    * @param	string		$callingExtKey: Extension key of the calling script.
+    * @param	string		$callingExtensionKey: Extension key of the calling script.
     * @return	void
     * @access	public
     */
-    public function transaction_init ($action, $paymentMethod, $gatewayMode, $callingExtKey);
+    public function transactionInit ($action, $paymentMethod, $gatewayMode, $callingExtensionKey);
 
     /**
     * Sets the payment details. Which fields can be set usually depends on the
@@ -143,7 +92,7 @@ interface tx_transactor_gateway_int {
     * @return	boolean		Returns true if all required details have been set
     * @access	public
     */
-    public function transaction_setDetails ($detailsArray);
+    public function transactionSetDetails ($detailsArray);
 
     /**
     * Validates the transaction data which was set by transaction_setDetails().
@@ -157,7 +106,7 @@ interface tx_transactor_gateway_int {
     * @return	boolean		Returns true if validation was successful, false if not
     * @access	public
     */
-    public function transaction_validate ($level = 1);
+    public function transactionValidate ($level = 1);
 
     /**
     * Submits the prepared transaction to the payment gateway
@@ -169,7 +118,7 @@ interface tx_transactor_gateway_int {
     * @return	boolean		true if transaction was successul, false if not. The result can be accessed via transaction_getResults()
     * @access	public
     */
-    public function transaction_process (&$errorMessage);
+    public function transactionProcess (&$errorMessage);
 
     /**
     * Displays the form on which the user will finally submit the transaction to the payment gateway
@@ -178,7 +127,7 @@ interface tx_transactor_gateway_int {
     * @return	string		HTML form and javascript
     * @access	public
     */
-    public function transaction_getForm ($lConf);
+    public function transactionGetForm ($lConf);
 
     /**
     * Returns the form action URI to be used in mode TX_TRANSACTOR_GATEWAYMODE_FORM.
@@ -186,7 +135,7 @@ interface tx_transactor_gateway_int {
     * @return	string		Form action URI
     * @access	public
     */
-    public function transaction_formGetActionURI ();
+    public function transactionFormGetActionURI ();
 
     /**
     * Returns any extra parameter for the form tag to be used in mode TX_TRANSACTOR_GATEWAYMODE_FORM.
@@ -194,7 +143,7 @@ interface tx_transactor_gateway_int {
     * @return  string      Form tag extra parameters
     * @access  public
     */
-    public function transaction_formGetFormParms ();
+    public function transactionFormGetFormParms ();
 
     /**
     * Returns any extra HTML attributes for the form tag to be used in mode TX_TRANSACTOR_GATEWAYMODE_FORM.
@@ -202,7 +151,7 @@ interface tx_transactor_gateway_int {
     * @return  string      Form submit button extra parameters
     * @access  public
     */
-    public function transaction_formGetAttributes ();
+    public function transactionFormGetAttributes ();
 
     /**
     * Returns an array of field names and values which must be included as hidden
@@ -211,7 +160,7 @@ interface tx_transactor_gateway_int {
     * @return	array		Field names and values to be rendered as hidden fields
     * @access	public
     */
-    public function transaction_formGetHiddenFields ();
+    public function transactionFormGetHiddenFields ();
 
 
     /**
@@ -222,7 +171,7 @@ interface tx_transactor_gateway_int {
     * @return void
     * @access public
     */
-    public function transaction_setOkPage ($uri);
+    public function transactionSetOkPage ($uri);
 
     /**
     * Sets the URI which the user should be redirected to after a failed payment/transaction
@@ -233,7 +182,7 @@ interface tx_transactor_gateway_int {
     * @return void
     * @access public
     */
-    public function transaction_setErrorPage ($row);
+    public function transactionSetErrorPage ($row);
 
 
     /**
@@ -243,7 +192,7 @@ interface tx_transactor_gateway_int {
     * @return boolean
     * @access public
     */
-    public function transaction_isInitState ($uri);
+    public function transactionIsInitState ($uri);
 
 
     /**
@@ -253,7 +202,7 @@ interface tx_transactor_gateway_int {
     * @return	array		Results of a processed transaction
     * @access	public
     */
-    public function transaction_getResults ($reference);
+    public function transactionGetResults ($reference);
 
     /**
     * Returns the error result
@@ -262,7 +211,7 @@ interface tx_transactor_gateway_int {
     * @return	array		Results of an internal error
     * @access	public
     */
-    public function transaction_getResultsError ($message);
+    public function transactionGetResultsError ($message);
 
     /**
     * Returns the error result
@@ -271,7 +220,7 @@ interface tx_transactor_gateway_int {
     * @return	array		Results of an internal error
     * @access	public
     */
-    public function transaction_getResultsSuccess ($message);
+    public function transactionGetResultsSuccess ($message);
 
     /**
     * Returns if the transaction has been successfull
@@ -280,7 +229,7 @@ interface tx_transactor_gateway_int {
     * @return	boolean		true if the transaction went fine
     * @access	public
     */
-    public function transaction_succeded ($resultsArr);
+    public function transactionSucceeded ($resultsArr);
 
     /**
     * Returns if the transaction has been unsuccessfull
@@ -289,7 +238,7 @@ interface tx_transactor_gateway_int {
     * @return	boolean		true if the transaction went wrong
     * @access	public
     */
-    public function transaction_failed ($resultsArr);
+    public function transactionFailed ($resultsArr);
 
     /**
     * Returns if the message of the transaction
@@ -298,7 +247,7 @@ interface tx_transactor_gateway_int {
     * @return	boolean		true if the transaction went wrong
     * @access	public
     */
-    public function transaction_message ($resultsArr);
+    public function transactionMessage ($resultsArr);
 
     public function clearErrors ();
 

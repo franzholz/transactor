@@ -1,4 +1,7 @@
 <?php
+
+namespace JambageCom\Transactor\Api;
+
 /***************************************************************
 *  Copyright notice
 *
@@ -35,32 +38,39 @@
 *
 */
 
+use JambageCom\Transactor\Api\Localization;
+use JambageCom\Transactor\Constants\GatewayMode;
+use JambageCom\Transactor\Constants\Action;
+use JambageCom\Transactor\Constants\Message;
 
 
+use TYPO3\CMS\Core\Utility\GeneralUtility;
+use TYPO3\CMS\Core\Utility\ExtensionManagementUtility;
 
-class tx_transactor_api {
+
+class Start implements \TYPO3\CMS\Core\SingletonInterface
+{
     protected static $cObj;
-
 
     static public function init (
         $pLangObj,
         $cObj,
         $conf
-    ) {
+    )
+    {
         if (!is_object($cObj)) {
             $cObj = \JambageCom\Div2007\Utility\FrontendUtility::getContentObjectRenderer();
         }
 
-        $langObj = t3lib_div::getUserObj('tx_transactor_language');
-        $langObj->init1(
+        $languageObj = GeneralUtility::makeInstance(Localization::class);
+        $languageObj->init1(
             $pLangObj,
             $cObj,
             $conf,
-            'lib/class.tx_transactor_api.php'
+            'Classes/Api/Start.php'
         );
-        $langObj->scriptRelPath = '';
-        tx_div2007_alpha5::loadLL_fh002(
-            $langObj,
+        \tx_div2007_alpha5::loadLL_fh002(
+            $languageObj,
             TRANSACTOR_LANGUAGE_PATH . 'locallang.xml'
         );
 
@@ -72,23 +82,23 @@ class tx_transactor_api {
         $cObj,
         $conf,
         &$markerArray
-    ) {
-        $langObj = t3lib_div::getUserObj('tx_transactor_language');
-        $langObj->init1(
+    )
+    {
+        $languageObj = GeneralUtility::makeInstance(Localization::class);
+        $languageObj->init1(
             '',
             $cObj,
             $conf['marks.'],
-            'lib/class.tx_transactor_api.php'
+            'Classes/Api/Start.php'
         );
 
-        tx_div2007_alpha5::loadLL_fh002(
-            $langObj,
+        \tx_div2007_alpha5::loadLL_fh002(
+            $languageObj,
             TRANSACTOR_LANGUAGE_PATH . 'locallang_marker.xml'
         );
 
-        $locallang = $langObj->getLocallang();
-        $LLkey = $langObj->getLLkey();
-        $typoVersion = tx_div2007_core::getTypoVersion();
+        $locallang = $languageObj->getLocallang();
+        $LLkey = $languageObj->getLLkey();
 
         if (isset($locallang[$LLkey])) {
             $langArray = array_merge($locallang['default'], $locallang[$LLkey]);
@@ -110,7 +120,7 @@ class tx_transactor_api {
 
         if(isset($langArray) && is_array($langArray)) {
             foreach ($langArray as $key => $value) {
-                if ($typoVersion >= 4006000 && is_array($value)) {
+                if (is_array($value)) {
                     $value = $value[0]['target'];
                 }
                 $newMarkerArray['###' . strtoupper($key) . '###'] =
@@ -132,9 +142,9 @@ class tx_transactor_api {
     ) {
         $gatewayModeArray =
             array(
-                'form' => TX_TRANSACTOR_GATEWAYMODE_FORM,
-                'ajax' => TX_TRANSACTOR_GATEWAYMODE_AJAX,
-                'webservice' => TX_TRANSACTOR_GATEWAYMODE_WEBSERVICE
+                'form' => GatewayMode::FORM,
+                'ajax' => GatewayMode::AJAX,
+                'webservice' => GatewayMode::WEBSERVICE
             );
         $gatewayMode = $gatewayModeArray[$confScript['gatewaymode']];
         if (!$gatewayMode) {
@@ -144,45 +154,20 @@ class tx_transactor_api {
     }
 
 
-    /**
-    * deprecated: use \JambageCom\Transactor\Api\PaymentApi::getGatewayProxyObject instead
-    *
-    * returns the gateway proxy object
-    */
-    static public function getGatewayProxyObject (
-        $handleLib,
-        $confScript
-    ) {
-        t3lib_div::requireOnce(t3lib_extMgm::extPath($handleLib) . 'model/class.tx_' . $handleLib . '_gatewayfactory.php');
-
-        if (is_array($confScript)) {
-            $gatewayExtKey = $confScript['extName'];
-            $gatewayFactoryObj = tx_transactor_gatewayfactory::getInstance();
-            $gatewayFactoryObj->registerGatewayExt($gatewayExtKey);
-            $paymentMethod = $confScript['paymentMethod'];
-            $gatewayProxyObject =
-                $gatewayFactoryObj->getGatewayProxyObjectByPaymentMethod(
-                    $paymentMethod
-                );
-        }
-
-        return $gatewayProxyObject;
-    }
-
-
     static public function getItemMarkerSubpartArrays (
         $confScript,
         &$subpartArray,
         &$wrappedSubpartArray
-    ) {
+    )
+    {
         $bUseTransactor = false;
         if (
             isset($confScript) &&
             is_array($confScript) &&
             isset($confScript['extName'])
         ) {
-            $extKey = $confScript['extName'];
-            if (t3lib_extMgm::isLoaded($extKey)) {
+            $extensionKey = $confScript['extName'];
+            if (ExtensionManagementUtility::isLoaded($extensionKey)) {
                 $bUseTransactor = true;
             }
         }
@@ -202,7 +187,8 @@ class tx_transactor_api {
         $confScript,
         $callingExtensionKey,
         $orderUid
-    ) {
+    )
+    {
         $referenceUid = false;
         $gatewayProxyObject = \JambageCom\Transactor\Api\PaymentApi::getGatewayProxyObject($confScript);
         if (
@@ -219,13 +205,20 @@ class tx_transactor_api {
     }
 
 
+    static public function test (
+    )
+    {
+        debug('', 'Start::test');
+    }
+
+
     /**
     * Include handle extension library
     */
     static public function includeHandleLib (
         $handleLib,
         $confScript,
-        $extKey,
+        $extensionKey,
         $itemArray,
         $calculatedArray,
         $deliveryNote,
@@ -243,8 +236,9 @@ class tx_transactor_api {
         &$templateFilename,
         &$localTemplateCode,
         &$errorMessage
-    ) {
-        $langObj = t3lib_div::getUserObj('tx_transactor_language');
+    )
+    {
+        $languageObj = GeneralUtility::makeInstance(Localization::class);
         $bFinalize = false;
         $bFinalVerify = false;
         $gatewayExtKey = '';
@@ -267,20 +261,20 @@ class tx_transactor_api {
 
             if (
                 $gatewayExtKey != '' &&
-                t3lib_extMgm::isLoaded($gatewayExtKey)
+                ExtensionManagementUtility::isLoaded($gatewayExtKey)
             ) {
                 // everything is ok
             } else {
                 if ($gatewayExtKey == '') {
                     $errorMessage =
-                        tx_div2007_alpha5::getLL_fh003(
-                            $langObj,
+                        \tx_div2007_alpha5::getLL_fh003(
+                            $languageObj,
                             'extension_payment_missing'
                         );
                 } else {
                     $message =
-                        tx_div2007_alpha5::getLL_fh003(
-                            $langObj,
+                        \tx_div2007_alpha5::getLL_fh003(
+                            $languageObj,
                             'extension_missing'
                         );
 
@@ -303,22 +297,23 @@ class tx_transactor_api {
                             $handleLib,
                             $confScript
                         );
-                    $ok = $gatewayProxyObject->transaction_init(
-                        TX_TRANSACTOR_TRANSACTION_ACTION_AUTHORIZEANDTRANSFER,
+                    $ok = $gatewayProxyObject->transactionInit(
+                        Action::AUTHORIZE_TRANSFER,
                         $paymentMethod,
                         $gatewayMode,
-                        $extKey,
+                        $extensionKey,
                         $confScript['conf.']
                     );
 
                     if (!$ok) {
                         $errorMessage =
-                            tx_div2007_alpha5::getLL_fh003(
-                                $langObj,
+                            \tx_div2007_alpha5::getLL_fh003(
+                                $languageObj,
                                 'error_transaction_init'
                             );
                         return '';
                     }
+
 
                     $gatewayConf = $gatewayProxyObject->getConf();
                     self::getPaymentBasket(
@@ -336,14 +331,14 @@ class tx_transactor_api {
                         self::getReferenceUid(
                             $handleLib,
                             $confScript,
-                            $extKey,
+                            $extensionKey,
                             $orderUid
                         ); // in the case of a callback, a former order than the current would have been read in
 
                     if (!$referenceId) {
                         $errorMessage =
-                            tx_div2007_alpha5::getLL_fh003(
-                                $langObj,
+                            \tx_div2007_alpha5::getLL_fh003(
+                                $languageObj,
                                 'error_reference_id'
                             );
                         return '';
@@ -353,7 +348,7 @@ class tx_transactor_api {
                         $referenceId,
                         $handleLib,
                         $confScript,
-                        $extKey,
+                        $extensionKey,
                         $gatewayExtKey,
                         $calculatedArray,
                         $paymentActivity,
@@ -369,85 +364,114 @@ class tx_transactor_api {
 
                         // Set payment details:
                     $ok =
-                        $gatewayProxyObject->transaction_setDetails(
+                        $gatewayProxyObject->transactionSetDetails(
                             $transactionDetailsArray
                         );
 
                     if (!$ok) {
                         $errorMessage =
-                            tx_div2007_alpha5::getLL_fh003(
-                                $langObj,
+                            \tx_div2007_alpha5::getLL_fh003(
+                                $languageObj,
                                 'error_transaction_details'
                             );
                         return '';
                     }
 
                         // Get results of a possible earlier submit and display messages:
-                    $transactionResults = $gatewayProxyObject->transaction_getResults($referenceId);
+                    $transactionResults =
+                        $gatewayProxyObject->transactionGetResults(
+                            $referenceId
+                        );
 
                     if (!is_array($transactionResults)) {
-                        $row = $gatewayProxyObject->getTransaction($referenceId);
+                        $row =
+                            $gatewayProxyObject->getTransaction(
+                                $referenceId
+                            );
 
                         if (is_array($row)) {
-                            if ($gatewayProxyObject->transaction_isInitState($row)) {
+                            if ($gatewayProxyObject->transactionIsInitState($row)) {
                                 $transactionResults = $row;
                             }
                         } else if (!is_array($row)) {
-                            $transactionResults = $gatewayProxyObject->transaction_getResultsSuccess('first trial');
+                            $transactionResults =
+                                $gatewayProxyObject->transactionGetResultsSuccess(
+                                    'first trial'
+                                );
                         }
                     }
 
                     if (is_array($transactionResults)) {
-                        if ($gatewayProxyObject->transaction_succeded($transactionResults)) {
+                        if (
+                            $gatewayProxyObject->transactionSucceeded(
+                                $transactionResults
+                            )
+                        ) {
                             $bFinalize = true;
                             $bFinalVerify = $gatewayProxyObject->needsVerificationMessage();
-                        } else if ($gatewayProxyObject->transaction_failed($transactionResults)) {
-                            $errorMessage = $gatewayProxyObject->transaction_message($transactionResults);
+                        } else if (
+                            $gatewayProxyObject->transactionFailed(
+                                $transactionResults
+                            )
+                        ) {
+                            $errorMessage = $gatewayProxyObject->transactionMessage($transactionResults);
                         } else {
-                            $gatewayProxyObject->transaction_setOkPage($transactionDetailsArray['transaction']['successlink']);
-                            $gatewayProxyObject->transaction_setErrorPage($transactionDetailsArray['transaction']['faillink']);
+                            $gatewayProxyObject->transactionSetOkPage(
+                                $transactionDetailsArray['transaction']['successlink']
+                            );
+                            $gatewayProxyObject->transactionSetErrorPage(
+                                $transactionDetailsArray['transaction']['faillink']
+                            );
 
                             if (
-                                $gatewayMode == TX_TRANSACTOR_GATEWAYMODE_WEBSERVICE ||
+                                $gatewayMode == GatewayMode::WEBSERVICE ||
                                 $currentPaymentActivity == 'verify' ||
                                 $currentPaymentActivity == 'finalize'
                             ) {
-                                $result = $gatewayProxyObject->transaction_process($errorMessage);
+                                $result = $gatewayProxyObject->transactionProcess($errorMessage);
 
                                 if ($result) {
-                                    $resultsArray = $gatewayProxyObject->transaction_getResults($referenceId); //array holen mit allen daten
+                                    $resultsArray = $gatewayProxyObject->transactionGetResults($referenceId); //array holen mit allen daten
 
                                     if (
                                         $paymentActivity == 'verify' &&
-                                        $gatewayProxyObject->transaction_succeded($resultsArray) == false
+                                        $gatewayProxyObject->transactionSucceeded($resultsArray) == false
                                     ) {
-                                        $errorMessage = htmlspecialchars($gatewayProxyObject->transaction_message($resultsArray)); // message auslesen
+                                        $errorMessage =
+                                            htmlspecialchars(
+                                                $gatewayProxyObject->transactionMessage(
+                                                    $resultsArray
+                                                )
+                                            ); // message auslesen
                                     } else {
                                         $bFinalize = true;
                                     }
                                 } else if ($errorMessage == '') {
                                     $errorMessage =
-                                        tx_div2007_alpha5::getLL_fh003(
-                                            $langObj,
+                                        \tx_div2007_alpha5::getLL_fh003(
+                                            $languageObj,
                                             'error_gateway_unknown'
                                         );
                                 }
                             } else if (
-                                $gatewayMode == TX_TRANSACTOR_GATEWAYMODE_AJAX
+                                $gatewayMode == GatewayMode::AJAX
                             ) {
-                                $result = $gatewayProxyObject->transaction_getForm($lConf);
+                                $result = $gatewayProxyObject->transactionGetForm($lConf);
                             } else if (
-                                $gatewayMode == TX_TRANSACTOR_GATEWAYMODE_FORM
+                                $gatewayMode == GatewayMode::FORM
                             ) {
                                 if (!$templateFilename) {
-                                    $templateFilename = ($lConf['templateFile'] ? $lConf['templateFile'] : 'EXT:transactor/template/transactor.tmpl');
+                                    $templateFilename = ($lConf['templateFile'] ? $lConf['templateFile'] : 'EXT:' . TRANSACTOR_EXT . '/template/transactor.tmpl');
                                 }
                                 $localTemplateCode = self::$cObj->fileResource($templateFilename);
 
-                                if (!$localTemplateCode && $templateFilename != '') {
+                                if (
+                                    !$localTemplateCode &&
+                                    $templateFilename != ''
+                                ) {
                                     $errorMessage =
-                                        tx_div2007_alpha5::getLL_fh003(
-                                            $langObj,
+                                        \tx_div2007_alpha5::getLL_fh003(
+                                            $languageObj,
                                             'error_no_template'
                                         );
                                     $errorMessage = sprintf($errorMessage, $templateFilename);
@@ -456,16 +480,17 @@ class tx_transactor_api {
 
                                     // Render hidden fields:
                                 $hiddenFields = '';
-                                $hiddenFieldsArray = $gatewayProxyObject->transaction_formGetHiddenFields();
+                                $hiddenFieldsArray =
+                                    $gatewayProxyObject->transactionFormGetHiddenFields();
 
                                 if (is_array($hiddenFieldsArray)) {
                                     foreach ($hiddenFieldsArray as $key => $value) {
                                         $hiddenFields .= '<input type="hidden" name="' . $key . '" value="' . htmlspecialchars($value) . '" />' . chr(10);
                                     }
                                 }
-                                $formuri = $gatewayProxyObject->transaction_formGetActionURI();
+                                $formuri = $gatewayProxyObject->transactionFormGetActionURI();
                                 $gatewayProxyObject->setFormActionURI($formuri);
-                                $formParams = $gatewayProxyObject->transaction_formGetFormParms();
+                                $formParams = $gatewayProxyObject->transactionFormGetFormParms();
 
                                 if (
                                     $formParams != ''
@@ -475,8 +500,7 @@ class tx_transactor_api {
                                         strpos($formParams, 'https://') === false &&
                                         strpos($formParams, 'http://') === false
                                     ) {
-
-                                            $formuri .= '?' . $formParams;
+                                        $formuri .= '?' . $formParams;
                                     } else {
                                         $formuri = $formParams;
                                         $formParams = '';
@@ -509,8 +533,8 @@ class tx_transactor_api {
                                     $markerArray['###TRANSACTOR_IMAGE###'] = $imageOut;
                                     $markerArray['###TRANSACTOR_WWW###'] = $lConf['extWww'];
                                     self::getMarkers(
-                                        $langObj->getCObj(),
-                                        $langObj->getConf(),
+                                        $languageObj->getCObj(),
+                                        $languageObj->getConf(),
                                         $markerArray
                                     );
                                 } else {
@@ -518,8 +542,8 @@ class tx_transactor_api {
                                         $errorMessage = $formuri;
                                     } else {
                                         $errorMessage =
-                                            tx_div2007_alpha5::getLL_fh003(
-                                                $langObj,
+                                            \tx_div2007_alpha5::getLL_fh003(
+                                                $languageObj,
                                                 'error_relay_url'
                                             );
                                     }
@@ -531,8 +555,8 @@ class tx_transactor_api {
                     }
                 } else {
                     $message =
-                        tx_div2007_alpha5::getLL_fh003(
-                            $langObj,
+                        \tx_div2007_alpha5::getLL_fh003(
+                            $languageObj,
                             'error_gateway_missing'
                         );
                     $messageArray =  explode('|', $message);
@@ -541,23 +565,22 @@ class tx_transactor_api {
             }
         } else {
             $message =
-                tx_div2007_alpha5::getLL_fh003(
-                    $langObj,
+                \tx_div2007_alpha5::getLL_fh003(
+                    $languageObj,
                     'error_api_parameters'
                 );
             $messageArray =  explode('|', $message);
             $errorMessage = $messageArray[0] . $paymentMethod . $messageArray[1];
         }
 
-        if ($errorMessage == TX_TRANSACTOR_TRANSACTION_MESSAGE_NOT_PROCESSED) {
+        if ($errorMessage == Message::NOT_PROCESSED) {
             $errorMessage =
-                tx_div2007_alpha5::getLL_fh003(
-                    $langObj,
+                \tx_div2007_alpha5::getLL_fh003(
+                    $languageObj,
                     'error_transaction_no'
                 );
         }
-
-        return $result;
+      return $result;
     } // includeHandleLib
 
 
@@ -568,7 +591,7 @@ class tx_transactor_api {
         $referenceId,
         $handleLib,
         $confScript,
-        $extKey,
+        $extensionKey,
         $calculatedArray,
         $paymentActivity,
         $pidArray,
@@ -576,7 +599,8 @@ class tx_transactor_api {
         $trackingCode,
         $orderUid,
         $cardRow
-    ) {
+    )
+    {
         $result = '';
 
         if (strpos($handleLib, 'transactor') !== false) {
@@ -596,7 +620,7 @@ class tx_transactor_api {
                         $referenceId,
                         $handleLib,
                         $confScript,
-                        $extKey,
+                        $extensionKey,
                         $calculatedArray,
                         $paymentActivity,
                         $pidArray,
@@ -608,25 +632,25 @@ class tx_transactor_api {
                         $addressArray,
                         $paymentBasketArray
                     );
-                $set = $gatewayProxyObject->transaction_setDetails($transactionDetailsArray);
-                $ok = $gatewayProxyObject->transaction_validate();
+                $set = $gatewayProxyObject->transactionSetDetails($transactionDetailsArray);
+                $ok = $gatewayProxyObject->transactionValidate();
 
                 if (!$ok) {
-                    $langObj = t3lib_div::getUserObj('tx_transactor_language');
+                    $languageObj = GeneralUtility::makeInstance(Localization::class);
 
                     $errorMessage =
-                        tx_div2007_alpha5::getLL_fh003(
-                            $langObj,
+                        \tx_div2007_alpha5::getLL_fh003(
+                            $languageObj,
                             'error_invalid_data'
                         );
 
                     return $errorMessage;
                 }
 
-                if ($gatewayProxyObject->transaction_succeded() == false) {
+                if ($gatewayProxyObject->transactionSucceeded() == false) {
                     $result =
                         htmlspecialchars(
-                            $gatewayProxyObject->transaction_message(
+                            $gatewayProxyObject->transactionMessage(
                                 array()
                             )
                         );
@@ -641,7 +665,8 @@ class tx_transactor_api {
         $conf,
         $pid,
         $linkParamArray
-    ) {
+    )
+    {
         if (!$pid) {
             $pid = $GLOBLAS['TSFE']->id;
         }
@@ -655,7 +680,7 @@ class tx_transactor_api {
         }
         $linkParams = implode('&', $linkArray);
         $url =
-            tx_div2007_alpha5::getTypoLink_URL_fh003(
+            \tx_div2007_alpha5::getTypoLink_URL_fh003(
                 self::$cObj,
                 $pid,
                 $linkParamArray,
@@ -666,8 +691,8 @@ class tx_transactor_api {
     }
 
 
-    static public function getLanguage () {
-
+    static public function getLanguage ()
+    {
         if (
             isset($GLOBALS['TSFE']->config) &&
             is_array($GLOBALS['TSFE']->config) &&
@@ -689,7 +714,7 @@ class tx_transactor_api {
         $referenceId,
         $handleLib,
         $confScript,
-        $extKey,
+        $extensionKey,
         $gatewayExtKey,
         $calculatedArray,
         $paymentActivity,
@@ -701,8 +726,9 @@ class tx_transactor_api {
         &$totalArray,
         &$addressArray,
         &$paymentBasketArray
-    ) {
-        $paramNameActivity = $extKey . '[activity][' . $paymentActivity . ']';
+    )
+    {
+        $paramNameActivity = $extensionKey . '[activity][' . $paymentActivity . ']';
         $failLinkParams = array($paramNameActivity => '0');
 
         if (isset($linkParams) && is_array($linkParams)) {
@@ -777,7 +803,7 @@ class tx_transactor_api {
         }
 
         $conf = array('returnLast' => 'url');
-        $urlDir = t3lib_div::getIndpEnv('TYPO3_REQUEST_DIR');
+        $urlDir = GeneralUtility::getIndpEnv('TYPO3_REQUEST_DIR');
         $retlink = $urlDir . self::getUrl($conf, $GLOBALS['TSFE']->id, $linkParams);
         $returi = $retlink . $paramReturi;
 
@@ -801,12 +827,18 @@ class tx_transactor_api {
             'basket' => $paymentBasketArray,
             'cc' => $cardRow,
             'language' => self::getLanguage(),
-            'calling_extension' => $extKey,
+            'calling_extension' => $extensionKey,
             'confScript' => $confScript
         );
 
         if ($paymentActivity == 'verify') {
-            $verifyLink = $urlDir . self::getUrl($conf, $GLOBALS['TSFE']->id, $successLinkParams);
+            $verifyLink =
+                $urlDir .
+                self::getUrl(
+                    $conf,
+                    $GLOBALS['TSFE']->id,
+                    $successLinkParams
+                );
             $transactionDetailsArray['transaction']['verifylink'] = $verifyLink;
         }
 
@@ -828,11 +860,12 @@ class tx_transactor_api {
         &$totalArray,
         &$addressArray,
         &$basketArray
-    ) {
+    )
+    {
         $bUseStaticInfo = false;
-        $langObj = t3lib_div::getUserObj('tx_transactor_language');
+        $languageObj = GeneralUtility::makeInstance(Localization::class);
 
-        if (t3lib_extMgm::isLoaded('static_info_tables')) {
+        if (ExtensionManagementUtility::isLoaded('static_info_tables')) {
             $bUseStaticInfo = true;
         }
 
@@ -963,12 +996,13 @@ class tx_transactor_api {
                 // guess country and language settings for invoice address. One of these vars has to be set: country, countryISO2, $countryISO3 or countryISONr
                 // you can also set 2 or more of these codes. The codes will be joined with 'OR' in the select-statement and only the first
                 // record which is found will be returned. If there is no record at all, the codes will be returned untouched
-                $countryArray = tx_div2007_staticinfotables::fetchCountries(
-                    $addressArray[$key]['country'],
-                    $addressArray[$key]['countryISO2'],
-                    $addressArray[$key]['countryISO3'],
-                    $addressArray[$key]['countryISONr']
-                );
+                $countryArray =
+                    \JambageCom\Div2007\Utility\StaticInfoTablesUtility::fetchCountries(
+                        $addressArray[$key]['country'],
+                        $addressArray[$key]['countryISO2'],
+                        $addressArray[$key]['countryISO3'],
+                        $addressArray[$key]['countryISONr']
+                    );
                 $countryRow = $countryArray[0];
 
                 if (count($countryRow)) {
@@ -1099,8 +1133,8 @@ class tx_transactor_api {
         ) {
             $voucherAmount = $value1 - $value2;
             $voucherText =
-                tx_div2007_alpha5::getLL_fh003(
-                    $langObj,
+                \tx_div2007_alpha5::getLL_fh003(
+                    $languageObj,
                     'voucher_payment_article'
                 );
             $basketArray['VOUCHER'][] =
@@ -1128,24 +1162,25 @@ class tx_transactor_api {
     static public function fFloat (
         $value = 0,
         $level = 2
-    ) {
+    )
+    {
         $float = floatval($value);
 
         return round($float, $level);
     }
 
 
-    static public function getListenerExtKey (
-    ) {
+    static public function getListenerExtKey ()
+    {
         $result = '';
 
         if (
-            isset($GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['transactor']['listener']) &&
-            is_array($GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['transactor']['listener'])
+            isset($GLOBALS['TYPO3_CONF_VARS']['EXTCONF'][TRANSACTOR_EXT]['listener']) &&
+            is_array($GLOBALS['TYPO3_CONF_VARS']['EXTCONF'][TRANSACTOR_EXT]['listener'])
         ) {
-            foreach ($GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['transactor']['listener'] as $extKey => $classRef) {
-                if ($extKey != '') {
-                    $result = $extKey;
+            foreach ($GLOBALS['TYPO3_CONF_VARS']['EXTCONF'][TRANSACTOR_EXT]['listener'] as $extensionKey => $classRef) {
+                if ($extensionKey != '') {
+                    $result = $extensionKey;
                     // Todo: Determine the extension key from the plugins of the current page and by Typoscript settings
 
                     break;

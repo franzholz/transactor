@@ -4,7 +4,7 @@
 		<description>texts for the markers</description>
 		<type>module</type>
 		<csh_table></csh_table>
-		<fileId>EXT:transactor/marker/locallang.xml</fileId>
+		<fileId>EXT:transactor/Resources/Private/Language/locallang_api.xml</fileId>
 		<labelContext type="array">
 		</labelContext>
 	</meta>

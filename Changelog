@@ -1,4 +1,7 @@
 2017-09-30  Franz Holzinger <franz@ttproducts.de>
+    * new namespace API and classes. This feature must be activated in the Extension Manager compatibility = 0
+
+2017-09-30  Franz Holzinger <franz@ttproducts.de>
     * readd the file ext_autoload.php
 
 2017-08-14 Franz Holzinger <franz@ttproducts.de>

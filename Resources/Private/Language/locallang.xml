@@ -4,7 +4,7 @@
 		<description>texts for processing of the transactions</description>
 		<type>module</type>
 		<csh_table></csh_table>
-		<fileId>EXT:transactor/locallang.xml</fileId>
+		<fileId>EXT:transactor/Resources/Private/Language/locallang.xml</fileId>
 		<labelContext type="array">
 		</labelContext>
 	</meta>

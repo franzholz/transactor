@@ -1,3 +1,5 @@
+# cat=basic/enable; type=integer; label=Compatibility Mode: If set to 1, then the old API class.tx_transactor_api.php shall be used by extensions like tt_products. Set this to 0 to use the new API with the namespace class \JambageCom\Transactor\Api\Start .
+compatibility = 1
 
 # cat=basic/enable; type=text; label=first option label: First option field label. The os0 variable contains the corresponding value for this option field. For example, if on0 is size, os0 could be large.
 on0l = EAN

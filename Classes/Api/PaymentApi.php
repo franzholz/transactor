@@ -5,7 +5,7 @@ namespace JambageCom\Transactor\Api;
 /***************************************************************
 *  Copyright notice
 *
-*  (c) 2016 Franz Holzinger <franz@ttproducts.de>
+*  (c) 2017 Franz Holzinger <franz@ttproducts.de>
 *  All rights reserved
 *
 *  This script is part of the Typo3 project. The Typo3 project is
@@ -38,31 +38,50 @@ namespace JambageCom\Transactor\Api;
  *
  */
 
-class PaymentApi {
+use TYPO3\CMS\Core\Utility\GeneralUtility;
 
+
+class PaymentApi
+{
     /**
     * returns the gateway proxy object
     */
     static public function getGatewayProxyObject (
         $confScript
     ) {
-        $result = FALSE;
+        $result = false;
 
         if (
             is_array($confScript) &&
             $confScript['extName'] != '' &&
             $confScript['paymentMethod'] != ''
         ) {
-            $gatewayExtKey = $confScript['extName'];
+            $gatewayExtensionKey = $confScript['extName'];
 
-            if (\TYPO3\CMS\Core\Utility\ExtensionManagementUtility::isLoaded($gatewayExtKey)) {
-                $gatewayFactoryObj = \tx_transactor_gatewayfactory::getInstance();
-                $gatewayFactoryObj->registerGatewayExt($gatewayExtKey);
+            if (
+                \TYPO3\CMS\Core\Utility\ExtensionManagementUtility::isLoaded(
+                    $gatewayExtensionKey
+                )
+            ) {
+                $gatewayFactoryObj =
+                    \JambageCom\Transactor\Domain\GatewayFactory::getInstance();
+
+                $gatewayFactoryObj->registerGatewayExtension($gatewayExtensionKey);
                 $paymentMethod = $confScript['paymentMethod'];
-                $result =
-                    $gatewayFactoryObj->getGatewayProxyObjectByPaymentMethod(
+                $gatewayProxyObj =
+                    $gatewayFactoryObj->getGatewayProxyObject(
                         $paymentMethod
                     );
+                if (is_object($gatewayProxyObj)) {
+                    if (
+                        $gatewayProxyObj instanceof \JambageCom\Transactor\Domain\GatewayProxy
+                    ) {
+                        $gatewayProxyObj->init($gatewayExtensionKey);
+                        $result = $gatewayProxyObj;
+                    } else {
+                        throw new \RuntimeException('Error in transactor: Gateway object class "' . get_class($gatewayProxyObj) . '" must be an instance of  "JambageCom\Transactor\Domain\GatewayProxy"', 50200);
+                    }
+                }
             }
         }
 

@@ -4,7 +4,7 @@
 		<description>database fields</description>
 		<type>database</type>
 		<csh_table></csh_table>
-		<fileId>EXT:transactor/locallang_db.xml</fileId>
+		<fileId>EXT:transactor/Resources/Private/Language/locallang_db.xml</fileId>
 		<labelContext type="array">
 		</labelContext>
 	</meta>
