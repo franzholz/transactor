@@ -1,3 +1,6 @@
+2017-10-02  Franz Holzinger <franz@ttproducts.de>
+    * add the backwards compatible API under the name PaymentPreviousApi.php because only this supports PHP 5.3 and the former transactor classes
+
 2017-09-30  Franz Holzinger <franz@ttproducts.de>
     * new namespace API and classes. This feature must be activated in the Extension Manager compatibility = 0
 

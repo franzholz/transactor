@@ -145,7 +145,7 @@ class tx_transactor_api {
 
 
     /**
-    * deprecated: use \JambageCom\Transactor\Api\PaymentApi::getGatewayProxyObject instead
+    * deprecated: use \JambageCom\Transactor\Api\PaymentPreviousApi::getGatewayProxyObject instead
     *
     * returns the gateway proxy object
     */
@@ -204,7 +204,7 @@ class tx_transactor_api {
         $orderUid
     ) {
         $referenceUid = false;
-        $gatewayProxyObject = \JambageCom\Transactor\Api\PaymentApi::getGatewayProxyObject($confScript);
+        $gatewayProxyObject = \JambageCom\Transactor\Api\PaymentPreviousApi::getGatewayProxyObject($confScript);
         if (
             $orderUid &&
             method_exists($gatewayProxyObject, 'generateReferenceUid')
@@ -291,7 +291,7 @@ class tx_transactor_api {
 
             $paymentMethod = $confScript['paymentMethod'];
             $gatewayProxyObject =
-                \JambageCom\Transactor\Api\PaymentApi::getGatewayProxyObject(
+                \JambageCom\Transactor\Api\PaymentPreviousApi::getGatewayProxyObject(
                     $confScript
                 );
 
@@ -581,7 +581,7 @@ class tx_transactor_api {
 
         if (strpos($handleLib, 'transactor') !== false) {
             $gatewayProxyObject =
-                \JambageCom\Transactor\Api\PaymentApi::getGatewayProxyObject(
+                \JambageCom\Transactor\Api\PaymentPreviousApi::getGatewayProxyObject(
                     $confScript
                 );
 
