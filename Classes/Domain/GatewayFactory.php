@@ -128,15 +128,25 @@ final class GatewayFactory
                     $prefix = substr($extensionKey, strlen(TRANSACTOR_EXT . '_'));
                     $key = $prefix . '_' . $paymentMethod;
                     if (
-                        isset($paymentMethodsArray[$key])
+                        isset($paymentMethodsArray[$key]) ||
+                        isset($paymentMethodsArray[$paymentMethod])
                     ) {
                         $result = $gatewayProxyObject;
                         break;
                     }
                 } else {
+                    $errors = $gatewayProxyObject->getErrors();
                     self::addError(
                         'JambageCom\Transactor\Domain\GatewayFactory::getGatewayProxyObject ' . $extensionKey
                     );
+                    if (
+                        isset($errors) &&
+                        is_array($errors)
+                    ) {
+                        foreach ($errors as $error) {
+                            self::addError($error);
+                        }
+                    }
                 }
             }
         }

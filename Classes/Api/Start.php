@@ -284,12 +284,12 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
             }
 
             $paymentMethod = $confScript['paymentMethod'];
-            $gatewayProxyObject =
-                \JambageCom\Transactor\Api\PaymentApi::getGatewayProxyObject(
-                    $confScript
-                );
 
             if ($errorMessage == '') {
+                $gatewayProxyObject =
+                    \JambageCom\Transactor\Api\PaymentApi::getGatewayProxyObject(
+                        $confScript
+                    );
                 if (is_object($gatewayProxyObject)) {
                     $gatewayKey = $gatewayProxyObject->getGatewayKey();
                     $gatewayMode =
@@ -456,7 +456,7 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
                             } else if (
                                 $gatewayMode == GatewayMode::AJAX
                             ) {
-                                $result = $gatewayProxyObject->transactionGetForm($lConf);
+                                $result = $gatewayProxyObject->transactionGetForm();
                             } else if (
                                 $gatewayMode == GatewayMode::FORM
                             ) {
@@ -580,6 +580,21 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
                     'error_transaction_no'
                 );
         }
+        if ($errorMessage != '') {
+            $gatewayFactoryObj =
+                \JambageCom\Transactor\Domain\GatewayFactory::getInstance();
+            $errors = $gatewayFactoryObj->getErrors();
+
+            if (
+                isset($errors) &&
+                is_array($errors)
+            ) {
+                foreach ($errors as $error) {
+                    $errorMessage .= '<br>' . $error;
+                }
+            }
+        }
+
       return $result;
     } // includeHandleLib
 

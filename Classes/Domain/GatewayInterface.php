@@ -127,7 +127,7 @@ interface GatewayInterface
     * @return	string		HTML form and javascript
     * @access	public
     */
-    public function transactionGetForm ($lConf);
+    public function transactionGetForm ();
 
     /**
     * Returns the form action URI to be used in mode TX_TRANSACTOR_GATEWAYMODE_FORM.

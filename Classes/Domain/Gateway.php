@@ -137,6 +137,16 @@ abstract class Gateway implements GatewayInterface, \TYPO3\CMS\Core\SingletonInt
     }
 
 
+    public function getSupportedGatewayArray () {
+        return $this->supportedGatewayArray;
+    }
+
+
+    public function setSupportedGatewayArray ($value) {
+        $this->supportedGatewayArray = $value;
+    }
+
+
     /**
     * Returns true if the payment implementation supports the given gateway mode.
     * All implementations should at least support the mode
@@ -166,7 +176,7 @@ abstract class Gateway implements GatewayInterface, \TYPO3\CMS\Core\SingletonInt
 
         if (!is_array($result)) {
             $this->addError(
-                'JambageCom\Transactor\Domain\Gateway::getAvailablePaymentMethods "' . $this->getExtensionKey() . ':' . $errorIndices . ':' .  $result . '"'
+                'JambageCom\Transactor\Domain\Gateway::getAvailablePaymentMethods ' . $this->getExtensionKey() . ': file "' . $errorIndices . ':' .  $result . '"'
             );
             $result = false;
         }
@@ -185,7 +195,7 @@ abstract class Gateway implements GatewayInterface, \TYPO3\CMS\Core\SingletonInt
     * @access	public
     */
     public function validGatewayMode ($gatewayMode) {
-        $result = in_array($gatewayMode, $this->supportedGatewayArray);
+        $result = in_array($gatewayMode, $this->getSupportedGatewayArray());
         return $result;
     }
 
@@ -214,6 +224,7 @@ abstract class Gateway implements GatewayInterface, \TYPO3\CMS\Core\SingletonInt
             $this->gatewayMode = $gatewayMode;
             $this->callingExtension = $callingExtensionKey;
             $theConf = $this->getConf();
+
             if (is_array($theConf) && is_array($conf)) {
                 $theConf = array_merge($theConf, $conf);
                 $this->setConf($theConf);
@@ -401,7 +412,7 @@ abstract class Gateway implements GatewayInterface, \TYPO3\CMS\Core\SingletonInt
     * @return	boolean		Returns true if validation was successful, false if not
     * @access	public
     */
-    public function transactionValidate ($level=1) {
+    public function transactionValidate ($level = 1) {
         return false;
     }
 
@@ -428,7 +439,7 @@ abstract class Gateway implements GatewayInterface, \TYPO3\CMS\Core\SingletonInt
     * @return	string		HTML form and javascript
     * @access	public
     */
-    public function transactionGetForm ($lConf) {
+    public function transactionGetForm () {
         return '';
     }
 

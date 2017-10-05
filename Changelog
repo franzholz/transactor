@@ -1,3 +1,9 @@
+2017-10-05  Franz Holzinger <franz@ttproducts.de>
+    * change in the new API: no parameter for transactionGetForm. The configuration can be read in by "$conf = $this->getConf();" .
+    * The name of the payment method does not need a transactor prefix.
+    * Read in all possible errors into a string which is added to the end of the return error message.
+    * new methods getSupportedGatewayArray and setSupportedGatewayArray
+
 2017-10-02  Franz Holzinger <franz@ttproducts.de>
     * add the backwards compatible API under the name PaymentPreviousApi.php because only this supports PHP 5.3 and the former transactor classes
 

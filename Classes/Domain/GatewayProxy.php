@@ -338,8 +338,8 @@ class GatewayProxy implements \JambageCom\Transactor\Domain\GatewayInterface
     *
     * @return	string		HTML form and javascript
     * @access	public
-    */	public function transactionGetForm ($lConf) {
-        $result = $this->getGatewayObj()->transactionGetForm($lConf);
+    */	public function transactionGetForm () {
+        $result = $this->getGatewayObj()->transactionGetForm();
         return $result;
     }
 
