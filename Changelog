@@ -1,3 +1,6 @@
+2017-10-07  Franz Holzinger <franz@ttproducts.de>
+    * move all images, icons and logos from the res/ folder into Resources/Public/Icons/
+
 2017-10-05  Franz Holzinger <franz@ttproducts.de>
     * change in the new API: no parameter for transactionGetForm. The configuration can be read in by "$conf = $this->getConf();" .
     * The name of the payment method does not need a transactor prefix.
