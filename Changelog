@@ -1,3 +1,10 @@
+2017-10-27  Franz Holzinger <franz@ttproducts.de>
+    * rename namespace method usesBasket into useBasket
+    * add new method transactionChangeValues to the GatewayBase for the change of a field in the current record of the transactor table
+    * API modification: add the order number and the notification email
+    * give extension informations in the details array transactionDetailsArray
+    * bugfix for the usage of the gatewayid: This is the internal transaction id used by any external gateway
+
 2017-10-07  Franz Holzinger <franz@ttproducts.de>
     * move all images, icons and logos from the res/ folder into Resources/Public/Icons/
 

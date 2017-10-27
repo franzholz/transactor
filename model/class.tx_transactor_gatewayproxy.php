@@ -406,7 +406,10 @@ class tx_transactor_gatewayproxy implements tx_transactor_gateway_int, t3lib_Sin
                 $row = $GLOBALS['TYPO3_DB']->sql_fetch_assoc($dbResult);
                 $GLOBALS['TYPO3_DB']->sql_free_result($dbResult);
 
-                if (is_array ($row) && $row['gatewayid'] === $resultsArr['gatewayid']) {
+                if (
+                    is_array ($row) &&
+                    $row['gatewayid'] === $resultsArr['gatewayid']
+                ) {
                     $resultsArr['internaltransactionuid'] = $dbTransactionUid;
                 }
             } else if ($create) {

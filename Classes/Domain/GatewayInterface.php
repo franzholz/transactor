@@ -257,7 +257,7 @@ interface GatewayInterface
 
     public function getErrors ();
 
-    public function usesBasket ();
+    public function useBasket ();
 
     public function getTransaction ($reference);
 

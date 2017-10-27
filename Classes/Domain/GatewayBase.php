@@ -32,6 +32,7 @@ use JambageCom\Transactor\Constants\GatewayMode;
 use JambageCom\Transactor\Constants\Message;
 use JambageCom\Transactor\Constants\State;
 
+use JambageCom\Transactor\Api\PaymentApi;
 
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Core\Utility\ExtensionManagementUtility;
@@ -51,17 +52,17 @@ use TYPO3\CMS\Core\Utility\ExtensionManagementUtility;
 * @subpackage	tx_transactor
 **/
 
-abstract class Gateway implements GatewayInterface, \TYPO3\CMS\Core\SingletonInterface {
-    protected $gatewayKey = 'transactor';	// must be overridden
-    protected $extensionKey = 'transactor';		// must be overridden
+abstract class GatewayBase implements GatewayInterface, \TYPO3\CMS\Core\SingletonInterface {
+    protected $gatewayKey = 'gatewayname';	// must be overridden
+    protected $extensionKey = TRANSACTOR_EXT;		// must be overridden
     protected $supportedGatewayArray = array();	// must be overridden
-    protected $bTaxIncluded = false; 	// can be overridden
-    protected $conf;
-    protected $bSendBasket = false;	// Submit detailled basket informations like single products
+    protected $taxIncluded = true;
+    protected $conf = array();
+    protected $sendBasket = false;	// Submit detailed basket informations like single products
     protected $optionsArray;
     protected $resultsArray = array();
     protected $config = array();
-    protected $bMergeConf = true;
+    protected $mergeConf = true;
     protected $formActionURI = '';	// The action uri for the submit form
 
     private $errorStack;
@@ -74,6 +75,7 @@ abstract class Gateway implements GatewayInterface, \TYPO3\CMS\Core\SingletonInt
     private $reference;
     private $cookieArray = array();
     private $internalArray = array(); // internal options
+    private $tablename = 'tx_transactor_transactions'; // name of the transactor table
 
 
     /**
@@ -85,21 +87,22 @@ abstract class Gateway implements GatewayInterface, \TYPO3\CMS\Core\SingletonInt
     */
     public function __construct () {
         $this->clearErrors();
-        $conf = unserialize($GLOBALS['TYPO3_CONF_VARS']['EXT']['extConf']['transactor']);
-        $extManagerConf = unserialize($GLOBALS['TYPO3_CONF_VARS']['EXT']['extConf'][$this->getExtensionKey()]);
-
-        if ($this->bMergeConf && is_array($this->conf)) {
-            if (is_array($extManagerConf)) {
-                $conf = array_merge($this->conf, $extManagerConf);
-            }
-        } else if (is_array($extManagerConf)) {
-            $conf = $extManagerConf;
-        }
+        $conf =
+            PaymentApi::getConf(
+                $this->getExtensionKey(),
+                $this->mergeConf,
+                $this->conf
+            );
 
         $this->setConf($conf);
         $this->setCookieArray(
             array('fe_typo_user' => $_COOKIE['fe_typo_user'])
         );
+    }
+
+
+    public function getTablename () {
+        return $this->tablename;
     }
 
 
@@ -110,6 +113,21 @@ abstract class Gateway implements GatewayInterface, \TYPO3\CMS\Core\SingletonInt
 
     public function getGatewayKey () {
         return $this->gatewayKey;
+    }
+
+
+    public function getGatewayMode () {
+        return $this->gatewayMode;
+    }
+
+
+    public function getPaymentMethod () {
+        return $this->paymentMethod;
+    }
+
+
+    public function getCallingExtension () {
+        return $this->callingExtension;
     }
 
 
@@ -134,6 +152,16 @@ abstract class Gateway implements GatewayInterface, \TYPO3\CMS\Core\SingletonInt
         } else {
             $this->config = $config;
         }
+    }
+
+
+    public function getSendBasket () {
+        return $this->sendBasket;
+    }
+
+
+    public function setSendBasket ($sendBasket) {
+        $this->sendBasket = $sendBasket;
     }
 
 
@@ -164,19 +192,27 @@ abstract class Gateway implements GatewayInterface, \TYPO3\CMS\Core\SingletonInt
     public function getAvailablePaymentMethods () {
 
         $result = false;
-        $filenamepath = GeneralUtility::getUrl(ExtensionManagementUtility::extPath($this->getExtensionKey()) . 'Resources/Private/Payment/methods.xml');
+        $errorIndices = '';
+        $filenamebase = 'Resources/Private/Payment/methods.xml';
+        $filenamepath = ExtensionManagementUtility::extPath($this->getExtensionKey()) . $filenamebase;
 
-        if ($filenamepath) {
-            $result = GeneralUtility::xml2array($filenamepath);
-            $errorIndices = $filenamepath;
+        $xmlContent =
+            GeneralUtility::getUrl(
+                $filenamepath
+            );
+
+        if ($xmlContent) {
+            $result = GeneralUtility::xml2array($xmlContent);
+            if (!is_array($result)) {
+                $errorIndices = ' has invalid xml. ' . $result;
+            }
         } else {
-            $filename = ExtensionManagementUtility::extPath($this->getExtensionKey()) . 'methods.xml';
-            $errorIndices = $filename . ' not found';
+            $errorIndices = ' not found';
         }
 
-        if (!is_array($result)) {
+        if ($errorIndices != '') {
             $this->addError(
-                'JambageCom\Transactor\Domain\Gateway::getAvailablePaymentMethods ' . $this->getExtensionKey() . ': file "' . $errorIndices . ':' .  $result . '"'
+                'JambageCom\Transactor\Domain\Gateway::getAvailablePaymentMethods ' . $this->getExtensionKey() . ': file "' . $filenamebase . '"' . $errorIndices
             );
             $result = false;
         }
@@ -284,6 +320,7 @@ abstract class Gateway implements GatewayInterface, \TYPO3\CMS\Core\SingletonInt
         $result = true;
         $this->detailsArray = $detailsArray;
         $reference = $detailsArray['reference'];
+        $transaction = $detailsArray['transaction'];
         $this->setReferenceUid($reference);
 
         if (
@@ -309,46 +346,45 @@ abstract class Gateway implements GatewayInterface, \TYPO3\CMS\Core\SingletonInt
         // Store order id in database
         $dataArray = array(
             'crdate' => time(),
-            'gatewayid' => $this->gatewayKey,
             'ext_key' => $this->callingExtension,
             'reference' => $reference,
-            'orderuid' => $detailsArray['transaction']['orderuid'],
+            'orderuid' => $transaction['orderuid'],
             'state' => State::IDLE,
-            'amount' => $detailsArray['transaction']['amount'],
-            'currency' => $detailsArray['transaction']['currency'],
-            'paymethod_key' => $this->gatewayKey,
+            'amount' => $transaction['amount'],
+            'currency' => $transaction['currency'],
+            'paymethod_key' => $this->getGatewayKey(),
             'paymethod_method' => $this->paymentMethod,
             'message' => Message::NOT_PROCESSED,
             'config' => $xmlOptions,
             'user' => $detailsArray['user']
         );
-        $res =
-            $GLOBALS['TYPO3_DB']->exec_DELETEquery(
-                'tx_transactor_transactions',
-                'gatewayid =' .
-                    $GLOBALS['TYPO3_DB']->fullQuoteStr(
-                        $this->getGatewayKey(),
-                        'tx_transactor_transactions'
-                    ) .
-                    ' AND amount LIKE "0.00"' .
-                    ' AND message LIKE "' . Message::NOT_PROCESSED . '"'
-            );
 
         if (($row = $this->getTransaction($reference)) === false) {
             $res =
                 $GLOBALS['TYPO3_DB']->exec_INSERTquery(
-                    'tx_transactor_transactions',
+                    $this->getTablename(),
                     $dataArray
                 );
             $dbTransactionUid = $GLOBALS['TYPO3_DB']->sql_insert_id();
             $this->setTransactionUid($dbTransactionUid);
+            if (!$dbTransactionUid) {
+                $result = false;
+            }
         } else {
             $this->setTransactionUid($row['uid']);
 
             if (
                 $row['state'] < State::APPROVE_OK &&
                 (
-                    abs(round($row['amount'], 2) - round($dataArray['amount'], 2) > 0.1) ||
+                    abs(
+                        round(
+                            $row['amount'], 2
+                        ) -
+                        round(
+                            $dataArray['amount'],
+                            2
+                        ) > 0.1
+                    ) ||
                     $row['gatewayid'] != $dataArray['gatewayid'] ||
                     $row['paymethod_key'] != $dataArray['paymethod_key'] ||
                     $row['paymethod_method'] != $dataArray['paymethod_method'] ||
@@ -357,20 +393,47 @@ abstract class Gateway implements GatewayInterface, \TYPO3\CMS\Core\SingletonInt
             ) {
                 $res =
                     $GLOBALS['TYPO3_DB']->exec_UPDATEquery(
-                        'tx_transactor_transactions',
+                        $this->getTablename(),
                         'reference = ' .
                             $GLOBALS['TYPO3_DB']->fullQuoteStr(
                                 $reference,
-                                'tx_transactor_transactions'
+                                $this->getTablename()
                             ),
                         $dataArray
                     );
+                if (!$res) {
+                    $result = false;
+                }
             }
         }
 
-        if (!$res) {
-            $result = false;
+        return $result;
+    }
+
+
+    /**
+    * Updates the transactor record with new values.
+    * Use this method to change the gateway specific transaction id in the field gatewayid
+    *
+    * @param    array       $values: key => value pairs of the transactor record
+    * @return   boolean     Returns true if all values could be changed
+    * @access   public
+    */
+    public function transactionChangeValues (array $values) {
+        $result = false;
+        $transactionUid = $this->getTransactionUid();
+        if ($transactionUid) {
+            $res =
+                $GLOBALS['TYPO3_DB']->exec_UPDATEquery(
+                    $this->getTablename(),
+                    'uid = ' . $transactionUid,
+                    $values
+                );
+            if (!$res) {
+                $result = false;
+            }
         }
+
         return $result;
     }
 
@@ -382,21 +445,6 @@ abstract class Gateway implements GatewayInterface, \TYPO3\CMS\Core\SingletonInt
 
     public function getDetails () {
         return $this->detailsArray;
-    }
-
-
-    public function getGatewayMode () {
-        return $this->gatewayMode;
-    }
-
-
-    public function getPaymentMethod () {
-        return $this->paymentMethod;
-    }
-
-
-    public function getCallingExtension () {
-        return $this->callingExtension;
     }
 
 
@@ -582,10 +630,10 @@ abstract class Gateway implements GatewayInterface, \TYPO3\CMS\Core\SingletonInt
 
 
     /**
-    * Returns the error result
+    * Returns the success result
     *
     * @param	string		$message ... message to show
-    * @return	array		Results of an internal error
+    * @return	array		Results of a success
     * @access	public
     */
     public function transactionGetResultsSuccess ($message) {
@@ -614,6 +662,24 @@ abstract class Gateway implements GatewayInterface, \TYPO3\CMS\Core\SingletonInt
 
     public function getResultsArray () {
         return $this->resultsArray;
+    }
+
+
+    public function getEmptyResultsArray ($reference, $currency) {
+        $resultsArray = array(
+            'gatewayid' => '',
+            'reference' => $reference,
+            'currency' => $config['currency_code'],
+            'amount' => '0.00',
+            'state' => State::IDLE,
+            'state_time' => time(),
+            'message' => Message::NOT_PROCESSED,
+            'ext_key' => $this->getCallingExtension(),
+            'paymethod_key' => $this->getExtensionKey(),
+            'paymethod_method' => $this->getPaymentMethod()
+        );
+
+        return $resultsArray;
     }
 
 
@@ -679,14 +745,14 @@ abstract class Gateway implements GatewayInterface, \TYPO3\CMS\Core\SingletonInt
     }
 
 
-    public function usesBasket () {
+    public function useBasket () {
 
         $detailsArray = $this->getDetails();
         $result = (
-            intval($this->bSendBasket) > 0) &&
+            $this->sendBasket &&
             isset($detailsArray['basket']) &&
             is_array($detailsArray['basket']) &&
-            count($detailsArray['basket']
+            count($detailsArray['basket'])
         );
         return $result;
     }
@@ -700,21 +766,16 @@ abstract class Gateway implements GatewayInterface, \TYPO3\CMS\Core\SingletonInt
         $result = false;
 
         if ($reference != '') {
-            $res =
-                $GLOBALS['TYPO3_DB']->exec_SELECTquery(
+            $result =
+                $GLOBALS['TYPO3_DB']->exec_SELECTgetSingleRow(
                     '*',
-                    'tx_transactor_transactions',
+                    $this->getTablename(),
                     'reference = ' .
                         $GLOBALS['TYPO3_DB']->fullQuoteStr(
                             $reference,
-                            'tx_transactor_transactions'
+                            $this->getTablename()
                         )
                 );
-
-            if ($res) {
-                $result = $GLOBALS['TYPO3_DB']->sql_fetch_assoc($res);
-                $GLOBALS['TYPO3_DB']->sql_free_result($res);
-            }
         }
         return $result;
     }
@@ -727,8 +788,8 @@ abstract class Gateway implements GatewayInterface, \TYPO3\CMS\Core\SingletonInt
     * @return	void
     * @access	public
     */
-    public function setTaxIncluded ($bTaxIncluded) {
-        $this->bTaxIncluded = $bTaxIncluded;
+    public function setTaxIncluded ($taxIncluded) {
+        $this->taxIncluded = $taxIncluded;
     }
 
 
@@ -739,7 +800,7 @@ abstract class Gateway implements GatewayInterface, \TYPO3\CMS\Core\SingletonInt
     * @access	public
     */
     public function getTaxIncluded () {
-        return $this->bTaxIncluded;
+        return $this->taxIncluded;
     }
 
 
@@ -747,7 +808,7 @@ abstract class Gateway implements GatewayInterface, \TYPO3\CMS\Core\SingletonInt
         $result = false;
 
         if ($orderuid) {
-            $result = $this->gatewayKey . '#' . md5($callingExtension . '-' . $orderuid);
+            $result = $this->getGatewayKey() . '#' . md5($callingExtension . '-' . $orderuid);
         }
         return $result;
     }

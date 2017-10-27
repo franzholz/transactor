@@ -29,6 +29,8 @@ namespace JambageCom\Transactor\Domain;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Core\Utility\ExtensionManagementUtility;
 
+use JambageCom\Transactor\Domain\Gateway;
+
 
 /**
 * Proxy class implementing the interface for gateway implementations. This
@@ -113,13 +115,14 @@ class GatewayProxy implements \JambageCom\Transactor\Domain\GatewayInterface
     public function getGatewayObj () {
         $result = false;
         if (
-            $this->getGatewayClass() != '' &&
-            class_exists($this->getGatewayClass())
+            $this->getGatewayClass() != ''/* &&
+            class_exists($this->getGatewayClass())*/
         ) {
             $result = GeneralUtility::makeInstance($this->getGatewayClass());
         }
+
         if (!is_object($result)) {
-            throw new \RuntimeException('ERROR in the Payment Transactor API (transactor) used by the extension "' . $this->getGatewayExtension() . '": no object exists for the class "' . $this->getGatewayClass() . '"', 2020290000);
+            throw new \RuntimeException('ERROR in the Payment Transactor API (transactor) used by the extension "' . $this->getGatewayExtension() . '": no object can be created for the class "' . $this->getGatewayClass() . '"', 2020290000);
         }
         return $result;
     }
@@ -314,8 +317,8 @@ class GatewayProxy implements \JambageCom\Transactor\Domain\GatewayInterface
                 $fields['pid'] = intval($this->extensionManagerConf['pid']);
                 $fields['message'] = (is_array($fields['message'])) ? serialize($fields['message']) : $fields['message'];
 
-                $dbResult = $GLOBALS['TYPO3_DB']->exec_INSERTquery (
-                    'tx_transactor_transactions',
+                $dbResult = $GLOBALS['TYPO3_DB']->exec_INSERTquery(
+                    $this->getGatewayObj()->getTablename(),
                     $fields
                 );
                 $dbTransactionUid = $GLOBALS['TYPO3_DB']->sql_insert_id();
@@ -451,21 +454,17 @@ class GatewayProxy implements \JambageCom\Transactor\Domain\GatewayInterface
             $dbTransactionUid = $this->getGatewayObj()->getTransactionUid();
 
             if ($dbTransactionUid) {
-                $dbResult = $GLOBALS['TYPO3_DB']->exec_SELECTquery (
+                $dbResult = $GLOBALS['TYPO3_DB']->exec_SELECTgetSingleRow(
                     'gatewayid',
-                    'tx_transactor_transactions',
+                    $this->getGatewayObj()->getTablename(),
                     'uid=' . intval($dbTransactionUid)
                 );
             }
 
-            if ($dbResult) {
-                $row = $GLOBALS['TYPO3_DB']->sql_fetch_assoc($dbResult);
-                $GLOBALS['TYPO3_DB']->sql_free_result($dbResult);
-
-                if (is_array ($row) && $row['gatewayid'] === $resultsArr['gatewayid']) {
-                    $resultsArr['internaltransactionuid'] = $dbTransactionUid;
-                }
-            } else if ($create) {
+            if (
+                !$dbResult &&
+                $create
+            ) {
                     // If the transaction doesn't exist yet in the database, create a transaction record.
                     // Usually the case with unsuccessful orders with gateway mode FORM.
                 $fields = $resultsArr;
@@ -477,7 +476,7 @@ class GatewayProxy implements \JambageCom\Transactor\Domain\GatewayInterface
                     $fields['reference']
                 ) {
                     $dbResult = $GLOBALS['TYPO3_DB']->exec_INSERTquery(
-                        'tx_transactor_transactions',
+                        $this->getGatewayObj()->getTablename(),
                         $fields
                     );
                     $resultsArr = $fields;
@@ -571,8 +570,8 @@ class GatewayProxy implements \JambageCom\Transactor\Domain\GatewayInterface
     }
 
 
-    public function usesBasket () {
-        $result = $this->getGatewayObj()->usesBasket();
+    public function useBasket () {
+        $result = $this->getGatewayObj()->useBasket();
         return $result;
     }
 

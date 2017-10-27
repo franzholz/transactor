@@ -279,7 +279,7 @@ abstract class tx_transactor_gateway implements tx_transactor_gateway_int, t3lib
         // Store order id in database
         $dataArray = array(
             'crdate' => time(),
-            'gatewayid' => $this->gatewayKey,
+            'gatewayid' => '',
             'ext_key' => $this->callingExtension,
             'reference' => $reference,
             'orderuid' => $detailsArray['transaction']['orderuid'],
@@ -295,7 +295,7 @@ abstract class tx_transactor_gateway implements tx_transactor_gateway_int, t3lib
         $res =
             $GLOBALS['TYPO3_DB']->exec_DELETEquery(
                 'tx_transactor_transactions',
-                'gatewayid =' .
+                'paymethod_key =' .
                     $GLOBALS['TYPO3_DB']->fullQuoteStr(
                         $this->getGatewayKey(),
                         'tx_transactor_transactions'

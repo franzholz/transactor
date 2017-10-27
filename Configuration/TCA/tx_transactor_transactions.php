@@ -46,7 +46,7 @@ $result = array (
                 'max' => '256'
             )
         ),
-        'gatewayid' => array (
+        'gatewayid' => array ( // gateway internal transaction id
             'exclude' => 0,
             'label' => TRANSACTOR_LANGUAGE_PATH_LL .  'locallang_db.xml:tx_transactor_transactions.gatewayid',
             'config' => array (

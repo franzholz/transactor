@@ -69,5 +69,18 @@ abstract class Listener {
             }
         }
     }
+
+    /**
+    * returns the gateway proxy object by a gateway specific transaction id
+    */
+    static public function getGatewayProxyObject (
+        $row
+    ) {
+        $gatewayProxyObject =
+            \JambageCom\Transactor\Domain\GatewayFactory::getGatewayProxyObjectByRow(
+                $row
+            );
+        return $gatewayProxyObject;
+    }
 }
 

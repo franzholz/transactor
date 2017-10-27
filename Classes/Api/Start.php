@@ -208,7 +208,7 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
     static public function test (
     )
     {
-        debug('', 'Start::test');
+        debug('', 'Start::test'); // keep this
     }
 
 
@@ -229,6 +229,8 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
         $linkParams,
         $trackingCode,
         $orderUid,
+        $orderNumber, // text string of the order number
+        $notificationEmail,
         $cardRow,
         &$bFinalize,
         &$bFinalVerify,
@@ -356,6 +358,8 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
                         $linkParams,
                         $trackingCode,
                         $orderUid,
+                        $orderNumber,
+                        $notificationEmail,
                         $cardRow,
                         $totalArray,
                         $addressArray,
@@ -580,6 +584,7 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
                     'error_transaction_no'
                 );
         }
+
         if ($errorMessage != '') {
             $gatewayFactoryObj =
                 \JambageCom\Transactor\Domain\GatewayFactory::getInstance();
@@ -613,6 +618,8 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
         $linkParams,
         $trackingCode,
         $orderUid,
+        $orderNumber,
+        $notificationEmail,
         $cardRow
     )
     {
@@ -642,6 +649,8 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
                         $linkParams,
                         $trackingCode,
                         $orderUid,
+                        $orderNumber,
+                        $notificationEmail,
                         $cardRow,
                         $totalArray,
                         $addressArray,
@@ -702,6 +711,15 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
                 '',
                 $conf
             );
+
+        if (strpos($url, '/') === 0) {
+            $url = substr($url, 1);
+        }
+
+        if (($position = strrpos($url, '/')) === strlen($url) - 1) {
+            $url = substr($url, 0, -1);
+        }
+
         return $url;
     }
 
@@ -737,6 +755,8 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
         $linkParams,
         $trackingCode,
         $orderUid,
+        $orderNumber,
+        $notificationEmail,
         $cardRow,
         &$totalArray,
         &$addressArray,
@@ -826,8 +846,24 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
         $successlink = $urlDir . self::getUrl($conf, $successPid, $successLinkParams);
         $notifyurl = $urlDir . self::getUrl($conf, $GLOBALS['TSFE']->id, $notifyUrlParams);
 
-        $transactionDetailsArray = array (
-            'transaction' => array (
+        $extensions = array(
+            'calling' => $extensionKey,
+            'gateway' => $gatewayExtKey,
+            'library' => TRANSACTOR_EXT
+        );
+        $extensionInfo = array();
+        foreach ($extensions as $type => $extension) {
+            $info = \JambageCom\Div2007\Utility\ExtensionUtility::getExtensionInfo($extension);
+            $extensionInfo[$type] = array(
+                'key' => $extension,
+                'version' => $info['version'],
+                'title' => $info['title'],
+                'author' => $info['author']
+            );
+        }
+
+        $transactionDetailsArray = array(
+            'transaction' => array(
                 'amount' => $totalPrice,
                 'currency' => $confScript['currency'] ? $confScript['currency'] : $confScript['Currency'],
                 'orderuid' => $orderUid,
@@ -842,7 +878,7 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
             'basket' => $paymentBasketArray,
             'cc' => $cardRow,
             'language' => self::getLanguage(),
-            'calling_extension' => $extensionKey,
+            'extension' => $extensionInfo,
             'confScript' => $confScript
         );
 
@@ -861,6 +897,9 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
             $transactionDetailsArray['options'] = $confScript['conf.'];
         }
         $transactionDetailsArray['reference'] = $referenceId;
+        $transactionDetailsArray['order'] = array();
+        $transactionDetailsArray['order']['orderNumber'] = $orderNumber;
+        $transactionDetailsArray['order']['notificationEmail'] = array($notificationEmail);
 
         return $transactionDetailsArray;
     }

@@ -44,6 +44,30 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
 class PaymentApi
 {
     /**
+    * @param        string      $extensionKey: Extension key
+    * @param        boolean     $mergeConf: if the conf of the extension shall be merged
+    * @param        array       $conf: configuration array of the extension
+    * returns the configuration array
+    */
+    static public function getConf (
+        $extensionKey,
+        $mergeConf,
+        array $conf = array()
+    ) {
+        $result = unserialize($GLOBALS['TYPO3_CONF_VARS']['EXT']['extConf'][TRANSACTOR_EXT]);
+        $extManagerConf = unserialize($GLOBALS['TYPO3_CONF_VARS']['EXT']['extConf'][$extensionKey]);
+
+        if ($mergeConf && is_array($conf)) {
+            if (is_array($extManagerConf)) {
+                $result = array_merge($result, $conf, $extManagerConf);
+            }
+        } else if (is_array($extManagerConf)) {
+            $result = $extManagerConf;
+        }
+        return $result;
+    }
+
+    /**
     * returns the gateway proxy object
     */
     static public function getGatewayProxyObject (
@@ -65,13 +89,13 @@ class PaymentApi
             ) {
                 $gatewayFactoryObj =
                     \JambageCom\Transactor\Domain\GatewayFactory::getInstance();
-
                 $gatewayFactoryObj->registerGatewayExtension($gatewayExtensionKey);
                 $paymentMethod = $confScript['paymentMethod'];
                 $gatewayProxyObj =
                     $gatewayFactoryObj->getGatewayProxyObject(
                         $paymentMethod
                     );
+
                 if (is_object($gatewayProxyObj)) {
                     if (
                         $gatewayProxyObj instanceof \JambageCom\Transactor\Domain\GatewayProxy
@@ -87,6 +111,163 @@ class PaymentApi
 
         return $result;
     }
+
+
+    /**
+    * Returns an array of transaction records which match the given extension key
+    * and optionally the given extension reference string and or booking status.
+    * Use this function instead accessing the transaction records directly.
+    *
+    * @param        string      $extensionKey: Extension key
+    * @param        int         $gatewayid: (optional) Filter by gateway id
+    * @param        string      $reference: (optional) Filter by reference
+    * @param        string      $state: (optional) Filter by transaction state
+    * @param        string      $tablename: (optional) Name of the transactor table
+    * @return       array       Array of transaction records, false if no records where found or an error occurred.
+    * @access       public
+    */
+    static public function getTransactions (
+        $extensionKey,
+        $gatewayid = null,
+        $reference = null,
+        $state = null,
+        $tablename = 'tx_transactor_transactions'
+    ) {
+        $transactionsArray = false;
+
+        $additionalWhere = '';
+        $additionalWhere .= (isset ($gatewayid)) ? ' AND gatewayid="' . $gatewayid . '"' : '';
+        $additionalWhere .= (isset ($invoiceid)) ? ' AND reference="' . $reference . '"' : '';
+        $additionalWhere .= (isset ($state)) ? ' AND state="' . $state . '"' : '';
+
+        $res = $GLOBALS['TYPO3_DB']->exec_SELECTquery(
+            '*',
+            $tablename,
+            'ext_key="' . $extensionKey . '"' . $additionalWhere,
+            '',
+            'crdate DESC'
+        );
+
+        if ($res && $GLOBALS['TYPO3_DB']->sql_num_rows($res)) {
+            $transactionsArray = array();
+            while ($row = $GLOBALS['TYPO3_DB']->sql_fetch_assoc($res)) {
+                $row['user'] = self::field2array($row['user']);
+                $transactionsArray[$row['uid']] = $row;
+            }
+        }
+        return $transactionsArray;
+    }
+
+
+    /**
+    * Returns an array of transaction records which match the given extension key
+    * and optionally the given extension reference string and or booking status.
+    * Use this function instead accessing the transaction records directly.
+    *
+    * @param        int         $uid: uid of the transaction record
+    * @param        string      $message: Message to write
+    * @param        string      $state: transaction state
+    * @param        integer     $time: current unix time
+    * @param        string      $user: (optional) gateway specific texts
+    * @param        string      $tablename: (optional) Name of the transactor table
+    * @return       reference to the database result
+    * @access       public
+    */
+    static public function updateMessageState (
+        $uid,
+        $message,
+        $state,
+        $time,
+        $user = '',
+        $tablename = 'tx_transactor_transactions'
+    ) {
+        $fields = array();
+        $fields['message'] = $message;
+        $fields['state'] = $state;
+        $fields['state_time'] = $time;
+        $fields['user'] = $GLOBALS['TYPO3_DB']->fullQuoteStr($user, $tablename);
+
+        $dbResult =
+            $GLOBALS['TYPO3_DB']->exec_UPDATEquery(
+                $tablename,
+                'uid=' . $uid,
+                $fields
+            );
+        return $dbResult;
+    }
+
+
+    /**
+    * Returns a single transaction record which matches the given uid
+    *
+    * @param        integer     $uid: UID of the transaction
+    * @param        string      $tablename: (optional) Name of the transactor table
+    * @access       public
+    */
+    static public function getTransactionByUid (
+        $uid,
+        $tablename = 'tx_transactor_transactions'
+    ) {
+
+        $res = $GLOBALS['TYPO3_DB']->exec_SELECTquery(
+            '*',
+            $tablename,
+            'uid=' . $uid
+        );
+
+        if (!$res || !$GLOBALS['TYPO3_DB']->sql_num_rows($res)) {
+            return false;
+        }
+
+        $row = $GLOBALS['TYPO3_DB']->sql_fetch_assoc($res);
+        $row['user'] = self::field2array($row['user']);
+
+        return $row;
+    }
+
+
+    /**
+    * Returns a single transaction record which matches the given gateway id
+    *
+    * @param        integer     $uid: UID of the transaction
+    * @param        string      $tablename: (optional) Name of the transactor table
+    * @access       public
+    */
+    static public function getTransactionByGatewayId (
+        $id,
+        $tablename = 'tx_transactor_transactions'
+    ) {
+        $row = $GLOBALS['TYPO3_DB']->exec_SELECTgetSingleRow(
+            '*',
+            $tablename,
+            'gatewayid LIKE ' . $GLOBALS['TYPO3_DB']->fullQuoteStr($id, $tablename)
+        );
+
+        if (
+            is_array($row) &&
+            isset($row['user'])
+        ) {
+            $row['user'] = self::field2array($row['user']);
+        }
+
+        return $row;
+    }
+
+
+    /**
+    * Return an array with either a single value or an unserialized array
+    *
+    * @param        mixed       $field: some value from a database field
+    * @return   array
+    * @access       private
+    */
+    static private function field2array ($field) {
+        if (!$field = @unserialize ($field)) {
+            $field = array($field);
+        }
+        return $field;
+    }
+
 
     /**
     * Calculates the payment costs

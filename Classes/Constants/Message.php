@@ -22,8 +22,8 @@ class Message
 {
     const NOT_PROCESSED = '-';     // TX_TRANSACTOR_TRANSACTION_MESSAGE_NOT_PROCESSED
     const WRONG_TRANSACTION = 'Received wrong transaction';     // WRONG_TRANSACTION_MSG
-    const WRONG_AMOUNT =       'Received wrong amount';     // WRONG_TRANSACTION_MSG
-    const SUCCESS = 'ok';     // WRONG_TRANSACTION_MSG
+    const WRONG_AMOUNT =      'Received wrong amount';     // WRONG_TRANSACTION_MSG
+    const SUCCESS = 'OK';       // success
 }
 
 
