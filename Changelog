@@ -1,3 +1,6 @@
+2017-10-28  Franz Holzinger <franz@ttproducts.de>
+    * use language object method getLL of LocalisationBase instead of tx_div2007_alpha5::getLL_fh003
+
 2017-10-27  Franz Holzinger <franz@ttproducts.de>
     * rename namespace method usesBasket into useBasket
     * add new method transactionChangeValues to the GatewayBase for the change of a field in the current record of the transactor table

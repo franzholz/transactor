@@ -269,14 +269,12 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
             } else {
                 if ($gatewayExtKey == '') {
                     $errorMessage =
-                        \tx_div2007_alpha5::getLL_fh003(
-                            $languageObj,
+                        $languageObj->getLL(
                             'extension_payment_missing'
                         );
                 } else {
                     $message =
-                        \tx_div2007_alpha5::getLL_fh003(
-                            $languageObj,
+                        $languageObj->getLL(
                             'extension_missing'
                         );
 
@@ -309,8 +307,7 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
 
                     if (!$ok) {
                         $errorMessage =
-                            \tx_div2007_alpha5::getLL_fh003(
-                                $languageObj,
+                            $languageObj->getLL(
                                 'error_transaction_init'
                             );
                         return '';
@@ -339,8 +336,7 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
 
                     if (!$referenceId) {
                         $errorMessage =
-                            \tx_div2007_alpha5::getLL_fh003(
-                                $languageObj,
+                            $languageObj->getLL(
                                 'error_reference_id'
                             );
                         return '';
@@ -374,8 +370,7 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
 
                     if (!$ok) {
                         $errorMessage =
-                            \tx_div2007_alpha5::getLL_fh003(
-                                $languageObj,
+                            $languageObj->getLL(
                                 'error_transaction_details'
                             );
                         return '';
@@ -452,8 +447,7 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
                                     }
                                 } else if ($errorMessage == '') {
                                     $errorMessage =
-                                        \tx_div2007_alpha5::getLL_fh003(
-                                            $languageObj,
+                                        $languageObj->getLL(
                                             'error_gateway_unknown'
                                         );
                                 }
@@ -465,7 +459,12 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
                                 $gatewayMode == GatewayMode::FORM
                             ) {
                                 if (!$templateFilename) {
-                                    $templateFilename = ($lConf['templateFile'] ? $lConf['templateFile'] : 'EXT:' . TRANSACTOR_EXT . '/template/transactor.tmpl');
+                                    $templateFilename =
+                                        (
+                                            $lConf['templateFile'] ?
+                                                $lConf['templateFile'] :
+                                                'EXT:' . TRANSACTOR_EXT . '/Resources/Private/Templates/PaymentHtmlTemplate.html'
+                                        );
                                 }
                                 $localTemplateCode = self::$cObj->fileResource($templateFilename);
 
@@ -474,8 +473,7 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
                                     $templateFilename != ''
                                 ) {
                                     $errorMessage =
-                                        \tx_div2007_alpha5::getLL_fh003(
-                                            $languageObj,
+                                        $languageObj->getLL(
                                             'error_no_template'
                                         );
                                     $errorMessage = sprintf($errorMessage, $templateFilename);
@@ -546,8 +544,7 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
                                         $errorMessage = $formuri;
                                     } else {
                                         $errorMessage =
-                                            \tx_div2007_alpha5::getLL_fh003(
-                                                $languageObj,
+                                            $languageObj->getLL(
                                                 'error_relay_url'
                                             );
                                     }
@@ -559,8 +556,7 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
                     }
                 } else {
                     $message =
-                        \tx_div2007_alpha5::getLL_fh003(
-                            $languageObj,
+                        $languageObj->getLL(
                             'error_gateway_missing'
                         );
                     $messageArray =  explode('|', $message);
@@ -569,8 +565,7 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
             }
         } else {
             $message =
-                \tx_div2007_alpha5::getLL_fh003(
-                    $languageObj,
+                $languageObj->getLL(
                     'error_api_parameters'
                 );
             $messageArray =  explode('|', $message);
@@ -579,8 +574,7 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
 
         if ($errorMessage == Message::NOT_PROCESSED) {
             $errorMessage =
-                \tx_div2007_alpha5::getLL_fh003(
-                    $languageObj,
+                $languageObj->getLL(
                     'error_transaction_no'
                 );
         }
@@ -663,8 +657,7 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
                     $languageObj = GeneralUtility::makeInstance(Localization::class);
 
                     $errorMessage =
-                        \tx_div2007_alpha5::getLL_fh003(
-                            $languageObj,
+                        $languageObj->getLL(
                             'error_invalid_data'
                         );
 
@@ -1187,8 +1180,7 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
         ) {
             $voucherAmount = $value1 - $value2;
             $voucherText =
-                \tx_div2007_alpha5::getLL_fh003(
-                    $languageObj,
+                $languageObj->getLL(
                     'voucher_payment_article'
                 );
             $basketArray['VOUCHER'][] =
@@ -1202,6 +1194,7 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
                 );
 
             $totalArray['goodsnotax'] = self::fFloat($goodsTotalNoTax + $voucherAmount);
+
             if (isset($calculatedArray['depositnotax'])) {
                 $totalArray['goodsnotax'] = self::fFloat($goodsTotalNoTax + $goodsTotalDepositNoTax);
             }
