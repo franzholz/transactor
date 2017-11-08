@@ -108,10 +108,8 @@ class PaymentApi
                 }
             }
         }
-
         return $result;
     }
-
 
     /**
     * Returns an array of transaction records which match the given extension key
@@ -127,7 +125,7 @@ class PaymentApi
     * @access       public
     */
     static public function getTransactions (
-        $extensionKey,
+        $extensionKey = null,
         $gatewayid = null,
         $reference = null,
         $state = null,
@@ -135,15 +133,55 @@ class PaymentApi
     ) {
         $transactionsArray = false;
 
-        $additionalWhere = '';
-        $additionalWhere .= (isset ($gatewayid)) ? ' AND gatewayid="' . $gatewayid . '"' : '';
-        $additionalWhere .= (isset ($invoiceid)) ? ' AND reference="' . $reference . '"' : '';
-        $additionalWhere .= (isset ($state)) ? ' AND state="' . $state . '"' : '';
+        $where = '1=1';
+        $where .=
+            (
+                isset ($extensionKey) ?
+                    ' AND ext_key=' .
+                    $GLOBALS['TYPO3_DB']->fullQuoteStr(
+                        $extensionKey,
+                        $tablename
+                    ) :
+                    ''
+            );
+
+        $where .=
+            (
+                isset ($gatewayid) ?
+                    ' AND gatewayid=' .
+                    $GLOBALS['TYPO3_DB']->fullQuoteStr(
+                        $gatewayid,
+                        $tablename
+                    ) :
+                    ''
+            );
+
+        $where .=
+            (
+                isset ($reference) ?
+                    ' AND reference=' .
+                $GLOBALS['TYPO3_DB']->fullQuoteStr(
+                    $reference,
+                    $tablename
+                ) :
+                ''
+            );
+
+        $where .=
+            (
+                isset ($state) ?
+                    ' AND state=' .
+                $GLOBALS['TYPO3_DB']->fullQuoteStr(
+                    $state,
+                    $tablename
+                ) :
+                ''
+            );
 
         $res = $GLOBALS['TYPO3_DB']->exec_SELECTquery(
             '*',
             $tablename,
-            'ext_key="' . $extensionKey . '"' . $additionalWhere,
+            $where,
             '',
             'crdate DESC'
         );
@@ -154,10 +192,10 @@ class PaymentApi
                 $row['user'] = self::field2array($row['user']);
                 $transactionsArray[$row['uid']] = $row;
             }
+            $GLOBALS['TYPO3_DB']->sql_free_result($res);
         }
         return $transactionsArray;
     }
-
 
     /**
     * Returns an array of transaction records which match the given extension key
@@ -196,7 +234,6 @@ class PaymentApi
         return $dbResult;
     }
 
-
     /**
     * Returns a single transaction record which matches the given uid
     *
@@ -225,7 +262,6 @@ class PaymentApi
         return $row;
     }
 
-
     /**
     * Returns a single transaction record which matches the given gateway id
     *
@@ -253,7 +289,6 @@ class PaymentApi
         return $row;
     }
 
-
     /**
     * Return an array with either a single value or an unserialized array
     *
@@ -267,7 +302,6 @@ class PaymentApi
         }
         return $field;
     }
-
 
     /**
     * Calculates the payment costs
@@ -295,7 +329,6 @@ class PaymentApi
         return $costs;
     }
 
-
     static public function sendErrorEmail (
         $fromEMail,
         $fromName,
@@ -316,6 +349,17 @@ class PaymentApi
             $fromEMail,
             $fromName
         );
+    }
+
+    static public function getRequestId ($reference) {
+        $position = strpos($reference, '#');
+        $requestId = substr($reference, $position + 1);
+        return $requestId;
+    }
+
+    static public function generateReferenceUid ($gatewayKey, $requestId) {
+        $result = $gatewayKey . '#' . $requestId;
+        return $result;
     }
 }
 

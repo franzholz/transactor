@@ -58,25 +58,11 @@ interface GatewayInterface
     public function getAvailablePaymentMethods ();
 
     /**
-    * Returns true if the payment implementation supports the given gateway mode.
-    * All implementations should at least support the mode
-    * TX_TRANSACTOR_GATEWAYMODE_FORM.
-    *
-    * TX_TRANSACTOR_GATEWAYMODE_WEBSERVICE usually requires your webserver and
-    * the whole application to be certified if used with certain credit cards.
-    *
-    * @param	integer		$gatewayMode: The gateway mode to check for. One of the constants TX_TRANSACTOR_GATEWAYMODE_*
-    * @return	boolean		true if the given gateway mode is supported
-    * @access	public
-    */
-    public function validGatewayMode ($gatewayMode);
-
-    /**
     * Initializes a transaction.
     *
     * @param	integer		$action: Type of the transaction, one of the constants TX_TRANSACTOR_TRANSACTION_ACTION_*
     * @param	string		$paymentMethod: Payment method, one of the values of getSupportedMethods()
-    * @param	integer		$gatewayMode: Gateway mode for this transaction, one of the constants TX_TRANSACTOR_GATEWAYMODE_*
+    * @param	integer		$gatewayMode: Gateway mode for this transaction, one of the constants GatewayMode::*
     * @param	string		$callingExtensionKey: Extension key of the calling script.
     * @return	void
     * @access	public
@@ -85,7 +71,7 @@ interface GatewayInterface
 
     /**
     * Sets the payment details. Which fields can be set usually depends on the
-    * chosen / supported gateway mode. TX_TRANSACTOR_GATEWAYMODE_FORM does not
+    * chosen / supported gateway mode. GatewayMode::FORM does not
     * allow setting credit card data for example.
     *
     * @param	array		$detailsArray: The payment details array
@@ -100,7 +86,7 @@ interface GatewayInterface
     * formally correct while level 2 checks if the credit card or bank account
     * really exists.
     *
-    * This method is not available in mode TX_TRANSACTOR_GATEWAYMODE_FORM!
+    * This method is not available in mode GatewayMode::FORM!
     *
     * @param	integer		$level: Level of validation, depends on implementation
     * @return	boolean		Returns true if validation was successful, false if not
@@ -111,7 +97,7 @@ interface GatewayInterface
     /**
     * Submits the prepared transaction to the payment gateway
     *
-    * This method is not available in mode TX_TRANSACTOR_GATEWAYMODE_FORM, you'll have
+    * This method is not available in mode GatewayMode::FORM, you'll have
     * to render and submit a form instead.
     *
     * @param	string		an error message will be provided in case of error
@@ -130,7 +116,7 @@ interface GatewayInterface
     public function transactionGetForm ();
 
     /**
-    * Returns the form action URI to be used in mode TX_TRANSACTOR_GATEWAYMODE_FORM.
+    * Returns the form action URI to be used in mode GatewayMode::FORM.
     *
     * @return	string		Form action URI
     * @access	public
@@ -138,7 +124,7 @@ interface GatewayInterface
     public function transactionFormGetActionURI ();
 
     /**
-    * Returns any extra parameter for the form tag to be used in mode TX_TRANSACTOR_GATEWAYMODE_FORM.
+    * Returns any extra parameter for the form tag to be used in mode GatewayMode::FORM.
     *
     * @return  string      Form tag extra parameters
     * @access  public
@@ -146,7 +132,7 @@ interface GatewayInterface
     public function transactionFormGetFormParms ();
 
     /**
-    * Returns any extra HTML attributes for the form tag to be used in mode TX_TRANSACTOR_GATEWAYMODE_FORM.
+    * Returns any extra HTML attributes for the form tag to be used in mode GatewayMode::FORM.
     *
     * @return  string      Form submit button extra parameters
     * @access  public
@@ -155,7 +141,7 @@ interface GatewayInterface
 
     /**
     * Returns an array of field names and values which must be included as hidden
-    * fields in the form you render use mode TX_TRANSACTOR_GATEWAYMODE_FORM.
+    * fields in the form you render use mode GatewayMode::FORM.
     *
     * @return	array		Field names and values to be rendered as hidden fields
     * @access	public

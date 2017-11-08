@@ -36,6 +36,8 @@ namespace JambageCom\Transactor\Domain;
 */
 
 
+use JambageCom\Transactor\Constants\GatewayMode;
+
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Core\Utility\ExtensionManagementUtility;
 

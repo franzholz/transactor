@@ -1,3 +1,10 @@
+
+2017-11-08  Franz Holzinger <franz@ttproducts.de>
+    * new feature: pass the transactor parameter request id for notification urls
+    * move function getGatewayMode into the class GatewayBase
+    * add new method transactionGetErrorDetails to store all errors in a variable inside of the gateway class
+    * enhanced initialization method transactionInit to read in the methods.xml file and its attributes
+
 2017-10-28  Franz Holzinger <franz@ttproducts.de>
     * use language object method getLL of LocalisationBase instead of tx_div2007_alpha5::getLL_fh003
 

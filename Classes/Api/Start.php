@@ -133,27 +133,6 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
     }
 
 
-    /**
-    * returns the gateway mode from the settings
-    */
-    static public function getGatewayMode (
-        $handleLib,
-        $confScript
-    ) {
-        $gatewayModeArray =
-            array(
-                'form' => GatewayMode::FORM,
-                'ajax' => GatewayMode::AJAX,
-                'webservice' => GatewayMode::WEBSERVICE
-            );
-        $gatewayMode = $gatewayModeArray[$confScript['gatewaymode']];
-        if (!$gatewayMode) {
-            $gatewayMode = $gatewayModeArray['form'];
-        }
-        return $gatewayMode;
-    }
-
-
     static public function getItemMarkerSubpartArrays (
         $confScript,
         &$subpartArray,
@@ -292,18 +271,14 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
                     );
                 if (is_object($gatewayProxyObject)) {
                     $gatewayKey = $gatewayProxyObject->getGatewayKey();
-                    $gatewayMode =
-                        self::getGatewayMode(
-                            $handleLib,
-                            $confScript
-                        );
                     $ok = $gatewayProxyObject->transactionInit(
                         Action::AUTHORIZE_TRANSFER,
                         $paymentMethod,
-                        $gatewayMode,
                         $extensionKey,
                         $confScript['conf.']
                     );
+
+                    $gatewayMode = $gatewayProxyObject->getGatewayMode();
 
                     if (!$ok) {
                         $errorMessage =
@@ -312,7 +287,6 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
                             );
                         return '';
                     }
-
 
                     $gatewayConf = $gatewayProxyObject->getConf();
                     self::getPaymentBasket(
@@ -455,16 +429,19 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
                                 $gatewayMode == GatewayMode::AJAX
                             ) {
                                 $result = $gatewayProxyObject->transactionGetForm();
+                                if (!$result) {
+                                    $errorDetails = $gatewayProxyObject->transactionGetErrorDetails();
+                                    $errorMessage = 'ERROR: ' . $errorDetails;
+                                }
                             } else if (
                                 $gatewayMode == GatewayMode::FORM
                             ) {
                                 if (!$templateFilename) {
-                                    $templateFilename =
-                                        (
-                                            $lConf['templateFile'] ?
-                                                $lConf['templateFile'] :
-                                                'EXT:' . TRANSACTOR_EXT . '/Resources/Private/Templates/PaymentHtmlTemplate.html'
-                                        );
+                                    if ($lConf['templateFile'] != '') {
+                                        $templateFilename = $lConf['templateFile'];
+                                    } else {
+                                        $templateFilename = $gatewayProxyObject->getTemplateFilename();
+                                    }
                                 }
                                 $localTemplateCode = self::$cObj->fileResource($templateFilename);
 
@@ -510,7 +487,8 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
                                 }
 
                                 if (
-                                    stripos($formuri, 'ERROR') !== false
+                                    stripos($formuri, 'ERROR') !== false ||
+                                    !$formuri
                                 ) {
                                     $bError = true;
                                 }
@@ -541,7 +519,12 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
                                     );
                                 } else {
                                     if ($bError) {
-                                        $errorMessage = $formuri;
+                                        if (stripos($formuri, 'ERROR') !== false) {
+                                            $errorMessage = $formuri;
+                                        } else {
+                                            $errorDetails = $gatewayProxyObject->transactionGetErrorDetails();
+                                            $errorMessage = 'ERROR: ' . $errorDetails;
+                                        }
                                     } else {
                                         $errorMessage =
                                             $languageObj->getLL(
@@ -769,7 +752,11 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
             $successLinkParams = array_merge($successLinkParams, $linkParams);
         }
 
-        $notifyUrlParams = array('eID' => str_replace('transactor_', '', $gatewayExtKey));
+        $notifyUrlParams =
+            array(
+                'eID' => str_replace('transactor_', '', $gatewayExtKey),
+                'transactor' => PaymentApi::getRequestId($referenceId)
+            );
 
         if (isset($linkParams) && is_array($linkParams)) {
             $notifyUrlParams = array_merge($notifyUrlParams, $linkParams);

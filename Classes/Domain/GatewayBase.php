@@ -55,7 +55,6 @@ use TYPO3\CMS\Core\Utility\ExtensionManagementUtility;
 abstract class GatewayBase implements GatewayInterface, \TYPO3\CMS\Core\SingletonInterface {
     protected $gatewayKey = 'gatewayname';	// must be overridden
     protected $extensionKey = TRANSACTOR_EXT;		// must be overridden
-    protected $supportedGatewayArray = array();	// must be overridden
     protected $taxIncluded = true;
     protected $conf = array();
     protected $sendBasket = false;	// Submit detailed basket informations like single products
@@ -64,11 +63,18 @@ abstract class GatewayBase implements GatewayInterface, \TYPO3\CMS\Core\Singleto
     protected $config = array();
     protected $mergeConf = true;
     protected $formActionURI = '';	// The action uri for the submit form
+    protected $gatewayModeArray = array
+        (
+            'form' => GatewayMode::FORM,
+            'ajax' => GatewayMode::AJAX,
+            'webservice' => GatewayMode::WEBSERVICE
+        );
 
     private $errorStack;
     private $action;
     private $paymentMethod;
     private $gatewayMode;
+    private $templateFilename;
     private $callingExtension;
     private $detailsArray;
     private $transactionId;
@@ -116,8 +122,23 @@ abstract class GatewayBase implements GatewayInterface, \TYPO3\CMS\Core\Singleto
     }
 
 
+    public function setGatewayMode ($gatewayMode) {
+        $this->gatewayMode = $gatewayMode;
+    }
+
+
     public function getGatewayMode () {
         return $this->gatewayMode;
+    }
+
+
+    public function setTemplateFilename ($templateFilename) {
+        $this->templateFilename = $templateFilename;
+    }
+
+
+    public function getTemplateFilename () {
+        return $this->templateFilename;
     }
 
 
@@ -165,11 +186,6 @@ abstract class GatewayBase implements GatewayInterface, \TYPO3\CMS\Core\Singleto
     }
 
 
-    public function getSupportedGatewayArray () {
-        return $this->supportedGatewayArray;
-    }
-
-
     public function setSupportedGatewayArray ($value) {
         $this->supportedGatewayArray = $value;
     }
@@ -178,14 +194,14 @@ abstract class GatewayBase implements GatewayInterface, \TYPO3\CMS\Core\Singleto
     /**
     * Returns true if the payment implementation supports the given gateway mode.
     * All implementations should at least support the mode
-    * TX_TRANSACTOR_GATEWAYMODE_FORM.
+    * GatewayMode::FORM.
     *
-    * TX_TRANSACTOR_GATEWAYMODE_WEBSERVICE usually requires your webserver and
+    * GatewayMode::WEBSERVICE usually requires your webserver and
     * the whole application to be certified if used with certain credit cards.
     *
-    * @param	integer		$gatewayMode: The gateway mode to check for. One of the constants TX_TRANSACTOR_GATEWAYMODE_*
+    * @param	integer		$gatewayMode: The gateway mode to check for. One of the constants GatewayMode::*
     * @return	array / boolean
-    *           array of available payment methods
+    *           array of available payment methods and their attributes
     *           false in case of error
     * @access	public
     */
@@ -221,54 +237,69 @@ abstract class GatewayBase implements GatewayInterface, \TYPO3\CMS\Core\Singleto
 
 
     /**
-    * Initializes a transaction.
-    *
-    * @param	integer		$action: Type of the transaction, one of the constants TX_TRANSACTOR_GATEWAYMODE_*
-    * @param	string		$paymentMethod: Payment method, one of the values of getSupportedMethods()
-    * @param	integer		$gatewayMode: Gateway mode for this transaction, one of the constants TX_TRANSACTOR_GATEWAYMODE_*
-    * @param	string		$callingExtensionKey: Extension key of the calling script.
-    * @return	void
-    * @access	public
+    * @param    string       $mode of the gateway: 'form', 'ajax' or 'webservice'
+    * @return   integer      type of the transaction, one of the constants GatewayMode::*
     */
-    public function validGatewayMode ($gatewayMode) {
-        $result = in_array($gatewayMode, $this->getSupportedGatewayArray());
-        return $result;
+    public function convertGatewayMode (
+        $mode = 'form'
+    ) {
+        $mode = strtolower($mode);
+        $gatewayMode = GatewayMode::INVALID;
+
+        if (isset($this->gatewayModeArray[$mode])) {
+            $gatewayMode = $this->gatewayModeArray[$mode];
+        }
+
+        return $gatewayMode;
     }
 
 
     /**
     * Initializes a transaction.
     *
-    * @param	integer		$action: Type of the transaction, one of the constants TX_TRANSACTOR_GATEWAYMODE_*
+    * @param	integer		$action: Type of the transaction, one of the constants GatewayMode::*
     * @param	string		$paymentMethod: Payment method, one of the values of getSupportedMethods()
-    * @param	integer		$gatewayMode: Gateway mode for this transaction, one of the constants TX_TRANSACTOR_GATEWAYMODE_*
     * @param	string		$callingExtensionKey: Extension key of the calling script.
     * @param	array		$conf: configuration. This will override former configuration from the exension manager.
-    * @return	void
+    * @return	boolean     true if the initialization went fine
     * @access	public
     */
     public function transactionInit (
         $action,
         $paymentMethod,
-        $gatewayMode,
         $callingExtensionKey,
         $conf = array()
     ) {
-        if ($this->validGatewayMode($gatewayMode)) {
-            $this->action = $action;
-            $this->paymentMethod = $paymentMethod;
-            $this->gatewayMode = $gatewayMode;
-            $this->callingExtension = $callingExtensionKey;
-            $theConf = $this->getConf();
+        $result = true;
+        $this->action = $action;
+        $this->paymentMethod = $paymentMethod;
+        $this->callingExtension = $callingExtensionKey;
+        $theConf = $this->getConf();
 
-            if (is_array($theConf) && is_array($conf)) {
-                $theConf = array_merge($theConf, $conf);
-                $this->setConf($theConf);
-            }
-            $result = true;
+        if (is_array($theConf) && is_array($conf)) {
+            $theConf = array_merge($theConf, $conf);
+            $this->setConf($theConf);
+        }
+
+        $paymentMethodsArray = $this->getAvailablePaymentMethods();
+        if (isset($paymentMethodsArray[$paymentMethod]['gatewaymode'])) {
+            $gatewayModeValue = $paymentMethodsArray[$paymentMethod]['gatewaymode'];
         } else {
+            $gatewayModeValue = 'form';
+        }
+        $gatewayMode = $this->convertGatewayMode($gatewayModeValue);
+
+        if ($gatewayMode == GatewayMode::INVALID) {
             $result = false;
         }
+        $this->setGatewayMode($gatewayMode);
+
+        if (isset($paymentMethodsArray[$paymentMethod]['template'])) {
+            $templateFilename = $paymentMethodsArray[$paymentMethod]['template'];
+        } else {
+            $templateFilename = 'EXT:' . TRANSACTOR_EXT . '/Resources/Private/Templates/PaymentHtmlTemplate.html';
+        }
+        $this->setTemplateFilename($templateFilename);
 
         return $result;
     }
@@ -309,7 +340,7 @@ abstract class GatewayBase implements GatewayInterface, \TYPO3\CMS\Core\Singleto
 
     /**
     * Sets the payment details. Which fields can be set usually depends on the
-    * chosen / supported gateway mode. TX_TRANSACTOR_GATEWAYMODE_FORM does not
+    * chosen / supported gateway mode. GatewayMode::FORM does not
     * allow setting credit card data for example.
     *
     * @param	array		$detailsArray: The payment details array
@@ -353,7 +384,7 @@ abstract class GatewayBase implements GatewayInterface, \TYPO3\CMS\Core\Singleto
             'amount' => $transaction['amount'],
             'currency' => $transaction['currency'],
             'paymethod_key' => $this->getGatewayKey(),
-            'paymethod_method' => $this->paymentMethod,
+            'paymethod_method' => $this->getPaymentMethod(),
             'message' => Message::NOT_PROCESSED,
             'config' => $xmlOptions,
             'user' => $detailsArray['user']
@@ -426,7 +457,11 @@ abstract class GatewayBase implements GatewayInterface, \TYPO3\CMS\Core\Singleto
             $res =
                 $GLOBALS['TYPO3_DB']->exec_UPDATEquery(
                     $this->getTablename(),
-                    'uid = ' . $transactionUid,
+                    'uid = ' .
+                        $GLOBALS['TYPO3_DB']->fullQuoteStr(
+                            $transactionUid,
+                            $this->getTablename()
+                        ),
                     $values
                 );
             if (!$res) {
@@ -454,7 +489,7 @@ abstract class GatewayBase implements GatewayInterface, \TYPO3\CMS\Core\Singleto
     * formally correct while level 2 checks if the credit card or bank account
     * really exists.
     *
-    * This method is not available in mode TX_TRANSACTOR_GATEWAYMODE_FORM!
+    * This method is not available in mode GatewayMode::FORM!
     *
     * @param	integer		$level: Level of validation, depends on implementation
     * @return	boolean		Returns true if validation was successful, false if not
@@ -468,7 +503,7 @@ abstract class GatewayBase implements GatewayInterface, \TYPO3\CMS\Core\Singleto
     /**
     * Submits the prepared transaction to the payment gateway
     *
-    * This method is not available in mode TX_TRANSACTOR_GATEWAYMODE_FORM, you'll have
+    * This method is not available in mode GatewayMode::FORM, you'll have
     * to render and submit a form instead.
     *
     * @param	string		an error message will be provided in case of error
@@ -482,7 +517,7 @@ abstract class GatewayBase implements GatewayInterface, \TYPO3\CMS\Core\Singleto
 
     /**
     * Displays the form on which the user will finally submit the transaction to the payment gateway
-    * Only supported with TX_TRANSACTOR_GATEWAYMODE_AJAX
+    * Only supported with GatewayMode::AJAX
     *
     * @return	string		HTML form and javascript
     * @access	public
@@ -493,7 +528,18 @@ abstract class GatewayBase implements GatewayInterface, \TYPO3\CMS\Core\Singleto
 
 
     /**
-    * Returns the form action URI to be used in mode TX_TRANSACTOR_GATEWAYMODE_FORM.
+    * Fetches the details of the last occurred error in a string format.
+    *
+    * @return   string      details of the last error
+    * @access   public
+    */  public function transactionGetErrorDetails () {
+        $result = '(' . $this->getExtensionKey() . ') No details function transactionGetErrorDetails has been written.';
+        return $result;
+    }
+
+
+    /**
+    * Returns the form action URI to be used in mode GatewayMode::FORM.
     * This is used by PayPal and DIBS
     * @return	string		Form action URI
     * @access	public
@@ -514,7 +560,7 @@ abstract class GatewayBase implements GatewayInterface, \TYPO3\CMS\Core\Singleto
 
     /**
     * Returns any extra parameter for the form url to be used in mode
-    * TX_TRANSACTOR_GATEWAYMODE_FORM.
+    * GatewayMode::FORM.
     * It can also add the form url in the front and set the '?' as separator
     *
     * @return  string      Form tag extra parameters
@@ -527,7 +573,7 @@ abstract class GatewayBase implements GatewayInterface, \TYPO3\CMS\Core\Singleto
 
     /**
     * Returns any extra HTML attributes for the form tag to be used in mode
-    * TX_TRANSACTOR_GATEWAYMODE_FORM.
+    * GatewayMode::FORM.
     *
     * @return  string      Form submit button extra parameters
     * @access  public
@@ -539,7 +585,7 @@ abstract class GatewayBase implements GatewayInterface, \TYPO3\CMS\Core\Singleto
 
     /**
     * Returns an array of field names and values which must be included as hidden
-    * fields in the form you render use mode TX_TRANSACTOR_GATEWAYMODE_FORM.
+    * fields in the form you render use mode GatewayMode::FORM.
     *
     * @return	array		Field names and values to be rendered as hidden fields
     * @access	public

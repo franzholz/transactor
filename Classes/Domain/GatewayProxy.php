@@ -30,6 +30,7 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Core\Utility\ExtensionManagementUtility;
 
 use JambageCom\Transactor\Domain\Gateway;
+use JambageCom\Transactor\Constants\GatewayMode;
 
 
 /**
@@ -128,6 +129,18 @@ class GatewayProxy implements \JambageCom\Transactor\Domain\GatewayInterface
     }
 
 
+    public function getTablename () {
+        $result = $this->getGatewayObj()->getTablename();
+        return $result;
+    }
+
+
+    public function getExtensionKey () {
+        $result = $this->getGatewayObj()->getExtensionKey();
+        return $result;
+    }
+
+
     /**
     * Returns the gateway key. Each gateway implementation should have such
     * a unique key.
@@ -138,6 +151,27 @@ class GatewayProxy implements \JambageCom\Transactor\Domain\GatewayInterface
     public function getGatewayKey () {
         $result = $this->getGatewayObj()->getGatewayKey();
         return $result;
+    }
+
+
+    public function setGatewayMode ($gatewayMode) {
+        $this->getGatewayObj()->setGatewayMode($gatewayMode);
+    }
+
+
+    public function getGatewayMode () {
+        $result = $this->getGatewayObj()->getGatewayMode();
+        return $result;
+    }
+
+
+    public function setTemplateFilename ($templateFilename) {
+        $this->getGatewayObj()->setTemplateFilename($templateFilename);
+    }
+
+
+    public function getTemplateFilename () {
+        return $this->getGatewayObj()->getTemplateFilename();
     }
 
 
@@ -171,29 +205,10 @@ class GatewayProxy implements \JambageCom\Transactor\Domain\GatewayInterface
 
 
     /**
-    * Returns true if the payment implementation supports the given gateway mode.
-    * All implementations should at least support the mode
-    * TX_TRANSACTOR_GATEWAYMODE_FORM.
-    *
-    * TX_TRANSACTOR_GATEWAYMODE_WEBSERVICE usually requires your webserver and
-    * the whole application to be certified if used with certain credit cards.
-    *
-    * @param	integer		$gatewayMode: The gateway mode to check for. One of the constants TX_TRANSACTOR_GATEWAYMODE_*
-    * @return	boolean		true if the given gateway mode is supported
-    * @access	public
-    */
-    public function validGatewayMode ($gatewayMode) {
-        $result = $this->getGatewayObj()->validGatewayMode($gatewayMode);
-        return $result;
-    }
-
-
-    /**
     * Initializes a transaction.
     *
     * @param	integer		$action: Type of the transaction, one of the constants TX_TRANSACTOR_TRANSACTION_ACTION_*
     * @param	string		$paymentMethod: Payment method, one of the values of getSupportedMethods()
-    * @param	integer		$gatewayMode: Gateway mode for this transaction, one of the constants TX_TRANSACTOR_GATEWAYMODE_*
     * @param	string		$extensionKey: Extension key of the calling script.
     * @param	array		$config: configuration for the extension
     * @return	void
@@ -202,7 +217,6 @@ class GatewayProxy implements \JambageCom\Transactor\Domain\GatewayInterface
     public function transactionInit (
         $action,
         $method,
-        $gatewaymode,
         $extensionKey,
         $config = array()
     ) {
@@ -210,7 +224,6 @@ class GatewayProxy implements \JambageCom\Transactor\Domain\GatewayInterface
         $result = $this->getGatewayObj()->transactionInit(
             $action,
             $method,
-            $gatewaymode,
             $extensionKey,
             $config
         );
@@ -220,7 +233,7 @@ class GatewayProxy implements \JambageCom\Transactor\Domain\GatewayInterface
 
     /**
     * Sets the payment details. Which fields can be set usually depends on the
-    * chosen / supported gateway mode. TX_TRANSACTOR_GATEWAYMODE_FORM does not
+    * chosen / supported gateway mode. GatewayMode::FORM does not
     * allow setting credit card data for example.
     *
     * @param	array		$detailsArr: The payment details array
@@ -239,7 +252,7 @@ class GatewayProxy implements \JambageCom\Transactor\Domain\GatewayInterface
     * formally correct while level 2 checks if the credit card or bank account
     * really exists.
     *
-    * This method is not available in mode TX_TRANSACTOR_GATEWAYMODE_FORM!
+    * This method is not available in mode GatewayMode::FORM!
     *
     * @param	integer		$level: Level of validation, depends on implementation
     * @return	boolean		Returns true if validation was successful, false if not
@@ -293,7 +306,7 @@ class GatewayProxy implements \JambageCom\Transactor\Domain\GatewayInterface
     /**
     * Submits the prepared transaction to the payment gateway
     *
-    * This method is not available in mode TX_TRANSACTOR_GATEWAYMODE_FORM, you'll have
+    * This method is not available in mode GatewayMode::FORM, you'll have
     * to render and submit a form instead.
     *
     * @param	string		an error message will be provided in case of error
@@ -337,7 +350,7 @@ class GatewayProxy implements \JambageCom\Transactor\Domain\GatewayInterface
 
     /**
     * Displays the form on which the user will finally submit the transaction to the payment gateway
-    * Only to be used in mode TX_TRANSACTOR_GATEWAYMODE_AJAX
+    * Only to be used in mode GatewayMode::AJAX
     *
     * @return	string		HTML form and javascript
     * @access	public
@@ -348,7 +361,18 @@ class GatewayProxy implements \JambageCom\Transactor\Domain\GatewayInterface
 
 
     /**
-    * Returns the form action URI to be used in mode TX_TRANSACTOR_GATEWAYMODE_FORM.
+    * Fetches the details of the last occurred error in a string format.
+    *
+    * @return   string      details of the last error
+    * @access   public
+    */  public function transactionGetErrorDetails () {
+        $result = $this->getGatewayObj()->transactionGetErrorDetails();
+        return $result;
+    }
+
+
+    /**
+    * Returns the form action URI to be used in mode GatewayMode::FORM.
     *
     * @return	string		Form action URI
     * @access	public
@@ -360,30 +384,30 @@ class GatewayProxy implements \JambageCom\Transactor\Domain\GatewayInterface
 
 
     /**
-    * Returns any extra parameter for the form tag to be used in mode TX_TRANSACTOR_GATEWAYMODE_FORM.
+    * Returns any extra parameter for the form tag to be used in mode GatewayMode::FORM.
     *
     * @return  string      Form tag extra parameters
     * @access  public
     */
     public function transactionFormGetFormParms () {
         $result = '';
-        if ($this->getGatewayObj()->getGatewayMode() == TX_TRANSACTOR_GATEWAYMODE_FORM) {
-            $result = $this->getGatewayObj()->transaction_formGetFormParms();
+        if ($this->getGatewayObj()->getGatewayMode() == GatewayMode::FORM) {
+            $result = $this->getGatewayObj()->transactionFormGetFormParms();
         }
         return $result;
     }
 
 
     /**
-        * Returns any extra HTML attributes for the form tag to be used in mode TX_TRANSACTOR_GATEWAYMODE_FORM.
+        * Returns any extra HTML attributes for the form tag to be used in mode GatewayMode::FORM.
     *
     * @return  string      Form submit button extra parameters
     * @access  public
     */
     public function transactionFormGetAttributes () {
         $result = '';
-        if ($this->getGatewayObj()->getGatewayMode() == TX_TRANSACTOR_GATEWAYMODE_FORM) {
-            $result = $this->getGatewayObj()->transaction_formGetAttributes();
+        if ($this->getGatewayObj()->getGatewayMode() == GatewayMode::FORM) {
+            $result = $this->getGatewayObj()->transactionFormGetAttributes();
         }
         return $result;
     }
@@ -391,7 +415,7 @@ class GatewayProxy implements \JambageCom\Transactor\Domain\GatewayInterface
 
     /**
     * Returns an array of field names and values which must be included as hidden
-    * fields in the form you render use mode TX_TRANSACTOR_GATEWAYMODE_FORM.
+    * fields in the form you render use mode GatewayMode::FORM.
     *
     * @return	array		Field names and values to be rendered as hidden fields
     * @access	public

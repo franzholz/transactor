@@ -23,6 +23,7 @@ class GatewayMode
     const FORM = 400;       // TX_TRANSACTOR_GATEWAYMODE_FORM
     const WEBSERVICE = 401; // TX_TRANSACTOR_GATEWAYMODE_WEBSERVICE
     const AJAX = 402;       // TX_TRANSACTOR_GATEWAYMODE_AJAX
+    const INVALID = -1;     // set to invalid in error case
 }
 
 
