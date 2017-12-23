@@ -9,7 +9,7 @@ $EM_CONF[$_EXTKEY] = array(
     'description' => 'This is a basic API to develop extensions which connect to different payment transaction gateways.',
     'category' => 'misc',
     'shy' => 0,
-    'version' => '0.6.1',
+    'version' => '0.6.2',
     'dependencies' => 'div2007',
     'conflicts' => '',
     'priority' => '',
@@ -30,7 +30,7 @@ $EM_CONF[$_EXTKEY] = array(
         'depends' => array(
             'php' => '5.3.3-7.99.99',
             'typo3' => '4.5.0-8.99.99',
-            'div2007' => '1.7.14-0.0.0',
+            'div2007' => '1.7.16-0.0.0',
         ),
         'conflicts' => array(
         ),

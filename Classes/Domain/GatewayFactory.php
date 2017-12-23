@@ -47,7 +47,7 @@ final class GatewayFactory
     /**
      * @var \JambageCom\Transactor\Domain\GatewayFactory
      */
-    static protected $instance = null;
+    static protected $_instance = null;
 
     /**
      * @var \JambageCom\Transactor\Domain\GatewayProxy
@@ -65,12 +65,26 @@ final class GatewayFactory
      */
     static public function getInstance ()
     {
-        if (is_null(static::$instance)) {
-            self::$instance = new static();
-        }
-        return static::$instance;
+       if (null === self::$_instance)
+       {
+           self::$_instance = new self;
+       }
+       return self::$_instance;
     }
 
+    /**
+    * clone
+    *
+    * Kopieren der Instanz von aussen ebenfalls verbieten
+    */
+    protected function __clone() {}
+
+    /**
+    * constructor
+    *
+    * externe Instanzierung verbieten
+    */
+    protected function __construct() {}
 
     /**
     * Registers the given extension as a payment gateway (concrete product). This method will

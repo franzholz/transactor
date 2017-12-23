@@ -823,6 +823,7 @@ abstract class GatewayBase implements GatewayInterface, \TYPO3\CMS\Core\Singleto
                         )
                 );
         }
+
         return $result;
     }
 

@@ -1,4 +1,9 @@
 
+2017-12-23  Franz Holzinger <franz@ttproducts.de>
+    * new feature: use configurable maximumCharacters for a limit of the characters of the note field
+    * improvement for the GatewayFactory singleton interface
+    * do not use XHTML by default. The new marker ###XHTML_SLASH### can be replaced by the XHMTL end slash.
+
 2017-11-08  Franz Holzinger <franz@ttproducts.de>
     * new feature: pass the transactor parameter request id for notification urls
     * move function getGatewayMode into the class GatewayBase

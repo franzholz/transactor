@@ -224,6 +224,7 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
         $bFinalVerify = false;
         $gatewayExtKey = '';
         $result = '';
+        $xhtmlFix = \JambageCom\Div2007\Utility\HtmlUtility::generateXhtmlFix();
 
         if (
             !is_array($itemArray) ||
@@ -335,7 +336,6 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
                         $addressArray,
                         $paymentBasketArray
                     );
-
                         // Set payment details:
                     $ok =
                         $gatewayProxyObject->transactionSetDetails(
@@ -464,7 +464,7 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
 
                                 if (is_array($hiddenFieldsArray)) {
                                     foreach ($hiddenFieldsArray as $key => $value) {
-                                        $hiddenFields .= '<input type="hidden" name="' . $key . '" value="' . htmlspecialchars($value) . '" />' . chr(10);
+                                        $hiddenFields .= '<input type="hidden" name="' . $key . '" value="' . htmlspecialchars($value) . '"' . $xhtmlFix . '>' . chr(10);
                                     }
                                 }
                                 $formuri = $gatewayProxyObject->transactionFormGetActionURI();
@@ -496,6 +496,7 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
                                 if ($formuri && !$bError) {
                                     $markerArray['###HIDDENFIELDS###'] .= $hiddenFields;
                                     $markerArray['###REDIRECT_URL###'] = htmlspecialchars($formuri);
+                                    $markerArray['###XHTML_SLASH###'] = $xhtmlFix;
                                     $markerArray['###TRANSACTOR_TITLE###'] = $lConf['extTitle'];
                                     $markerArray['###TRANSACTOR_INFO###'] = $lConf['extInfo'];
                                     $returnUrlArray = parse_url($transactionDetailsArray['transaction']['returi']);
@@ -613,7 +614,6 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
                 $paymentBasketArray = array();
                 $addressArray = array();
                 $totalArray = array();
-
                 $transactionDetailsArray =
                     self::getTransactionDetails(
                         $referenceId,
@@ -1113,10 +1113,12 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
 
                     if (isset($gatewayConf['on' . $i . 'n'])) {
                         $fieldName = $gatewayConf['on' . $i . 'n'];
+                        $value = '';
 
                         if ($fieldName == 'note' || $fieldName == 'note2') {
                             $value = strip_tags(nl2br($row[$fieldName]));
                             $value = str_replace ('&nbsp;', ' ', $value);
+                            $value = str_replace ('&amp;', '&', $value);
                         } else if (
                             $fieldName != '' &&
                             isset($row[$fieldName])
@@ -1125,6 +1127,10 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
                         }
 
                         if ($value != '') {
+                            if (strlen($value) > $gatewayConf['maximumCharacters']) {
+                                $value = substr($value, 0, $gatewayConf['maximumCharacters']);
+                                $value .= '...';
+                            }
                             $basketRow['on' . $i] = $gatewayConf['on' . $i . 'l'];
                             $basketRow['os' . $i] = $value;
                         }

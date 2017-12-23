@@ -492,6 +492,7 @@ class tx_transactor_api {
                                 if ($formuri && !$bError) {
                                     $markerArray['###HIDDENFIELDS###'] .= $hiddenFields;
                                     $markerArray['###REDIRECT_URL###'] = htmlspecialchars($formuri);
+                                    $markerArray['###XHTML_SLASH###'] = '';
                                     $markerArray['###TRANSACTOR_TITLE###'] = $lConf['extTitle'];
                                     $markerArray['###TRANSACTOR_INFO###'] = $lConf['extInfo'];
                                     $returnUrlArray = parse_url($transactionDetailsArray['transaction']['returi']);

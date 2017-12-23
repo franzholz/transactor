@@ -54,6 +54,7 @@ abstract class Listener {
     * @return	void
     */
     public function execute ($params) {
+
         if (is_array ($GLOBALS['TYPO3_CONF_VARS']['EXTCONF'][TRANSACTOR_EXT]['listener'])) {
             foreach ($GLOBALS['TYPO3_CONF_VARS']['EXTCONF'][TRANSACTOR_EXT]['listener'] as $classRef) {
                 $hookObj = GeneralUtility::makeInstance($classRef);
