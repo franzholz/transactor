@@ -1,3 +1,5 @@
+2018-01-09  Franz Holzinger <franz@ttproducts.de>
+    * new feature: use the state INIT_ABORT and the message ABORT if an initialization of a transaction went wrong for any reason. E.g. after a page reload a token or a transaction number can have expired. Then the transactor extension treat it in the same way as an IDLE state and shows the connection form again.
 
 2017-12-23  Franz Holzinger <franz@ttproducts.de>
     * new feature: use configurable maximumCharacters for a limit of the characters of the note field
