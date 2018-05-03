@@ -1,3 +1,6 @@
+2018-05-02  Franz Holzinger <franz@ttproducts.de>
+    * remove ext_autoload.php file because the autoloading is done by the composer
+
 2018-02-26  Franz Holzinger <franz@ttproducts.de>
     * new requirement: version 0.7.0 requires PHP 5.5.0 and TYPO3 6.2 as a minimum.
 
