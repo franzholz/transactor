@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<xliff version="1.0">
+	<file source-language="en" target-language="de" datatype="plaintext" original="messages" date="2018-05-09T17:24:27Z" product-name="transactor">
+		<header/>
+		<body>
+			<trans-unit id="tstamp" xml:space="preserve" approved="yes">
+				<source>Time stamp</source>
+				<target></target>
+			</trans-unit>
+			<trans-unit id="crdate" xml:space="preserve" approved="yes">
+				<source>Creation date</source>
+				<target></target>
+			</trans-unit>
+			<trans-unit id="tx_transactor_transactions" xml:space="preserve" approved="yes">
+				<source>Transactions</source>
+				<target></target>
+			</trans-unit>
+			<trans-unit id="tx_transactor_transactions.gatewayid" xml:space="preserve" approved="yes">
+				<source>Gateway internal transaction identifier:</source>
+				<target></target>
+			</trans-unit>
+			<trans-unit id="tx_transactor_transactions.reference" xml:space="preserve" approved="yes">
+				<source>Reference of transaction:</source>
+				<target></target>
+			</trans-unit>
+			<trans-unit id="tx_transactor_transactions.orderuid" xml:space="preserve" approved="yes">
+				<source>Order number:</source>
+				<target></target>
+			</trans-unit>
+			<trans-unit id="tx_transactor_transactions.currency" xml:space="preserve" approved="yes">
+				<source>Currency of amount:</source>
+				<target></target>
+			</trans-unit>
+			<trans-unit id="tx_transactor_transactions.amount" xml:space="preserve" approved="yes">
+				<source>Amount:</source>
+				<target></target>
+			</trans-unit>
+			<trans-unit id="tx_transactor_transactions.state" xml:space="preserve" approved="yes">
+				<source>State:</source>
+				<target></target>
+			</trans-unit>
+			<trans-unit id="tx_transactor_transactions.state_time" xml:space="preserve" approved="yes">
+				<source>State time:</source>
+				<target></target>
+			</trans-unit>
+			<trans-unit id="tx_transactor_transactions.message" xml:space="preserve" approved="yes">
+				<source>Message:</source>
+				<target></target>
+			</trans-unit>
+			<trans-unit id="tx_transactor_transactions.ext_key" xml:space="preserve" approved="yes">
+				<source>Extension key:</source>
+				<target></target>
+			</trans-unit>
+			<trans-unit id="tx_transactor_transactions.paymethod_key" xml:space="preserve" approved="yes">
+				<source>Key of payment method:</source>
+				<target></target>
+			</trans-unit>
+			<trans-unit id="tx_transactor_transactions.paymethod_method" xml:space="preserve" approved="yes">
+				<source>Payment method:</source>
+				<target></target>
+			</trans-unit>
+			<trans-unit id="tx_transactor_transactions.config" xml:space="preserve" approved="yes">
+				<source>Configuration:</source>
+				<target></target>
+			</trans-unit>
+			<trans-unit id="tx_transactor_transactions.user" xml:space="preserve" approved="yes">
+				<source>Gateway specific:</source>
+				<target></target>
+			</trans-unit>
+		</body>
+	</file>
+</xliff>

@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<xliff version="1.0">
+	<file source-language="en" datatype="plaintext" original="messages" date="2018-05-09T17:24:37Z" product-name="transactor">
+		<header/>
+		<body>
+			<trans-unit id="message_redirect" xml:space="preserve">
+				<source>After completing the payment you need to return back to ###HOST### to complete the order.</source>
+			</trans-unit>
+			<trans-unit id="message_place_order" xml:space="preserve">
+				<source>buy now</source>
+			</trans-unit>
+			<trans-unit id="message_credit_card" xml:space="preserve">
+				<source>Credit card</source>
+			</trans-unit>
+			<trans-unit id="message_card_number" xml:space="preserve">
+				<source>Card number</source>
+			</trans-unit>
+			<trans-unit id="message_card_holder" xml:space="preserve">
+				<source>Card holder</source>
+			</trans-unit>
+			<trans-unit id="message_valid_until" xml:space="preserve">
+				<source>Valid until (MM/YYYY)</source>
+			</trans-unit>
+			<trans-unit id="message_account_holder" xml:space="preserve">
+				<source>Account holder</source>
+			</trans-unit>
+			<trans-unit id="message_account_number" xml:space="preserve">
+				<source>Account number</source>
+			</trans-unit>
+			<trans-unit id="message_bank_code" xml:space="preserve">
+				<source>Bank code</source>
+			</trans-unit>
+		</body>
+	</file>
+</xliff>

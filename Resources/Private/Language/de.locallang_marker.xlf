@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<xliff version="1.0">
+	<file source-language="en" target-language="de" datatype="plaintext" original="messages" date="2018-05-09T17:24:37Z" product-name="transactor">
+		<header/>
+		<body>
+			<trans-unit id="message_redirect" xml:space="preserve" approved="yes">
+				<source>After completing the payment you need to return back to ###HOST### to complete the order.</source>
+				<target>Nach abgeschlossener Bezahlung müssen Sie zu ###HOST### zurückkehren, um die Bestellung abzuschließen.</target>
+			</trans-unit>
+			<trans-unit id="message_place_order" xml:space="preserve" approved="yes">
+				<source>buy now</source>
+				<target>bezahlen und kostenpflichtig bestellen</target>
+			</trans-unit>
+			<trans-unit id="message_credit_card" xml:space="preserve" approved="yes">
+				<source>Credit card</source>
+				<target>Kreditkarte</target>
+			</trans-unit>
+			<trans-unit id="message_card_number" xml:space="preserve" approved="yes">
+				<source>Card number</source>
+				<target>Kartennummer</target>
+			</trans-unit>
+			<trans-unit id="message_card_holder" xml:space="preserve" approved="yes">
+				<source>Card holder</source>
+				<target>Karteninhaber</target>
+			</trans-unit>
+			<trans-unit id="message_valid_until" xml:space="preserve" approved="yes">
+				<source>Valid until (MM/YYYY)</source>
+				<target>Gültig bis (MM/JJJJ)</target>
+			</trans-unit>
+			<trans-unit id="message_account_holder" xml:space="preserve" approved="yes">
+				<source>Account holder</source>
+				<target>Kontoinhaber</target>
+			</trans-unit>
+			<trans-unit id="message_account_number" xml:space="preserve" approved="yes">
+				<source>Account number</source>
+				<target>Kontonummer</target>
+			</trans-unit>
+			<trans-unit id="message_bank_code" xml:space="preserve" approved="yes">
+				<source>Bank code</source>
+				<target>Bankleitzahl</target>
+			</trans-unit>
+		</body>
+	</file>
+</xliff>

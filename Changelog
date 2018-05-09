@@ -1,3 +1,6 @@
+2018-05-09  Franz Holzinger <franz@ttproducts.de>
+    * new feature: replace the locallang.xml files by locallang.xlf files
+
 2018-05-02  Franz Holzinger <franz@ttproducts.de>
     * remove ext_autoload.php file because the autoloading is done by the composer
 
