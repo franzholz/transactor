@@ -135,8 +135,8 @@ abstract class tx_transactor_gateway implements tx_transactor_gateway_int, t3lib
     */
     public function getAvailablePaymentMethods () {
 
-        $filename = t3lib_extMgm::extPath($this->getExtKey()) . 'paymentmethods.xml';
-        $filenamepath = t3lib_div::getUrl(t3lib_extMgm::extPath($this->getExtKey()) . 'paymentmethods.xml');
+        $filename = t3lib_extMgm::extPath($this->getExtKey()) . 'paymentmethods.xlf';
+        $filenamepath = t3lib_div::getUrl(t3lib_extMgm::extPath($this->getExtKey()) . 'paymentmethods.xlf');
 
         if ($filenamepath) {
             $result = t3lib_div::xml2array($filenamepath);

@@ -10,7 +10,7 @@ if (
 ) {
     $GLOBALS['TCA']['tx_transactor_transactions'] = array(
         'ctrl' => array(
-            'title' => 'LLL:EXT:transactor/Resources/Private/Language/locallang_db.xml:tx_transactor_transactions',
+            'title' => 'LLL:EXT:transactor/Resources/Private/Language/locallang_db.xlf:tx_transactor_transactions',
             'label' => 'reference',
             'crdate' => 'crdate',
             'default_sortby' => 'ORDER BY crdate',

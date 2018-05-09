@@ -2,7 +2,7 @@
 /***************************************************************
 *  Copyright notice
 *
-*  (c) 2017 Franz Holzinger <franz@ttproducts.de>
+*  (c) 2018 Franz Holzinger <franz@ttproducts.de>
 *  All rights reserved
 *
 *  This script is part of the TYPO3 project. The TYPO3 project is
@@ -36,6 +36,8 @@
 */
 
 
+use TYPO3\CMS\Core\Utility\ExtensionManagementUtility;
+use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 
 class tx_transactor_api {
@@ -51,17 +53,14 @@ class tx_transactor_api {
             $cObj = \JambageCom\Div2007\Utility\FrontendUtility::getContentObjectRenderer();
         }
 
-        $langObj = t3lib_div::getUserObj('tx_transactor_language');
-        $langObj->init1(
+        $languageObj = GeneralUtility::getUserObj(\JambageCom\Transactor\Api\Localization::class);
+        $languageObj->init1(
             $pLangObj,
-            $cObj,
-            $conf,
-            'lib/class.tx_transactor_api.php'
+            $conf['_LOCAL_LANG.'],
+            TRANSACTOR_LANGUAGE_PATH
         );
-        $langObj->scriptRelPath = '';
-        tx_div2007_alpha5::loadLL_fh002(
-            $langObj,
-            TRANSACTOR_LANGUAGE_PATH . 'locallang.xml'
+        $languageObj->loadLocalLang(
+            TRANSACTOR_LANGUAGE_PATH . 'locallang.xlf'
         );
 
         self::$cObj = $cObj;
@@ -69,29 +68,25 @@ class tx_transactor_api {
 
 
     static public function getMarkers (
-        $cObj,
         $conf,
         &$markerArray
     ) {
-        $langObj = t3lib_div::getUserObj('tx_transactor_language');
-        $langObj->init1(
+        $cObj = \JambageCom\Div2007\Utility\FrontendUtility::getContentObjectRenderer();
+        $languageObj = GeneralUtility::getUserObj(\JambageCom\Transactor\Api\Localization::class);
+        $languageObj->init1(
             '',
-            $cObj,
-            $conf['marks.'],
-            'lib/class.tx_transactor_api.php'
+            $conf['marks.']
         );
 
-        tx_div2007_alpha5::loadLL_fh002(
-            $langObj,
-            TRANSACTOR_LANGUAGE_PATH . 'locallang_marker.xml'
+        $languageObj->loadLocalLang(
+            TRANSACTOR_LANGUAGE_PATH . 'locallang_marker.xlf'
         );
 
-        $locallang = $langObj->getLocallang();
-        $LLkey = $langObj->getLLkey();
-        $typoVersion = tx_div2007_core::getTypoVersion();
+        $locallang = $languageObj->getLocalLang();
+        $languageKey = $languageObj->getLocalLangKey();
 
-        if (isset($locallang[$LLkey])) {
-            $langArray = array_merge($locallang['default'], $locallang[$LLkey]);
+        if (isset($locallang[$languageKey])) {
+            $langArray = array_merge($locallang['default'], $locallang[$languageKey]);
         } else {
             $langArray = $locallang['default'];
         }
@@ -110,7 +105,7 @@ class tx_transactor_api {
 
         if(isset($langArray) && is_array($langArray)) {
             foreach ($langArray as $key => $value) {
-                if ($typoVersion >= 4006000 && is_array($value)) {
+                if (is_array($value)) {
                     $value = $value[0]['target'];
                 }
                 $newMarkerArray['###' . strtoupper($key) . '###'] =
@@ -153,7 +148,7 @@ class tx_transactor_api {
         $handleLib,
         $confScript
     ) {
-        t3lib_div::requireOnce(t3lib_extMgm::extPath($handleLib) . 'model/class.tx_' . $handleLib . '_gatewayfactory.php');
+        GeneralUtility::requireOnce(ExtensionManagementUtility::extPath($handleLib) . 'model/class.tx_' . $handleLib . '_gatewayfactory.php');
 
         if (is_array($confScript)) {
             $gatewayExtKey = $confScript['extName'];
@@ -182,7 +177,7 @@ class tx_transactor_api {
             isset($confScript['extName'])
         ) {
             $extKey = $confScript['extName'];
-            if (t3lib_extMgm::isLoaded($extKey)) {
+            if (ExtensionManagementUtility::isLoaded($extKey)) {
                 $bUseTransactor = true;
             }
         }
@@ -244,7 +239,7 @@ class tx_transactor_api {
         &$localTemplateCode,
         &$errorMessage
     ) {
-        $langObj = t3lib_div::getUserObj('tx_transactor_language');
+        $languageObj = GeneralUtility::getUserObj(\JambageCom\Transactor\Api\Localization::class);
         $bFinalize = false;
         $bFinalVerify = false;
         $gatewayExtKey = '';
@@ -267,20 +262,18 @@ class tx_transactor_api {
 
             if (
                 $gatewayExtKey != '' &&
-                t3lib_extMgm::isLoaded($gatewayExtKey)
+                ExtensionManagementUtility::isLoaded($gatewayExtKey)
             ) {
                 // everything is ok
             } else {
                 if ($gatewayExtKey == '') {
                     $errorMessage =
-                        tx_div2007_alpha5::getLL_fh003(
-                            $langObj,
+                        $languageObj->getLabel(
                             'extension_payment_missing'
                         );
                 } else {
                     $message =
-                        tx_div2007_alpha5::getLL_fh003(
-                            $langObj,
+                        $languageObj->getLabel(
                             'extension_missing'
                         );
 
@@ -313,8 +306,7 @@ class tx_transactor_api {
 
                     if (!$ok) {
                         $errorMessage =
-                            tx_div2007_alpha5::getLL_fh003(
-                                $langObj,
+                            $languageObj->getLabel(
                                 'error_transaction_init'
                             );
                         return '';
@@ -342,8 +334,7 @@ class tx_transactor_api {
 
                     if (!$referenceId) {
                         $errorMessage =
-                            tx_div2007_alpha5::getLL_fh003(
-                                $langObj,
+                            $languageObj->getLabel(
                                 'error_reference_id'
                             );
                         return '';
@@ -375,8 +366,7 @@ class tx_transactor_api {
 
                     if (!$ok) {
                         $errorMessage =
-                            tx_div2007_alpha5::getLL_fh003(
-                                $langObj,
+                            $languageObj->getLabel(
                                 'error_transaction_details'
                             );
                         return '';
@@ -427,8 +417,7 @@ class tx_transactor_api {
                                     }
                                 } else if ($errorMessage == '') {
                                     $errorMessage =
-                                        tx_div2007_alpha5::getLL_fh003(
-                                            $langObj,
+                                        $languageObj->getLabel(
                                             'error_gateway_unknown'
                                         );
                                 }
@@ -446,8 +435,7 @@ class tx_transactor_api {
 
                                 if (!$localTemplateCode && $templateFilename != '') {
                                     $errorMessage =
-                                        tx_div2007_alpha5::getLL_fh003(
-                                            $langObj,
+                                        $languageObj->getLabel(
                                             'error_no_template'
                                         );
                                     $errorMessage = sprintf($errorMessage, $templateFilename);
@@ -510,8 +498,7 @@ class tx_transactor_api {
                                     $markerArray['###TRANSACTOR_IMAGE###'] = $imageOut;
                                     $markerArray['###TRANSACTOR_WWW###'] = $lConf['extWww'];
                                     self::getMarkers(
-                                        $langObj->getCObj(),
-                                        $langObj->getConf(),
+                                        $confScript, //  $languageObj->getConf(),
                                         $markerArray
                                     );
                                 } else {
@@ -519,8 +506,7 @@ class tx_transactor_api {
                                         $errorMessage = $formuri;
                                     } else {
                                         $errorMessage =
-                                            tx_div2007_alpha5::getLL_fh003(
-                                                $langObj,
+                                            $languageObj->getLabel(
                                                 'error_relay_url'
                                             );
                                     }
@@ -532,8 +518,7 @@ class tx_transactor_api {
                     }
                 } else {
                     $message =
-                        tx_div2007_alpha5::getLL_fh003(
-                            $langObj,
+                        $languageObj->getLabel(
                             'error_gateway_missing'
                         );
                     $messageArray =  explode('|', $message);
@@ -542,8 +527,7 @@ class tx_transactor_api {
             }
         } else {
             $message =
-                tx_div2007_alpha5::getLL_fh003(
-                    $langObj,
+                $languageObj->getLabel(
                     'error_api_parameters'
                 );
             $messageArray =  explode('|', $message);
@@ -552,8 +536,7 @@ class tx_transactor_api {
 
         if ($errorMessage == TX_TRANSACTOR_TRANSACTION_MESSAGE_NOT_PROCESSED) {
             $errorMessage =
-                tx_div2007_alpha5::getLL_fh003(
-                    $langObj,
+                $languageObj->getLabel(
                     'error_transaction_no'
                 );
         }
@@ -613,11 +596,10 @@ class tx_transactor_api {
                 $ok = $gatewayProxyObject->transaction_validate();
 
                 if (!$ok) {
-                    $langObj = t3lib_div::getUserObj('tx_transactor_language');
+                    $languageObj = GeneralUtility::getUserObj(\JambageCom\Transactor\Api\Localization::class);
 
                     $errorMessage =
-                        tx_div2007_alpha5::getLL_fh003(
-                            $langObj,
+                        $languageObj->getLabel(
                             'error_invalid_data'
                         );
 
@@ -778,7 +760,7 @@ class tx_transactor_api {
         }
 
         $conf = array('returnLast' => 'url');
-        $urlDir = t3lib_div::getIndpEnv('TYPO3_REQUEST_DIR');
+        $urlDir = GeneralUtility::getIndpEnv('TYPO3_REQUEST_DIR');
         $retlink = $urlDir . self::getUrl($conf, $GLOBALS['TSFE']->id, $linkParams);
         $returi = $retlink . $paramReturi;
 
@@ -831,9 +813,9 @@ class tx_transactor_api {
         &$basketArray
     ) {
         $bUseStaticInfo = false;
-        $langObj = t3lib_div::getUserObj('tx_transactor_language');
+        $languageObj = GeneralUtility::getUserObj(\JambageCom\Transactor\Api\Localization::class);
 
-        if (t3lib_extMgm::isLoaded('static_info_tables')) {
+        if (ExtensionManagementUtility::isLoaded('static_info_tables')) {
             $bUseStaticInfo = true;
         }
 
@@ -1100,8 +1082,7 @@ class tx_transactor_api {
         ) {
             $voucherAmount = $value1 - $value2;
             $voucherText =
-                tx_div2007_alpha5::getLL_fh003(
-                    $langObj,
+                $languageObj->getLabel(
                     'voucher_payment_article'
                 );
             $basketArray['VOUCHER'][] =

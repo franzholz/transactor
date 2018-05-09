@@ -21,7 +21,7 @@ if (
         $tableArray = array('tx_transactor_transactions');
 
         foreach ($tableArray as $theTable) {
-            $GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['cms']['db_layout']['LLFile'][$theTable] = TRANSACTOR_LANGUAGE_PATH . 'locallang.xml';
+            $GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['cms']['db_layout']['LLFile'][$theTable] = TRANSACTOR_LANGUAGE_PATH . 'locallang.xlf';
             $GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['cms']['db_layout']['page0'][$theTable] = true;
         }
 
