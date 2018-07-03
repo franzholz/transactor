@@ -35,8 +35,6 @@ namespace JambageCom\Transactor\Api;
  * @subpackage transactor
  */
 
-use TYPO3\CMS\Core\Utility\GeneralUtility;
-
 
 abstract class Listener {
 
@@ -54,10 +52,11 @@ abstract class Listener {
     * @return	void
     */
     public function execute ($params) {
-
         if (is_array ($GLOBALS['TYPO3_CONF_VARS']['EXTCONF'][TRANSACTOR_EXT]['listener'])) {
             foreach ($GLOBALS['TYPO3_CONF_VARS']['EXTCONF'][TRANSACTOR_EXT]['listener'] as $classRef) {
-                $hookObj = GeneralUtility::makeInstance($classRef);
+                $hookObj = 
+                    \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance($classRef);
+
                 if (
                     is_object($hookObj) &&
                     method_exists($hookObj, 'execute')

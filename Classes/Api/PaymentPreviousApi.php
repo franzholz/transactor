@@ -108,7 +108,7 @@ class PaymentPreviousApi {
         $PLAINContent .= chr(13) . implode('|', $fields);
         $HTMLContent = '';
 
-        \tx_div2007_email::sendMail(
+        $result = \JambageCom\Div2007\Utility\MailUtility::send(
             $toEMail,
             $subject,
             $PLAINContent,
@@ -116,6 +116,8 @@ class PaymentPreviousApi {
             $fromEMail,
             $fromName
         );
+
+        return $result;
     }
 }
 

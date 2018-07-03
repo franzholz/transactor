@@ -6,7 +6,7 @@ namespace JambageCom\Transactor\Domain;
 *
 *  Copyright notice
 *
-*  (c) 2017 Franz Holzinger (franz@ttproducts.de)
+*  (c) 2018 Franz Holzinger (franz@ttproducts.de)
 *  All rights reserved
 *
 *  This script is part of the TYPO3 project. The TYPO3 project is
@@ -28,6 +28,7 @@ namespace JambageCom\Transactor\Domain;
 
 
 use JambageCom\Transactor\Constants\Action;
+use JambageCom\Transactor\Constants\Field;
 use JambageCom\Transactor\Constants\GatewayMode;
 use JambageCom\Transactor\Constants\Message;
 use JambageCom\Transactor\Constants\State;
@@ -53,10 +54,16 @@ use TYPO3\CMS\Core\Utility\ExtensionManagementUtility;
 **/
 
 abstract class GatewayBase implements GatewayInterface, \TYPO3\CMS\Core\SingletonInterface {
-    protected $gatewayKey = 'gatewayname';	// must be overridden
-    protected $extensionKey = TRANSACTOR_EXT;		// must be overridden
+    protected $gatewayKey = 'gatewayname';	    // must be overridden
+    protected $extensionKey = TRANSACTOR_EXT;	// must be overridden
     protected $taxIncluded = true;
     protected $conf = array();
+    protected $basket = array();
+    protected $extraData = array();
+    protected $basketSum = 0;
+    protected $currency = 'EUR';
+    protected $orderUid = 0;
+    protected $orderNumber = '0';
     protected $sendBasket = false;	// Submit detailed basket informations like single products
     protected $optionsArray;
     protected $resultsArray = array();
@@ -106,66 +113,53 @@ abstract class GatewayBase implements GatewayInterface, \TYPO3\CMS\Core\Singleto
         );
     }
 
-
     public function getTablename () {
         return $this->tablename;
     }
-
 
     public function getExtensionKey () {
         return $this->extensionKey;
     }
 
-
     public function getGatewayKey () {
         return $this->gatewayKey;
     }
-
 
     public function setGatewayMode ($gatewayMode) {
         $this->gatewayMode = $gatewayMode;
     }
 
-
     public function getGatewayMode () {
         return $this->gatewayMode;
     }
-
 
     public function setTemplateFilename ($templateFilename) {
         $this->templateFilename = $templateFilename;
     }
 
-
     public function getTemplateFilename () {
         return $this->templateFilename;
     }
-
 
     public function getPaymentMethod () {
         return $this->paymentMethod;
     }
 
-
     public function getCallingExtension () {
         return $this->callingExtension;
     }
-
 
     public function getConf () {
         return $this->conf;
     }
 
-
     public function setConf ($conf) {
         $this->conf = $conf;
     }
 
-
     public function getConfig () {
         return $this->config;
     }
-
 
     public function setConfig ($config, $index = '') {
         if ($index != '') {
@@ -175,21 +169,89 @@ abstract class GatewayBase implements GatewayInterface, \TYPO3\CMS\Core\Singleto
         }
     }
 
+    public function setBasket ($basket)
+    {
+        $this->basket = $basket;
+    }
+
+    public function getBasket () 
+    {
+        return $this->basket;
+    }
+
+    public function setExtraData ($key, $value)
+    {
+        $this->extraData[$key] = $value;
+    }
+
+    public function getExtraData ($key) 
+    {
+        return $this->extraData[$key];
+    }
+
+    public function setBasketSum ($basketSum)
+    {
+        $this->basketSum = doubleval($basketSum);
+    }
+
+    public function getBasketSum () 
+    {
+        return $this->basketSum;
+    }
+
+    public function setOrderUid ($orderUid)
+    {
+        $this->orderUid = $orderUid;
+    }
+
+    public function getOrderUid () 
+    {
+        return $this->orderUid;
+    }
+
+    public function setOrderNumber ($orderNumber)
+    {
+        $this->orderNumber = $orderNumber;
+    }
+
+    public function getOrderNumber () 
+    {
+        return $this->orderNumber;
+    }
 
     public function getSendBasket () {
         return $this->sendBasket;
     }
 
-
     public function setSendBasket ($sendBasket) {
         $this->sendBasket = $sendBasket;
     }
 
+    /**
+     * 3 letter currency code as defined by ISO 4217.
+     *
+     * @param string $currency
+     * 
+     * @return void
+     */
+    public function setCurrency ($currency)
+    {
+        $this->currency = $currency;
+    }
+
+    /**
+     * 3 letter currency code as defined by ISO 4217.
+     *
+     * @return string
+     */
+    public function getCurrency ()
+    {
+        return $this->currency;
+    }
 
     public function setSupportedGatewayArray ($value) {
         $this->supportedGatewayArray = $value;
     }
-
 
     /**
     * Returns true if the payment implementation supports the given gateway mode.
@@ -235,7 +297,6 @@ abstract class GatewayBase implements GatewayInterface, \TYPO3\CMS\Core\Singleto
         return $result;
     }
 
-
     /**
     * @param    string       $mode of the gateway: 'form', 'ajax' or 'webservice'
     * @return   integer      type of the transaction, one of the constants GatewayMode::*
@@ -253,14 +314,18 @@ abstract class GatewayBase implements GatewayInterface, \TYPO3\CMS\Core\Singleto
         return $gatewayMode;
     }
 
-
     /**
     * Initializes a transaction.
     *
     * @param	integer		$action: Type of the transaction, one of the constants GatewayMode::*
     * @param	string		$paymentMethod: Payment method, one of the values of getSupportedMethods()
     * @param	string		$callingExtensionKey: Extension key of the calling script.
+    * @param	integer		$orderUid: order unique id
+    * @param	string		$orderNumber: order identifier name which also contains the number
+    * @param	string		$currency: 3 letter currency code as defined by ISO 4217.
     * @param	array		$conf: configuration. This will override former configuration from the exension manager.
+    * @param	array		$basket: items in the basket
+    * @param	array		$extraData: 'return_url', 'cancel_url'
     * @return	boolean     true if the initialization went fine
     * @access	public
     */
@@ -268,17 +333,48 @@ abstract class GatewayBase implements GatewayInterface, \TYPO3\CMS\Core\Singleto
         $action,
         $paymentMethod,
         $callingExtensionKey,
-        $conf = array()
+        $orderUid = 0,
+        $orderNumber = '0',
+        $currency = 'EUR',
+        $conf = array(),
+        $basket = array(),
+        $extraData = array()
     ) {
         $result = true;
         $this->action = $action;
         $this->paymentMethod = $paymentMethod;
         $this->callingExtension = $callingExtensionKey;
+        $this->setCurrency($currency);
+
         $theConf = $this->getConf();
 
         if (is_array($theConf) && is_array($conf)) {
             $theConf = array_merge($theConf, $conf);
             $this->setConf($theConf);
+        }
+        $this->setBasket($basket);
+        if (
+            isset($extraData['return_url']) &&
+            isset($extraData['cancel_url'])
+        ) {
+            $urlDir = GeneralUtility::getIndpEnv('TYPO3_REQUEST_DIR');
+            $this->setExtraData('return_url', $urlDir . $extraData['return_url']);
+            $this->setExtraData('cancel_url', $urlDir . $extraData['cancel_url']);
+        }
+
+        $basketSum = 0;
+        foreach ($basket as $record) {
+            $recordSum = $record[Field::PRICE_TAX] * $record[Field::QUANTITY];
+            $basketSum += $recordSum;
+        }
+        $this->setBasketSum($basketSum);
+
+        if (
+            $orderUid &&
+            $orderNumber
+        ) {
+            $this->setOrderUid($orderUid);
+            $this->setOrderNumber($orderNumber);            
         }
 
         $paymentMethodsArray = $this->getAvailablePaymentMethods();
@@ -288,7 +384,6 @@ abstract class GatewayBase implements GatewayInterface, \TYPO3\CMS\Core\Singleto
             $gatewayModeValue = 'form';
         }
         $gatewayMode = $this->convertGatewayMode($gatewayModeValue);
-
         if ($gatewayMode == GatewayMode::INVALID) {
             $result = false;
         }
@@ -304,13 +399,11 @@ abstract class GatewayBase implements GatewayInterface, \TYPO3\CMS\Core\Singleto
         return $result;
     }
 
-
     public function setCookieArray ($cookieArray) {
         if (is_array($cookieArray)) {
             $this->cookieArray = array_merge($this->cookieArray, $cookieArray);
         }
     }
-
 
     public function getCookies () {
         $result = '';
@@ -324,7 +417,6 @@ abstract class GatewayBase implements GatewayInterface, \TYPO3\CMS\Core\Singleto
         return $result;
     }
 
-
     public function getLanguage () {
         $result = (
             isset($GLOBALS['TSFE']->config['config']) &&
@@ -336,7 +428,6 @@ abstract class GatewayBase implements GatewayInterface, \TYPO3\CMS\Core\Singleto
 
         return $result;
     }
-
 
     /**
     * Sets the payment details. Which fields can be set usually depends on the
@@ -441,7 +532,6 @@ abstract class GatewayBase implements GatewayInterface, \TYPO3\CMS\Core\Singleto
         return $result;
     }
 
-
     /**
     * Updates the transactor record with new values.
     * Use this method to change the gateway specific transaction id in the field gatewayid
@@ -472,16 +562,13 @@ abstract class GatewayBase implements GatewayInterface, \TYPO3\CMS\Core\Singleto
         return $result;
     }
 
-
     public function setDetails ($detailsArray) {
         $this->detailsArray = $detailsArray;
     }
 
-
     public function getDetails () {
         return $this->detailsArray;
     }
-
 
     /**
     * Validates the transaction data which was set by transaction_setDetails().
@@ -499,7 +586,6 @@ abstract class GatewayBase implements GatewayInterface, \TYPO3\CMS\Core\Singleto
         return false;
     }
 
-
     /**
     * Submits the prepared transaction to the payment gateway
     *
@@ -514,7 +600,6 @@ abstract class GatewayBase implements GatewayInterface, \TYPO3\CMS\Core\Singleto
         return false;
     }
 
-
     /**
     * Displays the form on which the user will finally submit the transaction to the payment gateway
     * Only supported with GatewayMode::AJAX
@@ -526,7 +611,6 @@ abstract class GatewayBase implements GatewayInterface, \TYPO3\CMS\Core\Singleto
         return '';
     }
 
-
     /**
     * Fetches the details of the last occurred error in a string format.
     *
@@ -536,7 +620,6 @@ abstract class GatewayBase implements GatewayInterface, \TYPO3\CMS\Core\Singleto
         $result = '(' . $this->getExtensionKey() . ') No details function transactionGetErrorDetails has been written.';
         return $result;
     }
-
 
     /**
     * Returns the form action URI to be used in mode GatewayMode::FORM.
@@ -557,7 +640,6 @@ abstract class GatewayBase implements GatewayInterface, \TYPO3\CMS\Core\Singleto
         return $result;
     }
 
-
     /**
     * Returns any extra parameter for the form url to be used in mode
     * GatewayMode::FORM.
@@ -570,7 +652,6 @@ abstract class GatewayBase implements GatewayInterface, \TYPO3\CMS\Core\Singleto
         return '';
     }
 
-
     /**
     * Returns any extra HTML attributes for the form tag to be used in mode
     * GatewayMode::FORM.
@@ -581,7 +662,6 @@ abstract class GatewayBase implements GatewayInterface, \TYPO3\CMS\Core\Singleto
     public function transactionFormGetAttributes () {
         return '';
     }
-
 
     /**
     * Returns an array of field names and values which must be included as hidden
@@ -594,7 +674,6 @@ abstract class GatewayBase implements GatewayInterface, \TYPO3\CMS\Core\Singleto
         return false;
     }
 
-
     /**
     * Sets the URI which the user should be redirected to after a successful payment/transaction
     * If your gateway/gateway implementation only supports one redirect URI, set okpage and
@@ -606,7 +685,6 @@ abstract class GatewayBase implements GatewayInterface, \TYPO3\CMS\Core\Singleto
     public function transactionSetOkPage ($uri) {
         $this->internalArray['return'] = $uri;
     }
-
 
     /**
     * Return if the transaction is still in the initialization state
@@ -628,7 +706,6 @@ abstract class GatewayBase implements GatewayInterface, \TYPO3\CMS\Core\Singleto
         return $result;
     }
 
-
     /**
     * Sets the URI which the user should be redirected to after a failed payment/transaction
     * If your gateway/gateway implementation only supports one redirect URI, set okpage and
@@ -640,7 +717,6 @@ abstract class GatewayBase implements GatewayInterface, \TYPO3\CMS\Core\Singleto
     public function transactionSetErrorPage ($uri) {
         $this->internalArray['cancel_return'] = $uri;
     }
-
 
     /**
     * Returns the results of a processed transaction. You must override this by your method.
@@ -656,7 +732,6 @@ abstract class GatewayBase implements GatewayInterface, \TYPO3\CMS\Core\Singleto
             );
         return $result;
     }
-
 
     /**
     * Returns the error result
@@ -674,7 +749,6 @@ abstract class GatewayBase implements GatewayInterface, \TYPO3\CMS\Core\Singleto
         return $result;
     }
 
-
     /**
     * Returns the success result
     *
@@ -691,7 +765,6 @@ abstract class GatewayBase implements GatewayInterface, \TYPO3\CMS\Core\Singleto
         return $result;
     }
 
-
     protected function transactionGetResultsMessage ($state, $message) {
         $resultsArray = array();
         $resultsArray['message'] = $message;
@@ -700,16 +773,24 @@ abstract class GatewayBase implements GatewayInterface, \TYPO3\CMS\Core\Singleto
         return $resultsArray;
     }
 
+    /**
+    * Returns the parameters of the recently processed transaction
+    *
+    * @return	array		parameters of the last processed transaction
+    * @access	public
+    */
+    public function transactionGetParameters () {
+        $result = array();
+        return $result;
+    }
 
     public function setResultsArray ($resultsArray) {
         $this->resultsArray = $resultsArray;
     }
 
-
     public function getResultsArray () {
         return $this->resultsArray;
     }
-
 
     public function getEmptyResultsArray ($reference, $currency) {
         $resultsArray = array(
@@ -727,7 +808,6 @@ abstract class GatewayBase implements GatewayInterface, \TYPO3\CMS\Core\Singleto
 
         return $resultsArray;
     }
-
 
     public function transactionSucceeded ($resultsArray) {
 
@@ -747,7 +827,6 @@ abstract class GatewayBase implements GatewayInterface, \TYPO3\CMS\Core\Singleto
         return $result;
     }
 
-
     public function transactionFailed ($resultsArray) {
 
         if ($resultsArray['state'] == State::APPROVE_NOK) {
@@ -759,7 +838,6 @@ abstract class GatewayBase implements GatewayInterface, \TYPO3\CMS\Core\Singleto
         return $result;
     }
 
-
     public function transactionMessage ($resultsArray) {
 
         if (isset($resultsArray['message'])) {
@@ -770,26 +848,21 @@ abstract class GatewayBase implements GatewayInterface, \TYPO3\CMS\Core\Singleto
         return $result;
     }
 
-
     public function clearErrors () {
         $this->errorStack = array();
     }
-
 
     public function addError ($error) {
         $this->errorStack[] = $error;
     }
 
-
     public function hasErrors () {
         $result = (count($this->errorStack) > 0);
     }
 
-
     public function getErrors () {
         return $this->errorStack;
     }
-
 
     public function useBasket () {
 
@@ -802,7 +875,6 @@ abstract class GatewayBase implements GatewayInterface, \TYPO3\CMS\Core\Singleto
         );
         return $result;
     }
-
 
     // *****************************************************************************
     // Helpers
@@ -823,10 +895,8 @@ abstract class GatewayBase implements GatewayInterface, \TYPO3\CMS\Core\Singleto
                         )
                 );
         }
-
         return $result;
     }
-
 
     /**
     * Sets the information that the tax is included in the amount of the transaction
@@ -839,7 +909,6 @@ abstract class GatewayBase implements GatewayInterface, \TYPO3\CMS\Core\Singleto
         $this->taxIncluded = $taxIncluded;
     }
 
-
     /**
     * Fetches the information that the tax is included in the amount of the transaction
     *
@@ -850,7 +919,6 @@ abstract class GatewayBase implements GatewayInterface, \TYPO3\CMS\Core\Singleto
         return $this->taxIncluded;
     }
 
-
     public function generateReferenceUid ($orderuid, $callingExtension) {
         $result = false;
 
@@ -859,7 +927,6 @@ abstract class GatewayBase implements GatewayInterface, \TYPO3\CMS\Core\Singleto
         }
         return $result;
     }
-
 
     /**
     * Sets the reference of the transaction table
@@ -872,7 +939,6 @@ abstract class GatewayBase implements GatewayInterface, \TYPO3\CMS\Core\Singleto
         $this->reference = $reference;
     }
 
-
     /**
     * Fetches the reference of the transaction table
     *
@@ -882,7 +948,6 @@ abstract class GatewayBase implements GatewayInterface, \TYPO3\CMS\Core\Singleto
     public function getReferenceUid () {
         return $this->reference;
     }
-
 
     /**
     * Sets the uid of the transaction table
@@ -895,7 +960,6 @@ abstract class GatewayBase implements GatewayInterface, \TYPO3\CMS\Core\Singleto
         $this->transactionId = $transUid;
     }
 
-
     /**
     * Fetches the uid of the transaction table
     *
@@ -905,7 +969,6 @@ abstract class GatewayBase implements GatewayInterface, \TYPO3\CMS\Core\Singleto
     public function getTransactionUid () {
         return $this->transactionId;
     }
-
 
     /**
     * Sets the form action URI
@@ -918,7 +981,6 @@ abstract class GatewayBase implements GatewayInterface, \TYPO3\CMS\Core\Singleto
         $this->formActionURI = $formActionURI;
     }
 
-
     /**
     * Fetches the form action URI
     *
@@ -929,7 +991,6 @@ abstract class GatewayBase implements GatewayInterface, \TYPO3\CMS\Core\Singleto
         return $this->formActionURI;
     }
 
-
     /**
     * This gives the information if the order can only processed after a verification message has been received.
     *
@@ -937,6 +998,17 @@ abstract class GatewayBase implements GatewayInterface, \TYPO3\CMS\Core\Singleto
     * @access	public
     */
     public function needsVerificationMessage () {
+        return false;
+    }
+
+    /**
+    * This fetches the class of the controller if a given feature is supported by the gateway.
+    *
+    * @param	integer		feature of constant \JambageCom\Transactor\Constants\Feature
+    * @return	boolean		true if a feature is supported
+    * @access	public
+    */
+    public function getFeatureClass ($feature) {
         return false;
     }
 }

@@ -3,6 +3,14 @@
 	<file source-language="en" target-language="de" datatype="plaintext" original="messages" date="2018-05-09T17:24:14Z" product-name="transactor">
 		<header/>
 		<body>
+			<trans-unit id="error_feature_class" xml:space="preserve">
+				<source>ERROR: Could not find the class %s for the feature %s.</source>
+				<target>FEHLER: Die Klasse %s für das Feature %s konnte nicht gefunden werden.</target>
+			</trans-unit>
+			<trans-unit id="error_feature_class_interface" xml:space="preserve">
+				<source>ERROR: The feature class %s does not fit the required interface.</source>
+				<target>FEHLER: Die Feature Klasse %s passt nicht zum geforderten Interface.</target>
+			</trans-unit>
 			<trans-unit id="error_gateway_missing" xml:space="preserve" approved="yes">
 				<source>ERROR: Could not find gateway object for payment method '|'.</source>
 				<target>FEHLER: Es konnte kein Gateway Objeḱt für die Bezahlmethode '|' erzeugt werden.</target>
@@ -43,13 +51,17 @@
 				<source>ERROR: invalid data.</source>
 				<target>FEHLER: ungültige Daten.</target>
 			</trans-unit>
-			<trans-unit id="m_default" xml:space="preserve" approved="yes">
-				<source>default</source>
-				<target>Standard</target>
+			<trans-unit id="extension_payment_missing" xml:space="preserve">
+				<source>ERROR: No extension has been configured for the payment method.</source>
+				<target>FEHLER: Es ist keine Extension als Bezahlmethode konfiguriert worden.</target>
 			</trans-unit>
-			<trans-unit id="m_ext" xml:space="preserve" approved="yes">
-				<source>extended</source>
-				<target>erweitert</target>
+			<trans-unit id="extension_missing" xml:space="preserve">
+				<source>ERROR: The extension '|' has not been installed.</source>
+				<target>FEHLER: Die Extension '|' wurde nicht installiert.</target>
+			</trans-unit>
+			<trans-unit id="feature_address_input" xml:space="preserve">
+				<source>address input</source>
+				<target>Adresseingabe</target>
 			</trans-unit>
 		</body>
 	</file>

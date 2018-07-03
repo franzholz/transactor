@@ -39,15 +39,27 @@ interface GatewayInterface
     */
     public function getGatewayKey ();
 
-
     public function getConf ();
-
-
-    public function getConfig ();
-
 
     public function setConfig ($config);
 
+    public function getConfig ();
+
+    public function setBasket ($basket);
+
+    public function getBasket ();
+
+    public function setBasketSum ($basketSum);
+
+    public function getBasketSum ();
+
+    public function setOrderUid ($orderUid);
+
+    public function getOrderUid ();
+
+    public function setOrderNumber ($orderNumber);
+
+    public function getOrderNumber ();
 
     /**
     * Returns an array of keys of the supported payment methods
@@ -62,12 +74,16 @@ interface GatewayInterface
     *
     * @param	integer		$action: Type of the transaction, one of the constants TX_TRANSACTOR_TRANSACTION_ACTION_*
     * @param	string		$paymentMethod: Payment method, one of the values of getSupportedMethods()
-    * @param	integer		$gatewayMode: Gateway mode for this transaction, one of the constants GatewayMode::*
     * @param	string		$callingExtensionKey: Extension key of the calling script.
+    * @param	integer		$orderUid: order unique id
+    * @param	string		$orderNumber: order identifier name which also contains the number
+    * @param	array		$conf: configuration. This will override former configuration from the exension manager.
+    * @param	array		$basket: items in the basket
+    * @param	array		$extraData: 'return_url', 'cancel_url'
     * @return	void
     * @access	public
     */
-    public function transactionInit ($action, $paymentMethod, $gatewayMode, $callingExtensionKey);
+    public function transactionInit ($action, $paymentMethod, $callingExtensionKey, $orderUid = 0, $orderNumber = '0', $conf = array(), $basket = array(), $extraData = array());
 
     /**
     * Sets the payment details. Which fields can be set usually depends on the
@@ -209,6 +225,14 @@ interface GatewayInterface
     public function transactionGetResultsSuccess ($message);
 
     /**
+    * Returns the parameters of the recently processed transaction
+    *
+    * @return	array		parameters of the last processed transaction
+    * @access	public
+    */
+    public function transactionGetParameters ();
+
+    /**
     * Returns if the transaction has been successfull
     *
     * @param	array		results from transaction_getResults
@@ -287,7 +311,6 @@ interface GatewayInterface
     */
     public function getFormActionURI ();
 
-
     /**
     * This gives the information if the order can only processed after a verification message has been received.
     *
@@ -295,5 +318,14 @@ interface GatewayInterface
     * @access	public
     */
     public function needsVerificationMessage ();
+
+    /**
+    * This fetches the class of the controller if a given feature is supported by the gateway.
+    *
+    * @param	integer		feature of constant \JambageCom\Transactor\Constants\Feature
+    * @return	boolean		true if a feature is supported
+    * @access	public
+    */
+    public function getFeatureClass ($feature);
 }
 

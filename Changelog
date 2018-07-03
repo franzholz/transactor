@@ -1,3 +1,13 @@
+2018-07-03  Franz Holzinger <franz@ttproducts.de>
+    * new feature: support for features. Address entry form is the first feature which is supported. This is supported by the Paypal Plus extension.
+    * new feature: Show an error message if a requested payment extension has not been installed.
+    * new feature: Support markers in the format ###TRANSACTOR_...### which represent the parameters coming from the payment gateways.
+    * new requirement: PHP 5.6 because variable function paramters with token ... shall be used. The API has so many parameters. It should become easier to enhance the API methods.
+    * new API: \JambageCom\Transactor\Api\Start::render
+
+2018-05-25  Franz Holzinger <franz@ttproducts.de>
+    * remove support for TYPO3 < 6.2
+
 2018-05-09  Franz Holzinger <franz@ttproducts.de>
     * new feature: replace the locallang.xml files by locallang.xlf files
 

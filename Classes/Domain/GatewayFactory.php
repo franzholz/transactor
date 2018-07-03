@@ -107,7 +107,6 @@ final class GatewayFactory
         return $result;
     }
 
-
     /**
     * Returns an array of instantiated payment implementations wrapped by a proxy
     * object. We use this proxy as a smart reference: All function calls and access
@@ -120,7 +119,6 @@ final class GatewayFactory
     static public function getGatewayProxyObjects () {
         return self::$gatewayProxyObjects;
     }
-
 
     /**
     * Returns instance of the payment implementations (wrapped by a proxy
@@ -143,6 +141,7 @@ final class GatewayFactory
                 ) {
                     $prefix = substr($extensionKey, strlen(TRANSACTOR_EXT . '_'));
                     $key = $prefix . '_' . $paymentMethod;
+
                     if (
                         isset($paymentMethodsArray[$key]) ||
                         isset($paymentMethodsArray[$paymentMethod])
@@ -170,21 +169,17 @@ final class GatewayFactory
         return $result;
     }
 
-
     static public function clearErrors () {
         self::$errorStack = array();
     }
-
 
     static public function addError ($error) {
         self::$errorStack[] = $error;
     }
 
-
     static public function hasErrors () {
         $result = (count(self::$errorStack) > 0);
     }
-
 
     static public function getErrors () {
         return self::$errorStack;

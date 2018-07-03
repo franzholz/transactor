@@ -3,6 +3,12 @@
 	<file source-language="en" datatype="plaintext" original="messages" date="2018-05-09T17:24:14Z" product-name="transactor">
 		<header/>
 		<body>
+			<trans-unit id="error_feature_class" xml:space="preserve">
+				<source>ERROR: Could not find the class %s for the feature %s.</source>
+			</trans-unit>
+			<trans-unit id="error_feature_class_interface" xml:space="preserve">
+				<source>ERROR: The feature class %s does not fit the required interface.</source>
+			</trans-unit>
 			<trans-unit id="error_gateway_missing" xml:space="preserve">
 				<source>ERROR: Could not find gateway object for payment method '|'.</source>
 			</trans-unit>
@@ -29,15 +35,18 @@
 			</trans-unit>
 			<trans-unit id="error_api_parameters" xml:space="preserve">
 				<source>ERROR: Wrong parameter in the call of the Transactor API.</source>
-			</trans-unit>
+			</trans-unit>    
 			<trans-unit id="error_invalid_data" xml:space="preserve">
 				<source>ERROR: invalid data.</source>
 			</trans-unit>
-			<trans-unit id="m_default" xml:space="preserve">
-				<source>default</source>
+			<trans-unit id="extension_payment_missing" xml:space="preserve">
+				<source>ERROR: No extension has been configured for the payment method.</source>
 			</trans-unit>
-			<trans-unit id="m_ext" xml:space="preserve">
-				<source>extended</source>
+			<trans-unit id="extension_missing" xml:space="preserve">
+				<source>ERROR: The extension '|' has not been installed.</source>
+			</trans-unit>
+			<trans-unit id="feature_address_input" xml:space="preserve">
+				<source>address input</source>
 			</trans-unit>
 		</body>
 	</file>

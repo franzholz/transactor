@@ -5,7 +5,7 @@ namespace JambageCom\Transactor\Api;
 /***************************************************************
 *  Copyright notice
 *
-*  (c) 2017 Franz Holzinger <franz@ttproducts.de>
+*  (c) 2018 Franz Holzinger <franz@ttproducts.de>
 *  All rights reserved
 *
 *  This script is part of the TYPO3 project. The TYPO3 project is
@@ -38,70 +38,62 @@ namespace JambageCom\Transactor\Api;
 *
 */
 
-use JambageCom\Transactor\Api\Localization;
-use JambageCom\Transactor\Constants\GatewayMode;
+use TYPO3\CMS\Core\Utility\GeneralUtility;
+use TYPO3\CMS\Core\Utility\ExtensionManagementUtility;
+
 use JambageCom\Transactor\Constants\Action;
+use JambageCom\Transactor\Constants\Feature;
+use JambageCom\Transactor\Constants\GatewayMode;
 use JambageCom\Transactor\Constants\Message;
 
 
-use TYPO3\CMS\Core\Utility\GeneralUtility;
-use TYPO3\CMS\Core\Utility\ExtensionManagementUtility;
+use JambageCom\Transactor\Api\Localization;
+use JambageCom\Transactor\Api\PaymentApi;
 
 
 class Start implements \TYPO3\CMS\Core\SingletonInterface
 {
-    protected static $cObj;
-
     static public function init (
         $pLangObj,
-        $cObj,
-        $conf
+        $cObj, // DEPRECATED
+        array $conf,
+        $keepLanguageSettings = true
     )
     {
-        if (!is_object($cObj)) {
-            $cObj = \JambageCom\Div2007\Utility\FrontendUtility::getContentObjectRenderer();
-        }
-
         $languageObj = GeneralUtility::makeInstance(Localization::class);
         $languageObj->init1(
             $pLangObj,
-            $cObj,
-            $conf,
-            'Classes/Api/Start.php'
+            $conf['_LOCAL_LANG.'],
+            TRANSACTOR_LANGUAGE_PATH,
+            $keepLanguageSettings
         );
-        \tx_div2007_alpha5::loadLL_fh002(
-            $languageObj,
-            TRANSACTOR_LANGUAGE_PATH . 'locallang.xml'
+        $languageObj->loadLocalLang(
+            TRANSACTOR_LANGUAGE_PATH . 'locallang.xlf'
         );
-
-        self::$cObj = $cObj;
     }
 
-
     static public function getMarkers (
-        $cObj,
-        $conf,
+        array $conf,
         &$markerArray
     )
     {
+        $cObj = \JambageCom\Div2007\Utility\FrontendUtility::getContentObjectRenderer();
         $languageObj = GeneralUtility::makeInstance(Localization::class);
         $languageObj->init1(
             '',
-            $cObj,
-            $conf['marks.'],
-            'Classes/Api/Start.php'
+            $conf['_LOCAL_LANG.'],
+            TRANSACTOR_LANGUAGE_PATH
         );
 
-        \tx_div2007_alpha5::loadLL_fh002(
-            $languageObj,
-            TRANSACTOR_LANGUAGE_PATH . 'locallang_marker.xml'
+        $languageObj->loadLocalLang(
+            TRANSACTOR_LANGUAGE_PATH . 'locallang_marker.xlf'
         );
 
-        $locallang = $languageObj->getLocallang();
-        $LLkey = $languageObj->getLLkey();
+        $locallang = $languageObj->getLocalLang();
+        $localLangKey = $languageObj->getLocalLangkey();
 
-        if (isset($locallang[$LLkey])) {
-            $langArray = array_merge($locallang['default'], $locallang[$LLkey]);
+        if (isset($locallang[$localLangKey])) {
+            $langArray = array_merge($locallang['default'], $locallang[$localLangKey]);
         } else {
             $langArray = $locallang['default'];
         }
@@ -132,11 +124,10 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
         $markerArray = array_merge($markerArray, $newMarkerArray);
     }
 
-
     static public function getItemMarkerSubpartArrays (
         $confScript,
-        &$subpartArray,
-        &$wrappedSubpartArray
+        array &$subpartArray,
+        array &$wrappedSubpartArray
     )
     {
         $bUseTransactor = false;
@@ -160,7 +151,6 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
         }
     }
 
-
     static public function getReferenceUid (
         $handleLib,
         $confScript,
@@ -169,7 +159,7 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
     )
     {
         $referenceUid = false;
-        $gatewayProxyObject = \JambageCom\Transactor\Api\PaymentApi::getGatewayProxyObject($confScript);
+        $gatewayProxyObject = PaymentApi::getGatewayProxyObject($confScript);
         if (
             $orderUid &&
             method_exists($gatewayProxyObject, 'generateReferenceUid')
@@ -183,15 +173,47 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
         return $referenceUid;
     }
 
-
     static public function test (
     )
     {
         debug('', 'Start::test'); // keep this
     }
 
+    static public function checkLoaded (
+        &$errorMessage,
+        Localization $languageObj,
+        $gatewayExtKey
+    ) {
+        $result = false;
+        if (
+            $gatewayExtKey != '' &&
+            ExtensionManagementUtility::isLoaded($gatewayExtKey)
+        ) {
+            $result = true;
+            // everything is ok
+        } else {
+            if ($gatewayExtKey == '') {
+                $errorMessage =
+                    $languageObj->getLabel(
+                        'extension_payment_missing'
+                    );
+            } else {
+                $message =
+                    $languageObj->getLabel(
+                        'extension_missing'
+                    );
+                $messageArray =  explode('|', $message);
+                $errorMessage = $messageArray[0] . $gatewayExtKey . $messageArray[1];
+            }
+        }
+
+        return $result;
+    }
 
     /**
+    * deprecated old API
+    * use the render method instead
+    * 
     * Include handle extension library
     */
     static public function includeHandleLib (
@@ -211,17 +233,76 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
         $orderNumber, // text string of the order number
         $notificationEmail,
         $cardRow,
-        &$bFinalize,
-        &$bFinalVerify,
+        &$finalize,
+        &$finalVerify,
         &$markerArray,
         &$templateFilename,
         &$localTemplateCode,
         &$errorMessage
     )
     {
+        $gatewayStatus = '';
+        $result = static::render(
+            $finalize,
+            $finalVerify,
+            $gatewayStatus,
+            $markerArray,
+            $templateFilename,
+            $localTemplateCode,
+            $errorMessage,
+            $handleLib,
+            $confScript,
+            $extensionKey,
+            $itemArray,
+            $calculatedArray,
+            $deliveryNote,
+            $paymentActivity,
+            $currentPaymentActivity,
+            $infoArray,
+            $pidArray,
+            $linkParams,
+            $trackingCode,
+            $orderUid,
+            $orderNumber,
+            $notificationEmail,
+            $cardRow,
+            ''
+        );
+        return $result;
+    }
+    
+    static public function render (
+        &$finalize,
+        &$finalVerify,
+        &$gatewayStatus,
+        &$markerArray,
+        &$templateFilename,
+        &$localTemplateCode,
+        &$errorMessage,
+        $handleLib,
+        $confScript,
+        $extensionKey,
+        $itemArray,
+        $calculatedArray,
+        $deliveryNote,
+        $paymentActivity,
+        $currentPaymentActivity,
+        $infoArray,
+        $pidArray,
+        $linkParams,
+        $trackingCode,
+        $orderUid,
+        $orderNumber, // text string of the order number
+        $notificationEmail,
+        $cardRow,
+        ...$options // TODO: not yet used
+    )
+    {
+        $gatewayStatus = array();
         $languageObj = GeneralUtility::makeInstance(Localization::class);
-        $bFinalize = false;
-        $bFinalVerify = false;
+        $cObj = \JambageCom\Div2007\Utility\FrontendUtility::getContentObjectRenderer();
+        $finalize = false;
+        $finalVerify = false;
         $gatewayExtKey = '';
         $result = '';
         $xhtmlFix = \JambageCom\Div2007\Utility\HtmlUtility::generateXhtmlFix();
@@ -241,37 +322,18 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
                 $gatewayExtKey = $confScript['extName'];
             }
 
-            if (
-                $gatewayExtKey != '' &&
-                ExtensionManagementUtility::isLoaded($gatewayExtKey)
-            ) {
-                // everything is ok
-            } else {
-                if ($gatewayExtKey == '') {
-                    $errorMessage =
-                        $languageObj->getLL(
-                            'extension_payment_missing'
-                        );
-                } else {
-                    $message =
-                        $languageObj->getLL(
-                            'extension_missing'
-                        );
-
-                    $messageArray =  explode('|', $message);
-                    $errorMessage = $messageArray[0] . $gatewayExtKey . $messageArray[1];
-                }
-            }
-
+            $ok = static::checkLoaded($errorMessage, $languageObj, $gatewayExtKey);
             $paymentMethod = $confScript['paymentMethod'];
 
-            if ($errorMessage == '') {
+            if (
+                $ok &&
+                $errorMessage == ''
+            ) {
                 $gatewayProxyObject =
-                    \JambageCom\Transactor\Api\PaymentApi::getGatewayProxyObject(
+                    PaymentApi::getGatewayProxyObject(
                         $confScript
                     );
                 if (is_object($gatewayProxyObject)) {
-                    $gatewayKey = $gatewayProxyObject->getGatewayKey();
                     $ok = $gatewayProxyObject->transactionInit(
                         Action::AUTHORIZE_TRANSFER,
                         $paymentMethod,
@@ -283,14 +345,14 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
 
                     if (!$ok) {
                         $errorMessage =
-                            $languageObj->getLL(
+                            $languageObj->getLabel(
                                 'error_transaction_init'
                             );
                         return '';
                     }
 
                     $gatewayConf = $gatewayProxyObject->getConf();
-                    self::getPaymentBasket(
+                    static::getPaymentBasket(
                         $itemArray,
                         $calculatedArray,
                         $infoArray,
@@ -302,7 +364,7 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
                     );
 
                     $referenceId =
-                        self::getReferenceUid(
+                        static::getReferenceUid(
                             $handleLib,
                             $confScript,
                             $extensionKey,
@@ -311,13 +373,13 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
 
                     if (!$referenceId) {
                         $errorMessage =
-                            $languageObj->getLL(
+                            $languageObj->getLabel(
                                 'error_reference_id'
                             );
                         return '';
                     }
 
-                    $transactionDetailsArray = self::getTransactionDetails(
+                    $transactionDetailsArray = static::getTransactionDetails(
                         $referenceId,
                         $handleLib,
                         $confScript,
@@ -344,7 +406,7 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
 
                     if (!$ok) {
                         $errorMessage =
-                            $languageObj->getLL(
+                            $languageObj->getLabel(
                                 'error_transaction_details'
                             );
                         return '';
@@ -380,8 +442,8 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
                                 $transactionResults
                             )
                         ) {
-                            $bFinalize = true;
-                            $bFinalVerify = $gatewayProxyObject->needsVerificationMessage();
+                            $finalize = true;
+                            $finalVerify = $gatewayProxyObject->needsVerificationMessage();
                         } else if (
                             $gatewayProxyObject->transactionFailed(
                                 $transactionResults
@@ -417,11 +479,11 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
                                                 )
                                             ); // message auslesen
                                     } else {
-                                        $bFinalize = true;
+                                        $finalize = true;
                                     }
                                 } else if ($errorMessage == '') {
                                     $errorMessage =
-                                        $languageObj->getLL(
+                                        $languageObj->getLabel(
                                             'error_gateway_unknown'
                                         );
                                 }
@@ -443,14 +505,14 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
                                         $templateFilename = $gatewayProxyObject->getTemplateFilename();
                                     }
                                 }
-                                $localTemplateCode = self::$cObj->fileResource($templateFilename);
+                                $localTemplateCode = $cObj->fileResource($templateFilename);
 
                                 if (
                                     !$localTemplateCode &&
                                     $templateFilename != ''
                                 ) {
                                     $errorMessage =
-                                        $languageObj->getLL(
+                                        $languageObj->getLabel(
                                             'error_no_template'
                                         );
                                     $errorMessage = sprintf($errorMessage, $templateFilename);
@@ -507,15 +569,14 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
                                         isset($lConf['extImage.']) &&
                                         is_array($lConf['extImage.'])
                                     ) {
-                                        $imageOut = self::$cObj->getContentObject($lConf['extImage'])->render($lConf['extImage.']);
+                                        $imageOut = $cObj->getContentObject($lConf['extImage'])->render($lConf['extImage.']);
                                     } else {
-                                        $imageOut = self::$cObj->fileResource($lConf['extImage']);
+                                        $imageOut = $cObj->fileResource($lConf['extImage']);
                                     }
                                     $markerArray['###TRANSACTOR_IMAGE###'] = $imageOut;
                                     $markerArray['###TRANSACTOR_WWW###'] = $lConf['extWww'];
-                                    self::getMarkers(
-                                        $languageObj->getCObj(),
-                                        $languageObj->getConf(),
+                                    static::getMarkers(
+                                        $lConf,
                                         $markerArray
                                     );
                                 } else {
@@ -528,7 +589,7 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
                                         }
                                     } else {
                                         $errorMessage =
-                                            $languageObj->getLL(
+                                            $languageObj->getLabel(
                                                 'error_relay_url'
                                             );
                                     }
@@ -536,11 +597,11 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
                             }
                         }
                     } else {
-                        $bFinalize = $transactionResults;
+                        $finalize = $transactionResults;
                     }
                 } else {
                     $message =
-                        $languageObj->getLL(
+                        $languageObj->getLabel(
                             'error_gateway_missing'
                         );
                     $messageArray =  explode('|', $message);
@@ -549,7 +610,7 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
             }
         } else {
             $message =
-                $languageObj->getLL(
+                $languageObj->getLabel(
                     'error_api_parameters'
                 );
             $messageArray =  explode('|', $message);
@@ -558,7 +619,7 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
 
         if ($errorMessage == Message::NOT_PROCESSED) {
             $errorMessage =
-                $languageObj->getLL(
+                $languageObj->getLabel(
                     'error_transaction_no'
                 );
         }
@@ -573,14 +634,39 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
                 is_array($errors)
             ) {
                 foreach ($errors as $error) {
-                    $errorMessage .= '<br>' . $error;
+                    $errorMessage .= '<br' . $xhtmlFix . '>' . $error;
                 }
             }
+        }                                    
+
+        if ($finalize) { // neu
+            // add the markers for a processed transaction
+            $parameters = $gatewayProxyObject->transactionGetParameters();
+            foreach ($parameters as $key => $parameter) {
+                \JambageCom\Div2007\Utility\MarkerUtility::addMarkers(
+                    $markerArray,
+                    'TRANSACTOR',
+                    '_',
+                    $key,
+                    $parameter
+                ); 
+            }
+
+//      $markerArray['###TRANSACTOR_' . strtoupper($key) . '###'] =  strip_tags($parameter);
+
         }
 
-      return $result;
-    } // includeHandleLib
+        $gatewayStatus = array();
+        if (
+            isset($transactionResults) &&
+            is_array($transactionResults)
+        ) {
+            $gatewayStatus = array();
+            $gatewayStatus['result'] = $transactionResults;
+        }
 
+        return $result;
+    } // render
 
     /**
     * Checks if required fields for credit cards and bank accounts are filled in correctly
@@ -605,17 +691,16 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
 
         if (strpos($handleLib, 'transactor') !== false) {
             $gatewayProxyObject =
-                \JambageCom\Transactor\Api\PaymentApi::getGatewayProxyObject(
+                PaymentApi::getGatewayProxyObject(
                     $confScript
                 );
 
             if (is_object($gatewayProxyObject)) {
-                $gatewayKey = $gatewayProxyObject->getGatewayKey();
                 $paymentBasketArray = array();
                 $addressArray = array();
                 $totalArray = array();
                 $transactionDetailsArray =
-                    self::getTransactionDetails(
+                    static::getTransactionDetails(
                         $referenceId,
                         $handleLib,
                         $confScript,
@@ -640,7 +725,7 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
                     $languageObj = GeneralUtility::makeInstance(Localization::class);
 
                     $errorMessage =
-                        $languageObj->getLL(
+                        $languageObj->getLabel(
                             'error_invalid_data'
                         );
 
@@ -660,13 +745,13 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
         return $result;
     } // checkRequired
 
-
     static public function getUrl (
         $conf,
         $pid,
         $linkParamArray
     )
     {
+        $cObj = \JambageCom\Div2007\Utility\FrontendUtility::getContentObjectRenderer();
         if (!$pid) {
             $pid = $GLOBLAS['TSFE']->id;
         }
@@ -680,8 +765,8 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
         }
         $linkParams = implode('&', $linkArray);
         $url =
-            \tx_div2007_alpha5::getTypoLink_URL_fh003(
-                self::$cObj,
+            \JambageCom\Div2007\Utility\FrontendUtility::getTypoLink_URL(
+                $cObj,
                 $pid,
                 $linkParamArray,
                 '',
@@ -699,7 +784,6 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
         return $url;
     }
 
-
     static public function getLanguage ()
     {
         if (
@@ -714,7 +798,6 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
         }
         return $result;
     }
-
 
     /**
     * Gets all the data needed for the transaction or the verification check
@@ -734,9 +817,9 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
         $orderNumber,
         $notificationEmail,
         $cardRow,
-        &$totalArray,
-        &$addressArray,
-        &$paymentBasketArray
+        $totalArray,
+        $addressArray,
+        $paymentBasketArray
     )
     {
         $paramNameActivity = $extensionKey . '[activity][' . $paymentActivity . ']';
@@ -766,20 +849,24 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
         $successPid = 0;
         $failPid = 0;
         $value = 0;
+        $priceTotalField = 'vouchertotal';
+        if (!isset($calculatedArray['priceTax'][$priceTotalField])) {
+            $priceTotalField = 'total';
+        }
 
         if (
             isset($calculatedArray['priceTax']) &&
             is_array($calculatedArray['priceTax']) &&
-            isset($calculatedArray['priceTax']['total'])
+            isset($calculatedArray['priceTax'][$priceTotalField])
         ) {
             if (
-                is_array($calculatedArray['priceTax']['total'])
+                is_array($calculatedArray['priceTax'][$priceTotalField])
             ) {
-                if (isset($calculatedArray['priceTax']['total']['ALL'])) {
-                    $value = $calculatedArray['priceTax']['total']['ALL'];
+                if (isset($calculatedArray['priceTax'][$priceTotalField]['ALL'])) {
+                    $value = $calculatedArray['priceTax'][$priceTotalField]['ALL'];
                 }
             } else {
-                $value = $calculatedArray['priceTax']['total'];
+                $value = $calculatedArray['priceTax'][$priceTotalField];
             }
         }
 
@@ -819,12 +906,11 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
 
         $conf = array('returnLast' => 'url');
         $urlDir = GeneralUtility::getIndpEnv('TYPO3_REQUEST_DIR');
-        $retlink = $urlDir . self::getUrl($conf, $GLOBALS['TSFE']->id, $linkParams);
+        $retlink = $urlDir . static::getUrl($conf, $GLOBALS['TSFE']->id, $linkParams);
         $returi = $retlink . $paramReturi;
-
-        $faillink = $urlDir . self::getUrl($conf, $failPid, $failLinkParams);
-        $successlink = $urlDir . self::getUrl($conf, $successPid, $successLinkParams);
-        $notifyurl = $urlDir . self::getUrl($conf, $GLOBALS['TSFE']->id, $notifyUrlParams);
+        $faillink = $urlDir . static::getUrl($conf, $failPid, $failLinkParams);
+        $successlink = $urlDir . static::getUrl($conf, $successPid, $successLinkParams);
+        $notifyurl = $urlDir . static::getUrl($conf, $GLOBALS['TSFE']->id, $notifyUrlParams);
 
         $extensions = array(
             'calling' => $extensionKey,
@@ -857,7 +943,7 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
             'address' => $addressArray,
             'basket' => $paymentBasketArray,
             'cc' => $cardRow,
-            'language' => self::getLanguage(),
+            'language' => static::getLanguage(),
             'extension' => $extensionInfo,
             'confScript' => $confScript
         );
@@ -865,7 +951,7 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
         if ($paymentActivity == 'verify') {
             $verifyLink =
                 $urlDir .
-                self::getUrl(
+                static::getUrl(
                     $conf,
                     $GLOBALS['TSFE']->id,
                     $successLinkParams
@@ -884,11 +970,10 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
         return $transactionDetailsArray;
     }
 
-
     static protected function getPaymentBasket (
-        $itemArray,
-        $calculatedArray,
-        $infoArray,
+        array $itemArray,
+        array $calculatedArray,
+        array $infoArray,
         $deliveryNote,
         $gatewayConf,
         &$totalArray,
@@ -907,6 +992,8 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
         $totalArray = array();
         $goodsTotalTax = 0;
         $goodsTotalNoTax = 0;
+        $goodsTotalVoucherTax = 0;
+        $goodsTotalVoucherNoTax = 0;
         $goodsTotalDepositTax = 0;
         $goodsTotalDepositNoTax = 0;
 
@@ -921,29 +1008,61 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
                 if (isset($calculatedArray['priceTax']['goodstotal']['ALL'])) {
                     $goodsTotalTax = $calculatedArray['priceTax']['goodstotal']['ALL'];
                     $goodsTotalNoTax = $calculatedArray['priceNoTax']['goodstotal']['ALL'];
-                    $goodsTotalDepositTax = $calculatedArray['deposittax']['goodstotal']['ALL'];
-                    $goodsTotalDepositNoTax = $calculatedArray['depositnotax']['goodstotal']['ALL'];
+                    $goodsTotalVoucherTax = $goodsTotalTax;
+                    $goodsTotalVoucherNoTax = $goodsTotalNoTax;
+
+                    if (
+                        isset($calculatedArray['deposittax']) &&
+                        isset($calculatedArray['deposittax']['goodstotal']) &&
+                        isset($calculatedArray['deposittax']['goodstotal']['ALL'])
+                    ) {
+                        $goodsTotalDepositTax = $calculatedArray['deposittax']['goodstotal']['ALL'];
+                        $goodsTotalDepositNoTax = $calculatedArray['depositnotax']['goodstotal']['ALL'];
+                    }
+                    
+                    if (
+                        isset($calculatedArray['priceTax']['vouchertotal']) &&
+                        isset($calculatedArray['priceTax']['vouchertotal']['ALL'])
+                    ) {
+                        $goodsTotalVoucherTax = $calculatedArray['priceTax']['vouchertotal']['ALL'];
+                        $goodsTotalVoucherNoTax = $calculatedArray['priceNoTax']['vouchertotal']['ALL'];
+                    }
                 }
             } else {
                 $goodsTotalTax = $calculatedArray['priceTax']['goodstotal'];
                 $goodsTotalNoTax = $calculatedArray['priceNoTax']['goodstotal'];
-                $goodsTotalDepositTax = $calculatedArray['deposittax']['goodstotal'];
-                $goodsTotalDepositNoTax = $calculatedArray['depositnotax']['goodstotal'];
+                $goodsTotalVoucherTax = $goodsTotalTax;
+                $goodsTotalVoucherNoTax = $goodsTotalNoTax;
+                if (
+                    isset($calculatedArray['deposittax']) &&
+                    isset($calculatedArray['deposittax']['goodstotal'])
+                ) {
+                    $goodsTotalDepositTax = $calculatedArray['deposittax']['goodstotal'];
+                    $goodsTotalDepositNoTax = $calculatedArray['depositnotax']['goodstotal'];
+                }
+                if (
+                    isset($calculatedArray['priceTax']['vouchertotal'])
+                ) {
+                    $goodsTotalVoucherTax = $calculatedArray['priceTax']['vouchertotal'];
+                    $goodsTotalVoucherNoTax = $calculatedArray['priceNoTax']['vouchertotal'];
+                }
             }
         }
 
-        $totalArray['goodsnotax'] = self::fFloat($goodsTotalNoTax);
-        $totalArray['goodstax'] = self::fFloat($goodsTotalTax);
+        $totalArray['goodsnotax'] = static::fFloat($goodsTotalNoTax);
+        $totalArray['goodstax'] = static::fFloat($goodsTotalTax);
+        $totalArray['goodsvouchernotax'] = static::fFloat($goodsTotalVoucherTax);
+        $totalArray['goodsvouchertax'] = static::fFloat($goodsTotalVoucherNoTax);
 
         // is the new calculatedArray format used?
         if (
             isset($calculatedArray['shipping']) &&
             is_array($calculatedArray['shipping'])
         ) {
-            $totalArray['paymentnotax'] = self::fFloat($calculatedArray['payment']['priceNoTax']);
-            $totalArray['paymenttax'] = self::fFloat($calculatedArray['payment']['priceTax']);
-            $totalArray['shippingnotax'] = self::fFloat($calculatedArray['shipping']['priceNoTax']);
-            $totalArray['shippingtax'] = self::fFloat($calculatedArray['shipping']['priceTax']);
+            $totalArray['paymentnotax'] = static::fFloat($calculatedArray['payment']['priceNoTax']);
+            $totalArray['paymenttax'] = static::fFloat($calculatedArray['payment']['priceTax']);
+            $totalArray['shippingnotax'] = static::fFloat($calculatedArray['shipping']['priceNoTax']);
+            $totalArray['shippingtax'] = static::fFloat($calculatedArray['shipping']['priceTax']);
             if (
                 isset($calculatedArray['handling']) &&
                 is_array($calculatedArray['handling'])
@@ -951,24 +1070,23 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
                 $totalArray['handlingnotax'] = 0;
                 $totalArray['handlingtax'] = 0;
                 foreach ($calculatedArray['handling'] as $key => $priceArray) {
-                    $totalArray['handlingnotax'] += self::fFloat($priceArray['priceNoTax']);
-                    $totalArray['handlingtax'] += self::fFloat($priceArray['priceTax']);
+                    $totalArray['handlingnotax'] += static::fFloat($priceArray['priceNoTax']);
+                    $totalArray['handlingtax'] += static::fFloat($priceArray['priceTax']);
                 }
             }
         } else {
-            $totalArray['paymentnotax'] = self::fFloat($calculatedArray['priceNoTax']['payment']);
-            $totalArray['paymenttax'] = self::fFloat($calculatedArray['priceTax']['payment']);
-            $totalArray['shippingnotax'] = self::fFloat($calculatedArray['priceNoTax']['shipping']);
-            $totalArray['shippingtax'] = self::fFloat($calculatedArray['priceTax']['shipping']);
-            $totalArray['handlingnotax'] = self::fFloat($calculatedArray['priceNoTax']['handling']);
-            $totalArray['handlingtax'] = self::fFloat($calculatedArray['priceTax']['handling']);
+            $totalArray['paymentnotax'] = static::fFloat($calculatedArray['priceNoTax']['payment']);
+            $totalArray['paymenttax'] = static::fFloat($calculatedArray['priceTax']['payment']);
+            $totalArray['shippingnotax'] = static::fFloat($calculatedArray['priceNoTax']['shipping']);
+            $totalArray['shippingtax'] = static::fFloat($calculatedArray['priceTax']['shipping']);
+            $totalArray['handlingnotax'] = static::fFloat($calculatedArray['priceNoTax']['handling']);
+            $totalArray['handlingtax'] = static::fFloat($calculatedArray['priceTax']['handling']);
         }
 
-        $totalArray['amountnotax'] = self::fFloat($calculatedArray['priceNoTax']['vouchertotal']);
-        $totalArray['amounttax'] = self::fFloat($calculatedArray['priceTax']['vouchertotal']);
-
-
+        $totalArray['amountnotax'] = static::fFloat($calculatedArray['priceNoTax']['vouchertotal']);
+        $totalArray['amounttax'] = static::fFloat($calculatedArray['priceTax']['vouchertotal']);
         $maxTax = 0;
+
         if (
             isset($calculatedArray['maxtax']) &&
             is_array($calculatedArray['maxtax']) &&
@@ -986,7 +1104,7 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
         }
 
         $totalArray['taxrate'] = $maxTax;
-        $totalArray['totaltax'] = self::fFloat($totalArray['amounttax'] - $totalArray['amountnotax']);
+        $totalArray['totaltax'] = static::fFloat($totalArray['amounttax'] - $totalArray['amountnotax']);
 
         // Setting up address info values
         $mapAddrFields = array(
@@ -1087,11 +1205,11 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
                     }
                 }
 
-                $payment = self::fFloat($count * $totalArray['paymenttax'] / $totalCount, 2);
+                $payment = static::fFloat($count * $totalArray['paymenttax'] / $totalCount, 2);
                 $newTotalArray['payment'] += $payment;
-                $shipping = self::fFloat($count * $totalArray['shippingtax'] / $totalCount, 2);
+                $shipping = static::fFloat($count * $totalArray['shippingtax'] / $totalCount, 2);
                 $newTotalArray['shipping'] += $shipping;
-                $handling = self::fFloat($actItem['handling'], 2);
+                $handling = static::fFloat($actItem['handling'], 2);
                 $newTotalArray['handling'] += $handling;
 
                 $count = intval($actItem['count']);
@@ -1099,13 +1217,13 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
                 $basketRow = array(
                     'item_name'  => $row['title'],
                     'quantity'   => $count,
-                    'amount'     => self::fFloat($actItem['priceNoTax']),
+                    'amount'     => static::fFloat($actItem['priceNoTax']),
                     'payment'    => $payment,
                     'shipping'   => $shipping,
                     'handling'   => $handling,
                     'taxpercent' => $tax,
-                    'tax' => self::fFloat($actItem['priceTax'] - $actItem['priceNoTax']),
-                    'totaltax' => self::fFloat($actItem['totalTax'] - $actItem['totalNoTax']),
+                    'tax' => static::fFloat($actItem['priceTax'] - $actItem['priceNoTax']),
+                    'totaltax' => static::fFloat($actItem['totalTax'] - $actItem['totalNoTax']),
                     'item_number' => $row['itemnumber'],
                 );
 
@@ -1173,7 +1291,7 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
         ) {
             $voucherAmount = $value1 - $value2;
             $voucherText =
-                $languageObj->getLL(
+                $languageObj->getLabel(
                     'voucher_payment_article'
                 );
             $basketArray['VOUCHER'][] =
@@ -1186,18 +1304,17 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
                     'item_number' => 'VOUCHER'
                 );
 
-            $totalArray['goodsnotax'] = self::fFloat($goodsTotalNoTax + $voucherAmount);
+            $totalArray['goodsnotax'] = static::fFloat($goodsTotalNoTax + $voucherAmount);
 
             if (isset($calculatedArray['depositnotax'])) {
-                $totalArray['goodsnotax'] = self::fFloat($goodsTotalNoTax + $goodsTotalDepositNoTax);
+                $totalArray['goodsnotax'] = static::fFloat($goodsTotalNoTax + $goodsTotalDepositNoTax);
             }
-            $totalArray['goodstax'] = self::fFloat($goodsTotalTax + $voucherAmount);
+            $totalArray['goodstax'] = static::fFloat($goodsTotalTax + $voucherAmount);
             if (isset($calculatedArray['deposittax'])) {
-                $totalArray['goodstax'] = self::fFloat($goodsTotalTax + $goodsTotalDepositTax);
+                $totalArray['goodstax'] = static::fFloat($goodsTotalTax + $goodsTotalDepositTax);
             }
         }
     }
-
 
     static public function fFloat (
         $value = 0,
@@ -1208,7 +1325,6 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
 
         return round($float, $level);
     }
-
 
     static public function getListenerExtKey ()
     {
@@ -1230,5 +1346,114 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
 
         return $result;
     }
+
+    /**
+    * Render data entry forms for the user billing and shipping address
+    */
+    static public function renderDataEntry (
+        &$errorMessage,
+        $confScript,
+        $extensionKey,
+        array $basket,
+        $orderUid,
+        $orderNumber, // text string of the order number       
+        $currency,
+        array $extraData
+    ) {
+                
+        $languageObj = GeneralUtility::makeInstance(Localization::class);
+        $addressFeatureClass = false;
+        $gatewayExtKey = $confScript['extName'];
+        $ok = static::checkLoaded($errorMessage, $languageObj, $gatewayExtKey);
+        $result = false;
+
+        if ($ok) {
+            $gatewayProxyObject =
+                PaymentApi::getGatewayProxyObject(
+                    $confScript
+                );
+
+            if (is_object($gatewayProxyObject)) {
+                $addressFeatureClass = $gatewayProxyObject->getFeatureClass(Feature::ADRESS);
+            } else {
+                $paymentMethod = $confScript['paymentMethod'];
+                $message =
+                    $languageObj->getLabel(
+                        'error_gateway_missing'
+                    );
+                $messageArray =  explode('|', $message);
+                $errorMessage = $messageArray[0] . $paymentMethod . $messageArray[1];
+            }
+
+            if (
+                $addressFeatureClass != ''
+            ) {
+                if (
+                    $errorMessage == ''
+                ) {
+                    $ok = $gatewayProxyObject->transactionInit(
+                        Action::AUTHORIZE_TRANSFER,
+                        $confScript['paymentMethod'],
+                        $extensionKey,
+                        $orderUid,
+                        $orderNumber,
+                        $currency,
+                        $confScript['conf.'],
+                        $basket,
+                        $extraData
+                    );
+                }
+                
+                if ($ok) {
+                    if (class_exists($addressFeatureClass)) {
+                        if (
+                            method_exists($addressFeatureClass, 'init') &&
+                            method_exists($addressFeatureClass, 'render')
+                        ) {
+                            $controller =
+                                GeneralUtility::makeInstance(
+                                    $addressFeatureClass
+                                );
+                            $controller->init(
+                                $gatewayProxyObject->getGatewayObj(),
+                                $confScript
+                            );
+                            $result = $controller->render();
+                        } else {
+                            $errorMessage =
+                                sprintf(
+                                    $languageObj->getLabel(
+                                        'error_feature_class_interface'
+                                    ),
+                                    $addressFeatureClass,
+                                    $labelAdress
+                                );
+                        }
+                    } else {
+                        $labelAdress =
+                            $languageObj->getLabel(
+                                'feature_address_input'
+                            );
+                        $errorMessage =
+                            sprintf(
+                                $languageObj->getLabel(
+                                    'error_feature_class'
+                                ),
+                                $addressFeatureClass,
+                                $labelAdress
+                            );
+                    }
+                } else {
+                    $errorMessage =
+                        $languageObj->getLabel(
+                            'error_transaction_init'
+                        );
+                }
+            }
+        }
+
+        return $result;
+    }
+// neu Ende
 }
 

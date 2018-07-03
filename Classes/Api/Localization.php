@@ -5,7 +5,7 @@ namespace JambageCom\Transactor\Api;
 /***************************************************************
 *  Copyright notice
 *
-*  (c) 2017 Franz Holzinger (franz@ttproducts.de)
+*  (c) 2018 Franz Holzinger (franz@ttproducts.de)
 *  All rights reserved
 *
 *  This script is part of the TYPO3 project. The TYPO3 project is
@@ -40,36 +40,44 @@ namespace JambageCom\Transactor\Api;
  */
 
 
-
-class Localization extends \JambageCom\Div2007\Base\LocalisationBase implements \TYPO3\CMS\Core\SingletonInterface
+class Localization extends \JambageCom\Div2007\Base\TranslationBase implements \TYPO3\CMS\Core\SingletonInterface
 {
-    public function init1 ($pObj, $cObj, $conf, $scriptRelPath) {
-
+    public function init1 (
+        $pObj,
+        $confLocalLang = array(),
+        $scriptRelPath = '',
+        $keepLanguageSettings = true
+    ) {
         $this->init(
-            $cObj,
             TRANSACTOR_EXT,
-            $conf,
+            $confLocalLang,
             $scriptRelPath
         );
-        $this->scriptRelPath = '';
 
-        // keep previsous language settings if available
-        if (
-            isset($pObj->LOCAL_LANG) &&
-            is_array($pObj->LOCAL_LANG)
-        ) {
-            $this->setLocallang($pObj->LOCAL_LANG);
-        }
+        if ($keepLanguageSettings) {
+            // keep previsous language settings if available
+            if (
+                is_object($pObj) &&
+                isset($pObj->LOCAL_LANG) &&
+                is_array($pObj->LOCAL_LANG)
+            ) {
+                $this->setLocallang($pObj->LOCAL_LANG);
+            }
 
-        if (
-            isset($pObj->LOCAL_LANG_charset) &&
-            is_array($pObj->LOCAL_LANG_charset)
-        ) {
-            $this->setLocallangCharset($pObj->LOCAL_LANG_charset);
-        }
+            if (
+                is_object($pObj) &&
+                isset($pObj->LOCAL_LANG_charset) &&
+                is_array($pObj->LOCAL_LANG_charset)
+            ) {
+                $this->setLocallangCharset($pObj->LOCAL_LANG_charset);
+            }
 
-        if (isset($pObj->LOCAL_LANG_loaded)) {
-            $this->setLocallangLoaded($pObj->LOCAL_LANG_loaded);
+            if (
+                is_object($pObj) &&
+                isset($pObj->LOCAL_LANG_loaded)
+            ) {
+                $this->setLocallangLoaded($pObj->LOCAL_LANG_loaded);
+            }
         }
 
         return true;

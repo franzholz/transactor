@@ -50,18 +50,33 @@ class PaymentApi
     * returns the configuration array
     */
     static public function getConf (
-        $extensionKey,
-        $mergeConf,
+        $extensionKey = '',
+        $mergeConf = true,
         array $conf = array()
     ) {
         $result = unserialize($GLOBALS['TYPO3_CONF_VARS']['EXT']['extConf'][TRANSACTOR_EXT]);
-        $extManagerConf = unserialize($GLOBALS['TYPO3_CONF_VARS']['EXT']['extConf'][$extensionKey]);
+        if (
+            $extensionKey != '' &&
+            isset($GLOBALS['TYPO3_CONF_VARS']['EXT']['extConf'][$extensionKey])
+        ) {
+            $extManagerConf = unserialize($GLOBALS['TYPO3_CONF_VARS']['EXT']['extConf'][$extensionKey]);
+        }
 
         if ($mergeConf && is_array($conf)) {
-            if (is_array($extManagerConf)) {
-                $result = array_merge($result, $conf, $extManagerConf);
+            if (
+                isset($extManagerConf) &&
+                is_array($extManagerConf)
+            ) {
+                if (empty($conf)) {
+                    $result = array_merge($result, $extManagerConf);
+                } else {
+                    $result = array_merge($result, $conf, $extManagerConf);
+                }
             }
-        } else if (is_array($extManagerConf)) {
+        } else if (
+            isset($extManagerConf) &&
+            is_array($extManagerConf)
+        ) {
             $result = $extManagerConf;
         }
         return $result;
@@ -245,7 +260,6 @@ class PaymentApi
         $uid,
         $tablename = 'tx_transactor_transactions'
     ) {
-
         $res = $GLOBALS['TYPO3_DB']->exec_SELECTquery(
             '*',
             $tablename,
@@ -337,11 +351,11 @@ class PaymentApi
         array $fields,
         $extKey = ''
     ) {
-        $PLAINContent = 'The TYPO3 Transactor extension transfers to you an error message coming from extension "' . $extKey . '".';
+        $PLAINContent = 'The TYPO3 Transactor extension sends you an error message coming from extension "' . $extKey . '".';
         $PLAINContent .= chr(13) . implode('|', $fields);
         $HTMLContent = '';
 
-        \tx_div2007_email::sendMail(
+        \JambageCom\Div2007\Utility\MailUtility::send(
             $toEMail,
             $subject,
             $PLAINContent,
