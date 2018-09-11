@@ -2,7 +2,7 @@
 /***************************************************************
 *  Copyright notice
 *
-*  (c) 2014 Franz Holzinger (franz@ttproducts.de)
+*  (c) 2018 Franz Holzinger (franz@ttproducts.de)
 *  All rights reserved
 *
 *  This script is part of the TYPO3 project. The TYPO3 project is
@@ -33,6 +33,8 @@
  */
 
 
+use TYPO3\CMS\Core\Utility\GeneralUtility;
+
 
 abstract class tx_transactor_listener {
 
@@ -52,7 +54,7 @@ abstract class tx_transactor_listener {
     public function execute ($params) {
         if (is_array ($GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['transactor']['listener'])) {
             foreach ($GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['transactor']['listener'] as $classRef) {
-                $hookObj = t3lib_div::makeInstance($classRef);
+                $hookObj = GeneralUtility::makeInstance($classRef);
                 if (
                     is_object($hookObj) &&
                     method_exists($hookObj, 'execute')
@@ -69,6 +71,6 @@ abstract class tx_transactor_listener {
 
 
 if (defined('TYPO3_MODE') && $TYPO3_CONF_VARS[TYPO3_MODE]['XCLASS']['ext/transactor/class.tx_transactor_listener.php']) {
-	include_once($TYPO3_CONF_VARS[TYPO3_MODE]['XCLASS']['ext/transactor/class.tx_transactor_listener.php']);
+    include_once($TYPO3_CONF_VARS[TYPO3_MODE]['XCLASS']['ext/transactor/class.tx_transactor_listener.php']);
 }
 

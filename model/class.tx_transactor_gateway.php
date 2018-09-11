@@ -3,7 +3,7 @@
 *
 *  Copyright notice
 *
-*  (c) 2017 Franz Holzinger (franz@ttproducts.de)
+*  (c) 2018 Franz Holzinger (franz@ttproducts.de)
 *  All rights reserved
 *
 *  This script is part of the TYPO3 project. The TYPO3 project is
@@ -23,6 +23,9 @@
 *  This copyright notice MUST APPEAR in all copies of the script!
 ***************************************************************/
 
+use TYPO3\CMS\Core\Utility\GeneralUtility;
+use TYPO3\CMS\Core\Utility\ExtensionManagementUtility;
+
 
 /**
 * Abstract class defining the interface for gateway implementations.
@@ -35,7 +38,7 @@
 * @package 	TYPO3
 * @subpackage	tx_transactor
 **/
-abstract class tx_transactor_gateway implements tx_transactor_gateway_int, t3lib_Singleton {
+abstract class tx_transactor_gateway implements tx_transactor_gateway_int, \TYPO3\CMS\Core\SingletonInterface {
     protected $gatewayKey = 'transactor';	// must be overridden
     protected $extKey = 'transactor';		// must be overridden
     protected $supportedGatewayArray = array();	// must be overridden
@@ -135,11 +138,11 @@ abstract class tx_transactor_gateway implements tx_transactor_gateway_int, t3lib
     */
     public function getAvailablePaymentMethods () {
 
-        $filename = t3lib_extMgm::extPath($this->getExtKey()) . 'paymentmethods.xlf';
-        $filenamepath = t3lib_div::getUrl(t3lib_extMgm::extPath($this->getExtKey()) . 'paymentmethods.xlf');
+        $filename = ExtensionManagementUtility::extPath($this->getExtKey()) . 'paymentmethods.xlf';
+        $filenamepath = GeneralUtility::getUrl(ExtensionManagementUtility::extPath($this->getExtKey()) . 'paymentmethods.xlf');
 
         if ($filenamepath) {
-            $result = t3lib_div::xml2array($filenamepath);
+            $result = GeneralUtility::xml2array($filenamepath);
             $errorIndices = $filenamepath;
         } else {
             $errorIndices = $filename . ' not found';
@@ -268,8 +271,10 @@ abstract class tx_transactor_gateway implements tx_transactor_gateway_int, t3lib
                 }
             }
             $xmlOptions =
-                t3lib_div::array2xml_cs(
+                GeneralUtility::array2xml(
                     $this->getConfig(),
+                    '',
+                    0,
                     'phparray',
                     array(),
                     'utf-8'

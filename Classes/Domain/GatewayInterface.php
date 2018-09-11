@@ -157,13 +157,22 @@ interface GatewayInterface
 
     /**
     * Returns an array of field names and values which must be included as hidden
-    * fields in the form you render use mode GatewayMode::FORM.
+    * fields in the form you render. Use mode GatewayMode::FORM.
     *
     * @return	array		Field names and values to be rendered as hidden fields
     * @access	public
     */
     public function transactionFormGetHiddenFields ();
 
+    /**
+    * Returns an array of field names and values which must be included as script
+    * parameters in the form you render. Use mode GatewayMode::FORM.
+    * <script src="https://mywebsite.com" data-parameter-1="foo:bar"></script>
+    *
+    * @return	array		paramter names and values to be rendered as script parameters
+    * @access	public
+    */
+    public function transactionFormGetScriptParameters ();
 
     /**
     * Sets the URI which the user should be redirected to after a successful payment/transaction

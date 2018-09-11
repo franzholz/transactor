@@ -1,3 +1,8 @@
+2018-09-11  Franz Holzinger <franz@ttproducts.de>
+    * use TYPO3 and div2007 namespace classes everywhere
+    * new method transactionFormGetScriptParameters for javascript based gateways
+    * modification in composer.json
+
 2018-07-03  Franz Holzinger <franz@ttproducts.de>
     * new feature: support for features. Address entry form is the first feature which is supported. This is supported by the Paypal Plus extension.
     * new feature: Show an error message if a requested payment extension has not been installed.

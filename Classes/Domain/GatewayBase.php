@@ -394,6 +394,7 @@ abstract class GatewayBase implements GatewayInterface, \TYPO3\CMS\Core\Singleto
         } else {
             $templateFilename = 'EXT:' . TRANSACTOR_EXT . '/Resources/Private/Templates/PaymentHtmlTemplate.html';
         }
+
         $this->setTemplateFilename($templateFilename);
 
         return $result;
@@ -440,7 +441,7 @@ abstract class GatewayBase implements GatewayInterface, \TYPO3\CMS\Core\Singleto
     */
     public function transactionSetDetails ($detailsArray) {
         $result = true;
-        $this->detailsArray = $detailsArray;
+        $this->setDetails($detailsArray);
         $reference = $detailsArray['reference'];
         $transaction = $detailsArray['transaction'];
         $this->setReferenceUid($reference);
@@ -665,12 +666,24 @@ abstract class GatewayBase implements GatewayInterface, \TYPO3\CMS\Core\Singleto
 
     /**
     * Returns an array of field names and values which must be included as hidden
-    * fields in the form you render use mode GatewayMode::FORM.
+    * fields in the form you render. Use mode GatewayMode::FORM.
     *
     * @return	array		Field names and values to be rendered as hidden fields
     * @access	public
     */
     public function transactionFormGetHiddenFields () {
+        return false;
+    }
+
+    /**
+    * Returns an array of field names and values which must be included as script
+    * parameters in the form you render. Use mode GatewayMode::FORM.
+    * <script src="https://mywebsite.com" data-parameter-1="foo:bar"></script>
+    *
+    * @return	array		paramter names and values to be rendered as script parameters
+    * @access	public
+    */
+    public function transactionFormGetScriptParameters () {
         return false;
     }
 

@@ -311,12 +311,12 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
             !is_array($itemArray) ||
             !is_array($calculatedArray)
         ) {
-            $bValidParams = false;
+            $paramsValid = false;
         } else {
-            $bValidParams = true;
+            $paramsValid = true;
         }
 
-        if ($bValidParams) {
+        if ($paramsValid) {
             $lConf = $confScript;
             if (is_array($confScript)) {
                 $gatewayExtKey = $confScript['extName'];
@@ -398,6 +398,7 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
                         $addressArray,
                         $paymentBasketArray
                     );
+
                         // Set payment details:
                     $ok =
                         $gatewayProxyObject->transactionSetDetails(
@@ -526,9 +527,21 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
 
                                 if (is_array($hiddenFieldsArray)) {
                                     foreach ($hiddenFieldsArray as $key => $value) {
-                                        $hiddenFields .= '<input type="hidden" name="' . $key . '" value="' . htmlspecialchars($value) . '"' . $xhtmlFix . '>' . chr(10);
+                                        $hiddenFields .= '<input type="hidden" name="' . htmlspecialchars($key) . '" value="' . htmlspecialchars($value) . '"' . $xhtmlFix . '>' . chr(10);
                                     }
                                 }
+                                $scriptParametersArray =
+                                    $gatewayProxyObject->transactionFormGetScriptParameters();
+                                $script = '';
+                                if (is_array($scriptParametersArray)) {
+                                    $script = '<script ';
+                                    $scriptLines = array();
+                                    foreach ($scriptParametersArray as $key => $value) {
+                                        $scriptLines[] = htmlspecialchars($key) . '="' . htmlspecialchars($value) . '"';
+                                    }
+                                    $script .= implode(chr(10), $scriptLines) . '></script>';
+                                }
+                                
                                 $formuri = $gatewayProxyObject->transactionFormGetActionURI();
                                 $gatewayProxyObject->setFormActionURI($formuri);
                                 $formParams = $gatewayProxyObject->transactionFormGetFormParms();
@@ -557,6 +570,7 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
 
                                 if ($formuri && !$bError) {
                                     $markerArray['###HIDDENFIELDS###'] .= $hiddenFields;
+                                    $markerArray['###SCRIPT###'] = $script;
                                     $markerArray['###REDIRECT_URL###'] = htmlspecialchars($formuri);
                                     $markerArray['###XHTML_SLASH###'] = $xhtmlFix;
                                     $markerArray['###TRANSACTOR_TITLE###'] = $lConf['extTitle'];
@@ -654,6 +668,7 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
 
 //      $markerArray['###TRANSACTOR_' . strtoupper($key) . '###'] =  strip_tags($parameter);
 
+            
         }
 
         $gatewayStatus = array();
@@ -718,8 +733,12 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
                         $addressArray,
                         $paymentBasketArray
                     );
-                $set = $gatewayProxyObject->transactionSetDetails($transactionDetailsArray);
-                $ok = $gatewayProxyObject->transactionValidate();
+                $set =
+                    $gatewayProxyObject->transactionSetDetails(
+                        $transactionDetailsArray
+                    );
+                $ok =
+                    $gatewayProxyObject->transactionValidate();
 
                 if (!$ok) {
                     $languageObj = GeneralUtility::makeInstance(Localization::class);
@@ -958,7 +977,7 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
                 );
             $transactionDetailsArray['transaction']['verifylink'] = $verifyLink;
         }
-
+        
         if (isset($confScript['conf.']) && is_array($confScript['conf.'])) {
             $transactionDetailsArray['options'] = $confScript['conf.'];
         }

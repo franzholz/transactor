@@ -638,7 +638,7 @@ class tx_transactor_api {
         }
         $linkParams = implode('&', $linkArray);
         $url =
-            tx_div2007_alpha5::getTypoLink_URL_fh003(
+            \JambageCom\Div2007\Utility\FrontendUtility::getTypoLink_URL(
                 self::$cObj,
                 $pid,
                 $linkParamArray,
@@ -946,7 +946,7 @@ class tx_transactor_api {
                 // guess country and language settings for invoice address. One of these vars has to be set: country, countryISO2, $countryISO3 or countryISONr
                 // you can also set 2 or more of these codes. The codes will be joined with 'OR' in the select-statement and only the first
                 // record which is found will be returned. If there is no record at all, the codes will be returned untouched
-                $countryArray = tx_div2007_staticinfotables::fetchCountries(
+                $countryArray = \JambageCom\Div2007\Utility\StaticInfoTablesUtility::fetchCountries(
                     $addressArray[$key]['country'],
                     $addressArray[$key]['countryISO2'],
                     $addressArray[$key]['countryISO3'],

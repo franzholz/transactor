@@ -3,7 +3,7 @@
 *
 *  Copyright notice
 *
-*  (c) 2017 Franz Holzinger (franz@ttproducts.de)
+*  (c) 2018 Franz Holzinger (franz@ttproducts.de)
 *  All rights reserved
 *
 *  This script is part of the Typo3 project. The Typo3 project is
@@ -23,6 +23,9 @@
 *  This copyright notice MUST APPEAR in all copies of the script!
 ***************************************************************/
 
+use TYPO3\CMS\Core\Utility\GeneralUtility;
+use TYPO3\CMS\Core\Utility\ExtensionManagementUtility;
+
 
 /**
 * Proxy class implementing the interface for gateway implementations. This
@@ -34,7 +37,7 @@
 * @author	Robert Lemke <robert@typo3.org>
 * @author	Franz Holzinger <franz@ttproducts.de>
 */
-class tx_transactor_gatewayproxy implements tx_transactor_gateway_int, t3lib_Singleton {
+class tx_transactor_gatewayproxy implements tx_transactor_gateway_int, \TYPO3\CMS\Core\SingletonInterface {
     private $gatewayExt;
     private $gatewayClass;
     protected $extensionManagerConf;
@@ -62,12 +65,12 @@ class tx_transactor_gatewayproxy implements tx_transactor_gateway_int, t3lib_Sin
         }
         $this->gatewayClass = 'tx_' . str_replace('_', '', $extKey) . '_gateway';
         $this->gatewayExt = $extKey;
-        require_once(t3lib_extMgm::extPath($extKey) . 'model/class.' . $this->gatewayClass . '.php');
+//         require_once(ExtensionManagementUtility::extPath($extKey) . 'model/class.' . $this->gatewayClass . '.php');
     }
 
 
     public function getGatewayObj () {
-        $result = t3lib_div::getUserObj($this->gatewayClass);
+        $result = GeneralUtility::getUserObj($this->gatewayClass);
         if (!is_object($result)) {
             throw new RuntimeException('ERROR in the Payment Transactor API (transactor) used by the extension "' . $this->gatewayExt . '": no object exists for the class "' . $this->gatewayClass . '"', 2020290000);
         }
