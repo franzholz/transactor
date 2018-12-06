@@ -10,14 +10,14 @@
     "tt_products"
   ],
   "support": {
-    "issues": "http://jambage.com/kontakt/forum.html"
+    "issues": "https://jambage.com/kontakt/forum.html"
   },
   "homepage": "https://jambage.com",
   "authors": [
     {
       "name": "Franz Holzinger",
       "role": "Developer",
-      "homepage": "http://ttproducts.de"
+      "homepage": "https://ttproducts.de"
     }
   ],
   "license": [

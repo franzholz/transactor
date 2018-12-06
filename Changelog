@@ -1,3 +1,6 @@
+2018-12-06  Franz Holzinger <franz@ttproducts.de>
+    * remove the file ext_tables.php
+
 2018-09-11  Franz Holzinger <franz@ttproducts.de>
     * use TYPO3 and div2007 namespace classes everywhere
     * new method transactionFormGetScriptParameters for javascript based gateways
