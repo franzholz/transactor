@@ -57,8 +57,8 @@ class GatewayProxy implements \JambageCom\Transactor\Domain\GatewayInterface
     * @return	void
     * @access	public
     */
-    public function init ($extensionKey) {
-
+    public function init ($extensionKey)
+    {
         $this->gatewayClass = '';
         $this->extensionManagerConf = unserialize($GLOBALS['TYPO3_CONF_VARS']['EXT']['extConf']['transactor']);
 
@@ -102,15 +102,18 @@ class GatewayProxy implements \JambageCom\Transactor\Domain\GatewayInterface
         $this->gatewayExtension = $extensionKey;
     }
 
-    public function getGatewayExtension () {
+    public function getGatewayExtension ()
+    {
         return $this->gatewayExtension;
     }
 
-    public function getGatewayClass () {
+    public function getGatewayClass ()
+    {
         return $this->gatewayClass;
     }
 
-    public function getGatewayObj () {
+    public function getGatewayObj ()
+    {
         $result = false;
         if (
             $this->getGatewayClass() != ''/* &&
@@ -125,12 +128,14 @@ class GatewayProxy implements \JambageCom\Transactor\Domain\GatewayInterface
         return $result;
     }
 
-    public function getTablename () {
+    public function getTablename ()
+    {
         $result = $this->getGatewayObj()->getTablename();
         return $result;
     }
 
-    public function getExtensionKey () {
+    public function getExtensionKey ()
+    {
         $result = $this->getGatewayObj()->getExtensionKey();
         return $result;
     }
@@ -142,38 +147,46 @@ class GatewayProxy implements \JambageCom\Transactor\Domain\GatewayInterface
     * @return	array		Gateway key
     * @access	public
     */
-    public function getGatewayKey () {
+    public function getGatewayKey ()
+    {
         $result = $this->getGatewayObj()->getGatewayKey();
         return $result;
     }
 
-    public function setGatewayMode ($gatewayMode) {
+    public function setGatewayMode ($gatewayMode)
+    {
         $this->getGatewayObj()->setGatewayMode($gatewayMode);
     }
 
-    public function getGatewayMode () {
+    public function getGatewayMode ()
+    {
         $result = $this->getGatewayObj()->getGatewayMode();
         return $result;
     }
 
-    public function setTemplateFilename ($templateFilename) {
+    public function setTemplateFilename ($templateFilename)
+    {
         $this->getGatewayObj()->setTemplateFilename($templateFilename);
     }
 
-    public function getTemplateFilename () {
+    public function getTemplateFilename ()
+    {
         return $this->getGatewayObj()->getTemplateFilename();
     }
 
-    public function getConf () {
+    public function getConf ()
+    {
         $result = $this->getGatewayObj()->getConf();
         return $result;
     }
 
-    public function setConfig ($config) {
+    public function setConfig ($config)
+    {
         $this->getGatewayObj()->setConfig($config);
     }
 
-    public function getConfig () {
+    public function getConfig ()
+    {
         $result = $this->getGatewayObj()->getConfig();
         return $result;
     }
@@ -255,7 +268,8 @@ class GatewayProxy implements \JambageCom\Transactor\Domain\GatewayInterface
         $config = array(),
         $basket = array(),
         $extraData = array()
-    ) {
+    )
+    {
         $this->getGatewayObj()->setTransactionUid(0);
         $result = $this->getGatewayObj()->transactionInit(
             $action,
@@ -280,7 +294,8 @@ class GatewayProxy implements \JambageCom\Transactor\Domain\GatewayInterface
     * @return	boolean		Returns true if all required details have been set
     * @access	public
     */
-    public function transactionSetDetails ($detailsArr) {
+    public function transactionSetDetails ($detailsArr)
+    {
         $result = $this->getGatewayObj()->transactionSetDetails($detailsArr);
         return $result;
     }
@@ -297,7 +312,8 @@ class GatewayProxy implements \JambageCom\Transactor\Domain\GatewayInterface
     * @return	boolean		Returns true if validation was successful, false if not
     * @access	public
     */
-    public function transactionValidate ($level = 1) {
+    public function transactionValidate ($level = 1)
+    {
         $result = $this->getGatewayObj()->transactionValidate($level);
         return $result;
     }
@@ -309,7 +325,8 @@ class GatewayProxy implements \JambageCom\Transactor\Domain\GatewayInterface
     * @return	boolean		true if the transaction went fine
     * @access	public
     */
-    public function transactionSucceeded ($resultsArr) {
+    public function transactionSucceeded ($resultsArr)
+    {
         $result = $this->getGatewayObj()->transactionSucceeded($resultsArr);
         return $result;
     }
@@ -321,7 +338,8 @@ class GatewayProxy implements \JambageCom\Transactor\Domain\GatewayInterface
     * @return	boolean		true if the transaction went wrong
     * @access	public
     */
-    public function transactionFailed ($resultsArr) {
+    public function transactionFailed ($resultsArr)
+    {
         $result = $this->getGatewayObj()->transactionFailed($resultsArr);
         return $result;
     }
@@ -333,7 +351,8 @@ class GatewayProxy implements \JambageCom\Transactor\Domain\GatewayInterface
     * @return	boolean		true if the transaction went wrong
     * @access	public
     */
-    public function transactionMessage ($resultsArr) {
+    public function transactionMessage ($resultsArr)
+    {
         $result = $this->getGatewayObj()->transactionMessage($resultsArr);
         return $result;
     }
@@ -348,7 +367,8 @@ class GatewayProxy implements \JambageCom\Transactor\Domain\GatewayInterface
     * @return	boolean		true if transaction was successul, false if not. The result can be accessed via transaction_getResults()
     * @access	public
     */
-    public function transactionProcess (&$errorMessage) {
+    public function transactionProcess (&$errorMessage)
+    {
         $gatewayObj = $this->getGatewayObj();
         $processResult = $gatewayObj->transactionProcess($errorMessage);
         $reference = $this->getReferenceUid();
@@ -388,7 +408,9 @@ class GatewayProxy implements \JambageCom\Transactor\Domain\GatewayInterface
     *
     * @return	string		HTML form and javascript
     * @access	public
-    */	public function transactionGetForm () {
+    */
+    public function transactionGetForm ()
+    {
         $result = $this->getGatewayObj()->transactionGetForm();
         return $result;
     }
@@ -398,7 +420,9 @@ class GatewayProxy implements \JambageCom\Transactor\Domain\GatewayInterface
     *
     * @return   string      details of the last error
     * @access   public
-    */  public function transactionGetErrorDetails () {
+    */
+    public function transactionGetErrorDetails ()
+    {
         $result = $this->getGatewayObj()->transactionGetErrorDetails();
         return $result;
     }
@@ -409,7 +433,8 @@ class GatewayProxy implements \JambageCom\Transactor\Domain\GatewayInterface
     * @return	string		Form action URI
     * @access	public
     */
-    public function transactionFormGetActionURI () {
+    public function transactionFormGetActionURI ()
+    {
         $result = $this->getGatewayObj()->transactionFormGetActionURI();
         return $result;
     }
@@ -420,7 +445,8 @@ class GatewayProxy implements \JambageCom\Transactor\Domain\GatewayInterface
     * @return  string      Form tag extra parameters
     * @access  public
     */
-    public function transactionFormGetFormParms () {
+    public function transactionFormGetFormParms ()
+    {
         $result = '';
         if ($this->getGatewayObj()->getGatewayMode() == GatewayMode::FORM) {
             $result = $this->getGatewayObj()->transactionFormGetFormParms();
@@ -434,7 +460,8 @@ class GatewayProxy implements \JambageCom\Transactor\Domain\GatewayInterface
     * @return  string      Form submit button extra parameters
     * @access  public
     */
-    public function transactionFormGetAttributes () {
+    public function transactionFormGetAttributes ()
+    {
         $result = '';
         if ($this->getGatewayObj()->getGatewayMode() == GatewayMode::FORM) {
             $result = $this->getGatewayObj()->transactionFormGetAttributes();
@@ -449,7 +476,8 @@ class GatewayProxy implements \JambageCom\Transactor\Domain\GatewayInterface
     * @return	array		Field names and values to be rendered as hidden fields
     * @access	public
     */
-    public function transactionFormGetHiddenFields () {
+    public function transactionFormGetHiddenFields ()
+    {
         $result = $this->getGatewayObj()->transactionFormGetHiddenFields();
         return $result;
     }
@@ -462,7 +490,8 @@ class GatewayProxy implements \JambageCom\Transactor\Domain\GatewayInterface
     * @return	array		paramter names and values to be rendered as script parameters
     * @access	public
     */
-    public function transactionFormGetScriptParameters () {
+    public function transactionFormGetScriptParameters ()
+    {
         $result = $this->getGatewayObj()->transactionFormGetScriptParameters();
         return $result;
     }
@@ -473,7 +502,8 @@ class GatewayProxy implements \JambageCom\Transactor\Domain\GatewayInterface
     * @return void
     * @access public
     */
-    public function transactionSetOkPage ($uri) {
+    public function transactionSetOkPage ($uri)
+    {
         $this->getGatewayObj()->transactionSetOkPage($uri);
     }
 
@@ -483,7 +513,8 @@ class GatewayProxy implements \JambageCom\Transactor\Domain\GatewayInterface
     * @return void
     * @access public
     */
-    public function transactionSetErrorPage ($uri) {
+    public function transactionSetErrorPage ($uri)
+    {
         $this->getGatewayObj()->transactionSetErrorPage($uri);
     }
 
@@ -495,7 +526,8 @@ class GatewayProxy implements \JambageCom\Transactor\Domain\GatewayInterface
     * @return boolean
     * @access public
     */
-    public function transactionIsInitState ($row) {
+    public function transactionIsInitState ($row)
+    {
         $result = $this->getGatewayObj()->transactionIsInitState($row);
         return $result;
     }
@@ -508,7 +540,8 @@ class GatewayProxy implements \JambageCom\Transactor\Domain\GatewayInterface
     * @return	array		Results of a processed transaction
     * @access	public
     */
-    public function transactionGetResults ($reference, $create = true) {
+    public function transactionGetResults ($reference, $create = true)
+    {
         $dbResult = false;
         $resultsArr = $this->getGatewayObj()->transactionGetResults($reference);
 
@@ -548,12 +581,14 @@ class GatewayProxy implements \JambageCom\Transactor\Domain\GatewayInterface
         return $resultsArr;
     }
 
-    public function transactionGetResultsError ($message) {
+    public function transactionGetResultsError ($message)
+    {
         $result = $this->getGatewayObj()->transactionGetResultsError($message);
         return $result;
     }
 
-    public function transactionGetResultsSuccess ($message) {
+    public function transactionGetResultsSuccess ($message)
+    {
         $result = $this->getGatewayObj()->transactionGetResultsSuccess($message);
         return $result;
     }
@@ -564,7 +599,8 @@ class GatewayProxy implements \JambageCom\Transactor\Domain\GatewayInterface
     * @return	array		parameters of the last processed transaction
     * @access	public
     */
-    public function transactionGetParameters () {
+    public function transactionGetParameters ()
+    {
         $result = $this->getGatewayObj()->transactionGetParameters();
         return $result;
     }
@@ -580,7 +616,8 @@ class GatewayProxy implements \JambageCom\Transactor\Domain\GatewayInterface
     * @return	mixed		Result
     * @access	public
     */
-    public function __call ($method, $params) {
+    public function __call ($method, $params)
+    {
         $result = false;
         if (method_exists($this, $method)) {
             $result = call_user_func_array(array($this->getGatewayObj(), $method), $params);
@@ -598,7 +635,8 @@ class GatewayProxy implements \JambageCom\Transactor\Domain\GatewayInterface
     * @return	mixed		The value.
     * @access	public
     */
-    public function __get ($property) {
+    public function __get ($property)
+    {
         $result = $this->getGatewayObj()->$property;
         return $result;
     }
@@ -611,47 +649,57 @@ class GatewayProxy implements \JambageCom\Transactor\Domain\GatewayInterface
     * @return	void
     * @access	public
     */
-    public function __set ($property, $value) {
+    public function __set ($property, $value)
+    {
         $this->getGatewayObj()->$property = $value;
     }
 
-    public function clearErrors () {
+    public function clearErrors ()
+    {
         $this->getGatewayObj()->clearErrors();
     }
 
-    public function addError ($error) {
+    public function addError ($error)
+    {
         $this->getGatewayObj()->addError($error);
     }
 
-    public function hasErrors () {
+    public function hasErrors ()
+    {
         $result = $this->getGatewayObj()->hasErrors();
         return $result;
     }
 
-    public function getErrors () {
+    public function getErrors ()
+    {
         $result = $this->getGatewayObj()->getErrors();
         return $result;
     }
 
-    public function useBasket () {
+    public function useBasket ()
+    {
         $result = $this->getGatewayObj()->useBasket();
         return $result;
     }
 
-    public function getTransaction ($reference) {
+    public function getTransaction ($reference)
+    {
         $result = $this->getGatewayObj()->getTransaction($reference);
         return $result;
     }
 
-    public function setTaxIncluded ($bTaxIncluded) {
+    public function setTaxIncluded ($bTaxIncluded)
+    {
         $this->getGatewayObj()->setTaxIncluded($bTaxIncluded);
     }
 
-    public function getTaxIncluded() {
+    public function getTaxIncluded()
+    {
         return $this->getGatewayObj()->getTaxIncluded();
     }
 
-    public function generateReferenceUid ($orderuid, $callingExtensionKey) {
+    public function generateReferenceUid ($orderuid, $callingExtensionKey)
+    {
         $result = $this->getGatewayObj()->generateReferenceUid($orderuid, $callingExtensionKey);
         return $result;
     }
@@ -663,7 +711,8 @@ class GatewayProxy implements \JambageCom\Transactor\Domain\GatewayInterface
     * @return	void
     * @access	public
     */
-    public function setReferenceUid ($reference) {
+    public function setReferenceUid ($reference)
+    {
         $this->getGatewayObj()->setReferenceUid($reference);
     }
 
@@ -673,7 +722,8 @@ class GatewayProxy implements \JambageCom\Transactor\Domain\GatewayInterface
     * @return	void		unique reference
     * @access	public
     */
-    public function getReferenceUid () {
+    public function getReferenceUid ()
+    {
         $result = $this->getGatewayObj()->getReferenceUid();
         return $result;
     }
@@ -685,7 +735,8 @@ class GatewayProxy implements \JambageCom\Transactor\Domain\GatewayInterface
     * @return	void
     * @access	public
     */
-    public function setTransactionUid ($transUid) {
+    public function setTransactionUid ($transUid)
+    {
         $this->getGatewayObj()->setTransactionUid($transUid);
     }
 
@@ -695,7 +746,8 @@ class GatewayProxy implements \JambageCom\Transactor\Domain\GatewayInterface
     * @return	void		unique transaction id
     * @access	public
     */
-    public function getTransactionUid () {
+    public function getTransactionUid ()
+    {
         $this->getGatewayObj()->getTransactionUid();
     }
 
@@ -706,7 +758,8 @@ class GatewayProxy implements \JambageCom\Transactor\Domain\GatewayInterface
     * @return	void
     * @access	public
     */
-    public function setFormActionURI ($formActionURI) {
+    public function setFormActionURI ($formActionURI) 
+    {
         $this->getGatewayObj()->setFormActionURI($formActionURI);
     }
 
@@ -716,7 +769,8 @@ class GatewayProxy implements \JambageCom\Transactor\Domain\GatewayInterface
     * @return	string		form action URI
     * @access	public
     */
-    public function getFormActionURI () {
+    public function getFormActionURI ()
+    {
         $result = $this->getGatewayObj()->getFormActionURI();
         return $result;
     }
@@ -727,7 +781,8 @@ class GatewayProxy implements \JambageCom\Transactor\Domain\GatewayInterface
     * @return	boolean		true if a verification message needs to be sent
     * @access	public
     */
-    public function needsVerificationMessage () {
+    public function needsVerificationMessage ()
+    {
         $result = $this->getGatewayObj()->needsVerificationMessage();
         return $result;
     }
@@ -740,7 +795,8 @@ class GatewayProxy implements \JambageCom\Transactor\Domain\GatewayInterface
     * @return	boolean		true if a feature is supported
     * @access	public
     */
-    public function getFeatureClass ($feature) {
+    public function getFeatureClass ($feature)
+    {
         $result = $this->getGatewayObj()->getFeatureClass($feature);
         return $result;
     }
@@ -760,7 +816,8 @@ class GatewayProxy implements \JambageCom\Transactor\Domain\GatewayInterface
         $amount,
         $iso3Seller,
         $iso3Buyer
-    ) {
+    )
+    {
         $result = false;
         $gatewayObject = $this->getGatewayObj();
             // this method is not mandatory

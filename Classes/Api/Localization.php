@@ -47,7 +47,8 @@ class Localization extends \JambageCom\Div2007\Base\TranslationBase implements \
         $confLocalLang = array(),
         $scriptRelPath = '',
         $keepLanguageSettings = true
-    ) {
+    )
+    {
         $this->init(
             TRANSACTOR_EXT,
             $confLocalLang,

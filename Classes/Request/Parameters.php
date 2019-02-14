@@ -48,35 +48,43 @@ class Parameters implements \TYPO3\CMS\Core\SingletonInterface
     static private $successlinkVar = 'successlink';
 
 
-    static public function getCallingExtensionVar () {
+    static public function getCallingExtensionVar ()
+    {
         return self::$callingExtensionVar;
     }
 
-    static public function getOrderVar () {
+    static public function getOrderVar ()
+    {
         return self::$orderVar;
     }
 
-    static public function getReturiVar () {
+    static public function getReturiVar ()
+    {
         return self::$returiVar;
     }
 
-    static public function getFaillinkVar () {
+    static public function getFaillinkVar ()
+    {
         return self::$faillinkVar;
     }
 
-    static public function getSuccesslinkVar () {
+    static public function getSuccesslinkVar ()
+    {
         return self::$successlinkVar;
     }
 
-    static public function setPrefixId ($prefixId) {
+    static public function setPrefixId ($prefixId)
+    {
         self::$prefixId = $prefixId;
     }
 
-    static public function getPrefixId () {
+    static public function getPrefixId ()
+    {
         return self::$prefixId;
     }
 
-    static public function getPiVars () {
+    static public function getPiVars ()
+    {
         if (
             self::$prefixId &&
             !isset(self::$piVars[self::$prefixId])

@@ -53,7 +53,8 @@ class PaymentApi
         $extensionKey = '',
         $mergeConf = true,
         array $conf = array()
-    ) {
+    )
+    {
         $result = unserialize($GLOBALS['TYPO3_CONF_VARS']['EXT']['extConf'][TRANSACTOR_EXT]);
         if (
             $extensionKey != '' &&
@@ -87,7 +88,8 @@ class PaymentApi
     */
     static public function getGatewayProxyObject (
         $confScript
-    ) {
+    )
+    {
         $result = false;
 
         if (
@@ -145,7 +147,8 @@ class PaymentApi
         $reference = null,
         $state = null,
         $tablename = 'tx_transactor_transactions'
-    ) {
+    )
+    {
         $transactionsArray = false;
 
         $where = '1=1';
@@ -233,7 +236,8 @@ class PaymentApi
         $time,
         $user = '',
         $tablename = 'tx_transactor_transactions'
-    ) {
+    )
+    {
         $fields = array();
         $fields['message'] = $message;
         $fields['state'] = $state;
@@ -259,7 +263,8 @@ class PaymentApi
     static public function getTransactionByUid (
         $uid,
         $tablename = 'tx_transactor_transactions'
-    ) {
+    )
+    {
         $res = $GLOBALS['TYPO3_DB']->exec_SELECTquery(
             '*',
             $tablename,
@@ -286,7 +291,8 @@ class PaymentApi
     static public function getTransactionByGatewayId (
         $id,
         $tablename = 'tx_transactor_transactions'
-    ) {
+    )
+    {
         $row = $GLOBALS['TYPO3_DB']->exec_SELECTgetSingleRow(
             '*',
             $tablename,
@@ -310,7 +316,8 @@ class PaymentApi
     * @return   array
     * @access       private
     */
-    static private function field2array ($field) {
+    static private function field2array ($field)
+    {
         if (!$field = @unserialize ($field)) {
             $field = array($field);
         }
@@ -332,7 +339,8 @@ class PaymentApi
         $amount,
         $iso3Seller,
         $iso3Buyer
-    ) {
+    )
+    {
         $gatewayProxyObject = self::getGatewayProxyObject($confScript);
         $costs = $gatewayProxyObject->getCosts(
             $confScript,
@@ -350,7 +358,8 @@ class PaymentApi
         $subject,
         array $fields,
         $extKey = ''
-    ) {
+    )
+    {
         $PLAINContent = 'The TYPO3 Transactor extension sends you an error message coming from extension "' . $extKey . '".';
         $PLAINContent .= chr(13) . implode('|', $fields);
         $HTMLContent = '';
@@ -365,13 +374,15 @@ class PaymentApi
         );
     }
 
-    static public function getRequestId ($reference) {
+    static public function getRequestId ($reference)
+    {
         $position = strpos($reference, '#');
         $requestId = substr($reference, $position + 1);
         return $requestId;
     }
 
-    static public function generateReferenceUid ($gatewayKey, $requestId) {
+    static public function generateReferenceUid ($gatewayKey, $requestId)
+    {
         $result = $gatewayKey . '#' . $requestId;
         return $result;
     }

@@ -45,7 +45,8 @@ class PaymentPreviousApi {
     */
     static public function getGatewayProxyObject (
         $confScript
-    ) {
+    ) 
+    {
         $result = FALSE;
 
         if (
@@ -84,7 +85,8 @@ class PaymentPreviousApi {
         $amount,
         $iso3Seller,
         $iso3Buyer
-    ) {
+    )
+    {
         $gatewayProxyObject = self::getGatewayProxyObject($confScript);
         $costs = $gatewayProxyObject->getCosts(
             $confScript,
@@ -103,7 +105,8 @@ class PaymentPreviousApi {
         $subject,
         array $fields,
         $extKey = ''
-    ) {
+    )
+    {
         $PLAINContent = 'The TYPO3 Transactor extension transfers to you an error message coming from extension "' . $extKey . '".';
         $PLAINContent .= chr(13) . implode('|', $fields);
         $HTMLContent = '';

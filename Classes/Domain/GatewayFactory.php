@@ -94,7 +94,8 @@ final class GatewayFactory
     * @return		mixed		Proxied instance of the given extension or false if an error occurred.
     * @access		public
     */
-    static public function registerGatewayExtension ($extensionKey) {
+    static public function registerGatewayExtension ($extensionKey)
+    {
 
         if (ExtensionManagementUtility::isLoaded($extensionKey)) {
             $gatewayProxy = GeneralUtility::makeInstance(\JambageCom\Transactor\Domain\GatewayProxy::class);
@@ -116,7 +117,8 @@ final class GatewayFactory
     * @return		array		Array of payment implementations (objects)
     * @access		public
     */
-    static public function getGatewayProxyObjects () {
+    static public function getGatewayProxyObjects ()
+    {
         return self::$gatewayProxyObjects;
     }
 
@@ -128,7 +130,8 @@ final class GatewayFactory
     * @return		mixed		Reference to payment proxy object or false if no matching object was found
     * @access		public
     */
-    static public function getGatewayProxyObject ($paymentMethod) {
+    static public function getGatewayProxyObject ($paymentMethod)
+    {
         $result = false;
 
         if (is_array(self::$gatewayProxyObjects)) {
@@ -169,19 +172,23 @@ final class GatewayFactory
         return $result;
     }
 
-    static public function clearErrors () {
+    static public function clearErrors ()
+    {
         self::$errorStack = array();
     }
 
-    static public function addError ($error) {
+    static public function addError ($error)
+    {
         self::$errorStack[] = $error;
     }
 
-    static public function hasErrors () {
+    static public function hasErrors ()
+    {
         $result = (count(self::$errorStack) > 0);
     }
 
-    static public function getErrors () {
+    static public function getErrors ()
+    {
         return self::$errorStack;
     }
 }
