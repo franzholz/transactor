@@ -58,6 +58,8 @@ abstract class GatewayBase implements GatewayInterface, \TYPO3\CMS\Core\Singleto
     protected $extensionKey = TRANSACTOR_EXT;	// must be overridden
     protected $taxIncluded = true;
     protected $conf = array();
+    protected $config = array();
+    protected $mergeConf = true;
     protected $basket = array();
     protected $extraData = array();
     protected $basketSum = 0;
@@ -67,8 +69,6 @@ abstract class GatewayBase implements GatewayInterface, \TYPO3\CMS\Core\Singleto
     protected $sendBasket = false;	// Submit detailed basket informations like single products
     protected $optionsArray;
     protected $resultsArray = array();
-    protected $config = array();
-    protected $mergeConf = true;
     protected $formActionURI = '';	// The action uri for the submit form
     protected $gatewayModeArray = array
         (
@@ -105,7 +105,7 @@ abstract class GatewayBase implements GatewayInterface, \TYPO3\CMS\Core\Singleto
             PaymentApi::getConf(
                 $this->getExtensionKey(),
                 $this->mergeConf,
-                $this->conf
+                $this->getConf()
             );
 
         $this->setConf($conf);
@@ -464,6 +464,7 @@ abstract class GatewayBase implements GatewayInterface, \TYPO3\CMS\Core\Singleto
     public function transactionSetDetails ($detailsArray)
     {
         $result = true;
+        $xmlOptions = '';
         $this->setDetails($detailsArray);
         $reference = $detailsArray['reference'];
         $transaction = $detailsArray['transaction'];
@@ -488,6 +489,15 @@ abstract class GatewayBase implements GatewayInterface, \TYPO3\CMS\Core\Singleto
                     'utf-8'
                 );
         }
+        $conf = $this->getConf();
+        $xmlExtensionConfiguration =
+            GeneralUtility::array2xml_cs(
+                $conf,
+                'phparray',
+                array(),
+                'utf-8'
+            );
+        
 
         // Store order id in database
         $dataArray = array(
@@ -502,6 +512,7 @@ abstract class GatewayBase implements GatewayInterface, \TYPO3\CMS\Core\Singleto
             'paymethod_method' => $this->getPaymentMethod(),
             'message' => Message::NOT_PROCESSED,
             'config' => $xmlOptions,
+            'config_ext' => $xmlExtensionConfiguration,
             'user' => $detailsArray['user']
         );
 

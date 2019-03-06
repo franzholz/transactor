@@ -5,7 +5,7 @@ namespace JambageCom\Transactor\Api;
 /***************************************************************
 *  Copyright notice
 *
-*  (c) 2018 Franz Holzinger <franz@ttproducts.de>
+*  (c) 2019 Franz Holzinger <franz@ttproducts.de>
 *  All rights reserved
 *
 *  This script is part of the TYPO3 project. The TYPO3 project is
@@ -242,6 +242,10 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
     )
     {
         $gatewayStatus = '';
+        if (!is_array($confScript)) {
+            return false;
+        }
+
         $result = static::render(
             $finalize,
             $finalVerify,
@@ -280,7 +284,7 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
         &$localTemplateCode,
         &$errorMessage,
         $handleLib,
-        $confScript,
+        array $confScript,
         $extensionKey,
         array $itemArray,
         array $calculatedArray,
@@ -305,6 +309,7 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
         $finalVerify = false;
         $gatewayExtKey = '';
         $result = '';
+        $emConf = '';
         $xhtmlFix = \JambageCom\Div2007\Utility\HtmlUtility::generateXhtmlFix();
 
         if (
@@ -318,10 +323,10 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
 
         if ($paramsValid) {
             $lConf = $confScript;
-            if (is_array($confScript)) {
-                $gatewayExtKey = $confScript['extName'];
+            if (isset($confScript['em.'])) {
+                $emConf = $confScript['em.'];
             }
-
+            $gatewayExtKey = $confScript['extName'];
             $ok = static::checkLoaded($errorMessage, $languageObj, $gatewayExtKey);
             $paymentMethod = $confScript['paymentMethod'];
 
@@ -352,6 +357,11 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
                     }
 
                     $gatewayConf = $gatewayProxyObject->getConf();
+                    if ($emConf) {
+                        $gatewayConf = array_replace_recursive($gatewayConf, $emConf);
+                        $gatewayProxyObject->setConf($gatewayConf);
+                    }
+
                     static::getPaymentBasket(
                         $itemArray,
                         $calculatedArray,
@@ -689,7 +699,7 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
     static public function checkRequired (
         $referenceId,
         $handleLib,
-        $confScript,
+        array $confScript,
         $extensionKey,
         $calculatedArray,
         $paymentActivity,
@@ -824,21 +834,21 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
     static protected function getTransactionDetails (
         $referenceId,
         $handleLib,
-        $confScript,
+        array $confScript,
         $extensionKey,
         $gatewayExtKey,
-        $calculatedArray,
+        array $calculatedArray,
         $paymentActivity,
-        $pidArray,
+        array $pidArray,
         $linkParams,
         $trackingCode,
         $orderUid,
         $orderNumber,
         $notificationEmail,
         $cardRow,
-        $totalArray,
-        $addressArray,
-        $paymentBasketArray
+        array $totalArray,
+        array $addressArray,
+        array $paymentBasketArray
     )
     {
         $paramNameActivity = $extensionKey . '[activity][' . $paymentActivity . ']';
@@ -1176,7 +1186,10 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
                     );
                 $countryRow = $countryArray[0];
 
-                if (count($countryRow)) {
+                if (
+                    is_array($countryRow) &&
+                    count($countryRow)
+                ) {
                     $addressArray[$key]['country'] = $countryRow['cn_iso_2'];
                 }
             }
@@ -1371,7 +1384,7 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
     */
     static public function renderDataEntry (
         &$errorMessage,
-        $confScript,
+        array $confScript,
         $extensionKey,
         array $basket,
         $orderUid,

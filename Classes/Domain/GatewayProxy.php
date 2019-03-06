@@ -153,25 +153,25 @@ class GatewayProxy implements \JambageCom\Transactor\Domain\GatewayInterface
         return $result;
     }
 
-    public function setGatewayMode ($gatewayMode)
-    {
-        $this->getGatewayObj()->setGatewayMode($gatewayMode);
-    }
-
     public function getGatewayMode ()
     {
         $result = $this->getGatewayObj()->getGatewayMode();
         return $result;
     }
 
-    public function setTemplateFilename ($templateFilename)
+    public function setGatewayMode ($gatewayMode)
     {
-        $this->getGatewayObj()->setTemplateFilename($templateFilename);
+        $this->getGatewayObj()->setGatewayMode($gatewayMode);
     }
 
     public function getTemplateFilename ()
     {
         return $this->getGatewayObj()->getTemplateFilename();
+    }
+
+    public function setTemplateFilename ($templateFilename)
+    {
+        $this->getGatewayObj()->setTemplateFilename($templateFilename);
     }
 
     public function getConf ()
@@ -180,9 +180,9 @@ class GatewayProxy implements \JambageCom\Transactor\Domain\GatewayInterface
         return $result;
     }
 
-    public function setConfig ($config)
+    public function setConf ($conf)
     {
-        $this->getGatewayObj()->setConfig($config);
+        $this->getGatewayObj()->setConf($conf);
     }
 
     public function getConfig ()
@@ -191,9 +191,9 @@ class GatewayProxy implements \JambageCom\Transactor\Domain\GatewayInterface
         return $result;
     }
 
-    public function setBasket ($basket)
+    public function setConfig ($config)
     {
-        $this->getGatewayObj()->setBasket($basket);
+        $this->getGatewayObj()->setConfig($config);
     }
 
     public function getBasket () 
@@ -202,9 +202,9 @@ class GatewayProxy implements \JambageCom\Transactor\Domain\GatewayInterface
         return $result;
     }
 
-    public function setBasketSum ($basketSum)
+    public function setBasket ($basket)
     {
-        $this->getGatewayObj()->setBasketSum($basketSum);
+        $this->getGatewayObj()->setBasket($basket);
     }
 
     public function getBasketSum () 
@@ -213,9 +213,9 @@ class GatewayProxy implements \JambageCom\Transactor\Domain\GatewayInterface
         return $result;
     }
 
-    public function setOrderUid ($orderUid)
+    public function setBasketSum ($basketSum)
     {
-        $this->getGatewayObj()->setOrderUid($orderUid);
+        $this->getGatewayObj()->setBasketSum($basketSum);
     }
 
     public function getOrderUid () 
@@ -223,14 +223,19 @@ class GatewayProxy implements \JambageCom\Transactor\Domain\GatewayInterface
         return $this->getGatewayObj()->getOrderUid();
     }
 
-    public function setOrderNumber ($orderNumber)
+    public function setOrderUid ($orderUid)
     {
-        $this->getGatewayObj()->setOrderNumber($orderNumber);
+        $this->getGatewayObj()->setOrderUid($orderUid);
     }
 
     public function getOrderNumber () 
     {
         return $this->getGatewayObj()->getOrderNumber();
+    }
+
+    public function setOrderNumber ($orderNumber)
+    {
+        $this->getGatewayObj()->setOrderNumber($orderNumber);
     }
 
     /**

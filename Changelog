@@ -1,3 +1,7 @@
+2019-03-06  Franz Holzinger <franz@ttproducts.de>
+    * new feature: Support for multple configuration by setup. Store the extension configuration with each transactor record.
+    * apply to the requirements of PHP 7.2
+
 2019-02-14  Franz Holzinger <franz@ttproducts.de>
     * modifications according to the Coding Guidelines
 

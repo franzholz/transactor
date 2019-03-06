@@ -15,7 +15,7 @@ $result = array (
         'searchFields' => 'uid,reference,orderuid,message,user',
     ),
     'interface' => array (
-        'showRecordFieldList' => 'uid,reference,gatewayid,orderuid,currency,amount,state,state_time,message,ext_key,paymethod_key,paymethod_method,config,user'
+        'showRecordFieldList' => 'uid,reference,gatewayid,orderuid,currency,amount,state,state_time,message,ext_key,paymethod_key,paymethod_method,config,config_ext,user'
     ),
     'columns' => array (
         'uid' => array (
@@ -147,6 +147,15 @@ $result = array (
                 'rows' => '15'
             )
         ),
+        'config_ext' => array (
+            'exclude' => 1,
+            'label' => TRANSACTOR_LANGUAGE_PATH_LL .  'locallang_db.xlf:tx_transactor_transactions.config_ext',
+            'config' => array (
+                'type' => 'text',
+                'cols' => '48',
+                'rows' => '15'
+            )
+        ),
         'user' => array (
             'exclude' => 1,
             'label' => TRANSACTOR_LANGUAGE_PATH_LL . 'locallang_db.xlf:tx_transactor_transactions.user',
@@ -158,7 +167,7 @@ $result = array (
         ),
     ),
     'types' => array (
-        '0' => array('showitem' => 'reference,gatewayid,orderuid,currency,amount,state,state_time,message,ext_key,paymethod_key,paymethod_method,config,user')
+        '0' => array('showitem' => 'reference,gatewayid,orderuid,currency,amount,state,state_time,message,ext_key,paymethod_key,paymethod_method, config, config_ext,user')
     ),
     'palettes' => array (
         '1' => array('showitem' => '')

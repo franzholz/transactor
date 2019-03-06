@@ -14,6 +14,7 @@ CREATE TABLE tx_transactor_transactions (
 	paymethod_key varchar(100) DEFAULT '' NOT NULL,
 	paymethod_method varchar(100) DEFAULT '' NOT NULL,
 	config text,
+	config_ext text,
 	user text,
 
 	PRIMARY KEY (uid),

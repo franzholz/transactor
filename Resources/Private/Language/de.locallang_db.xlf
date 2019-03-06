@@ -5,7 +5,7 @@
 		<body>
 			<trans-unit id="tstamp" xml:space="preserve" approved="yes">
 				<source>Time stamp</source>
-				<target></target>
+				<target>Zeitstempel</target>
 			</trans-unit>
 			<trans-unit id="crdate" xml:space="preserve" approved="yes">
 				<source>Creation date</source>
@@ -13,7 +13,7 @@
 			</trans-unit>
 			<trans-unit id="tx_transactor_transactions" xml:space="preserve" approved="yes">
 				<source>Transactions</source>
-				<target></target>
+				<target>Transaktionen</target>
 			</trans-unit>
 			<trans-unit id="tx_transactor_transactions.gatewayid" xml:space="preserve" approved="yes">
 				<source>Gateway internal transaction identifier:</source>
@@ -25,11 +25,11 @@
 			</trans-unit>
 			<trans-unit id="tx_transactor_transactions.orderuid" xml:space="preserve" approved="yes">
 				<source>Order number:</source>
-				<target></target>
+				<target>Bestellnummer:</target>
 			</trans-unit>
 			<trans-unit id="tx_transactor_transactions.currency" xml:space="preserve" approved="yes">
 				<source>Currency of amount:</source>
-				<target></target>
+				<target>Währung zum Betrag:</target>
 			</trans-unit>
 			<trans-unit id="tx_transactor_transactions.amount" xml:space="preserve" approved="yes">
 				<source>Amount:</source>
@@ -45,7 +45,7 @@
 			</trans-unit>
 			<trans-unit id="tx_transactor_transactions.message" xml:space="preserve" approved="yes">
 				<source>Message:</source>
-				<target></target>
+				<target>Meldung:</target>
 			</trans-unit>
 			<trans-unit id="tx_transactor_transactions.ext_key" xml:space="preserve" approved="yes">
 				<source>Extension key:</source>
@@ -57,15 +57,19 @@
 			</trans-unit>
 			<trans-unit id="tx_transactor_transactions.paymethod_method" xml:space="preserve" approved="yes">
 				<source>Payment method:</source>
-				<target></target>
+				<target>Bezahl Methode:</target>
 			</trans-unit>
 			<trans-unit id="tx_transactor_transactions.config" xml:space="preserve" approved="yes">
 				<source>Configuration:</source>
-				<target></target>
+				<target>Konfiguration:</target>
+			</trans-unit>
+			<trans-unit id="tx_transactor_transactions.config_ext" xml:space="preserve" approved="yes">
+				<source>Extension Configuration:</source>
+				<target>Extension Konfiguration:</target>
 			</trans-unit>
 			<trans-unit id="tx_transactor_transactions.user" xml:space="preserve" approved="yes">
 				<source>Gateway specific:</source>
-				<target></target>
+				<target>Gateway spezifisch:</target>
 			</trans-unit>
 		</body>
 	</file>
