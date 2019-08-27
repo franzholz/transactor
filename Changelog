@@ -1,3 +1,6 @@
+2019-08-27  Franz Holzinger <franz@ttproducts.de>
+    * readd ext_autoload.php for TYPO3 6.2
+
 2019-03-06  Franz Holzinger <franz@ttproducts.de>
     * new feature: Support for multple configuration by setup. Store the extension configuration with each transactor record.
     * apply to the requirements of PHP 7.2
