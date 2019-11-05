@@ -70,7 +70,7 @@ class tx_transactor_gatewayproxy implements tx_transactor_gateway_int, \TYPO3\CM
 
 
     public function getGatewayObj () {
-        $result = GeneralUtility::getUserObj($this->gatewayClass);
+        $result = GeneralUtility::makeInstance($this->gatewayClass);
         if (!is_object($result)) {
             throw new RuntimeException('ERROR in the Payment Transactor API (transactor) used by the extension "' . $this->gatewayExt . '": no object exists for the class "' . $this->gatewayClass . '"', 2020290000);
         }

@@ -38,7 +38,7 @@
 */
 
 
-class tx_transactor_language extends tx_div2007_alpha_language_base implements t3lib_Singleton {
+class tx_transactor_language extends tx_div2007_alpha_language_base implements \TYPO3\CMS\Core\SingletonInterface {
     public function init1 ($pObj, $cObj, $conf, $scriptRelPath) {
 
         parent::init(

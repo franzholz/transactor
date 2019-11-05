@@ -31,6 +31,9 @@
 * @author	Robert Lemke <robert@typo3.org>
 */
 
+use TYPO3\CMS\Core\Utility\ExtensionManagementUtility;
+use TYPO3\CMS\Core\Utility\GeneralUtility;
+
 
 final class tx_transactor_gatewayfactory {
 
@@ -77,8 +80,8 @@ final class tx_transactor_gatewayfactory {
     */
     public static function registerGatewayExt ($extKey) {
 
-        if (t3lib_extMgm::isLoaded($extKey)) {
-            $gatewayProxy = t3lib_div::getUserObj('tx_transactor_gatewayproxy');
+        if (ExtensionManagementUtility::isLoaded($extKey)) {
+            $gatewayProxy = GeneralUtility::makeInstance('tx_transactor_gatewayproxy');
             $gatewayProxy->init($extKey);
             self::$gatewayProxyObjects[$extKey] = $gatewayProxy;
             $result = self::$gatewayProxyObjects[$extKey];

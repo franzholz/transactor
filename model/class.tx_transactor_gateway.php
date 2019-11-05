@@ -138,8 +138,8 @@ abstract class tx_transactor_gateway implements tx_transactor_gateway_int, \TYPO
     */
     public function getAvailablePaymentMethods () {
 
-        $filename = ExtensionManagementUtility::extPath($this->getExtKey()) . 'paymentmethods.xlf';
-        $filenamepath = GeneralUtility::getUrl(ExtensionManagementUtility::extPath($this->getExtKey()) . 'paymentmethods.xlf');
+        $filename = ExtensionManagementUtility::extPath($this->getExtKey()) . 'paymentmethods.xml';
+        $filenamepath = GeneralUtility::getUrl(ExtensionManagementUtility::extPath($this->getExtKey()) . 'paymentmethods.xml');
 
         if ($filenamepath) {
             $result = GeneralUtility::xml2array($filenamepath);

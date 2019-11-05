@@ -21,12 +21,12 @@
     }
   ],
   "license": [
-    "GPL-2.0+"
+    "GPL-2.0-or-later"
   ],
   "require": {
     "php": ">=5.6.0,<7.99.99",
     "typo3/cms-core": ">=6.2.0,<8.99.99",
-    "jambagecom/div2007": ">=1.10.7"
+    "jambagecom/div2007": ">=1.10.16"
   },
   "suggest": {
     "jambagecom/migration_core": ">=0.0.0"
@@ -43,7 +43,7 @@
     ]
   },
   "replace": {
-    "transactor": "self.version",
+    "jambagecom/transactor": "self.version",
     "typo3-ter/transactor": "self.version"
   },
   "extra": {

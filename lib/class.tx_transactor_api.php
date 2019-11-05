@@ -53,7 +53,7 @@ class tx_transactor_api {
             $cObj = \JambageCom\Div2007\Utility\FrontendUtility::getContentObjectRenderer();
         }
 
-        $languageObj = GeneralUtility::getUserObj(\JambageCom\Transactor\Api\Localization::class);
+        $languageObj = GeneralUtility::makeInstance(\JambageCom\Transactor\Api\Localization::class);
         $languageObj->init1(
             $pLangObj,
             $conf['_LOCAL_LANG.'],
@@ -72,7 +72,7 @@ class tx_transactor_api {
         &$markerArray
     ) {
         $cObj = \JambageCom\Div2007\Utility\FrontendUtility::getContentObjectRenderer();
-        $languageObj = GeneralUtility::getUserObj(\JambageCom\Transactor\Api\Localization::class);
+        $languageObj = GeneralUtility::makeInstance(\JambageCom\Transactor\Api\Localization::class);
         $languageObj->init1(
             '',
             $conf['marks.']
@@ -239,7 +239,7 @@ class tx_transactor_api {
         &$localTemplateCode,
         &$errorMessage
     ) {
-        $languageObj = GeneralUtility::getUserObj(\JambageCom\Transactor\Api\Localization::class);
+        $languageObj = GeneralUtility::makeInstance(\JambageCom\Transactor\Api\Localization::class);
         $bFinalize = false;
         $bFinalVerify = false;
         $gatewayExtKey = '';
@@ -596,7 +596,7 @@ class tx_transactor_api {
                 $ok = $gatewayProxyObject->transaction_validate();
 
                 if (!$ok) {
-                    $languageObj = GeneralUtility::getUserObj(\JambageCom\Transactor\Api\Localization::class);
+                    $languageObj = GeneralUtility::makeInstance(\JambageCom\Transactor\Api\Localization::class);
 
                     $errorMessage =
                         $languageObj->getLabel(
@@ -813,7 +813,7 @@ class tx_transactor_api {
         &$basketArray
     ) {
         $bUseStaticInfo = false;
-        $languageObj = GeneralUtility::getUserObj(\JambageCom\Transactor\Api\Localization::class);
+        $languageObj = GeneralUtility::makeInstance(\JambageCom\Transactor\Api\Localization::class);
 
         if (ExtensionManagementUtility::isLoaded('static_info_tables')) {
             $bUseStaticInfo = true;

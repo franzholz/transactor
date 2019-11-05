@@ -1,3 +1,9 @@
+
+2019-11-05  Franz Holzinger <franz@ttproducts.de>
+    * bugfix: paymentmethods.xml must be used in the old API for the payment methods, and not paymentmethods.xlf.
+    * remove dependency from migration_core. Replace all t3lib_div calls by TYPO3\CMS\Core\Utility\GeneralUtility. Replace all t3lib_extMgm calls by TYPO3\CMS\Core\Utility\ExtensionManagementUtility. Replace t3lib_Singleton by \TYPO3\CMS\Core\SingletonInterface
+    * use makeInstance instead of getUserObj
+
 2019-08-27  Franz Holzinger <franz@ttproducts.de>
     * readd ext_autoload.php for TYPO3 6.2
 

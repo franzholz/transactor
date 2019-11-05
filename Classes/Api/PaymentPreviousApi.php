@@ -47,7 +47,7 @@ class PaymentPreviousApi {
         $confScript
     ) 
     {
-        $result = FALSE;
+        $result = false;
 
         if (
             is_array($confScript) &&

@@ -663,7 +663,7 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
             }
         }                                    
 
-        if ($finalize) { // neu
+        if ($finalize) {
             // add the markers for a processed transaction
             $parameters = $gatewayProxyObject->transactionGetParameters();
             foreach ($parameters as $key => $parameter) {
@@ -675,10 +675,6 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
                     $parameter
                 ); 
             }
-
-//      $markerArray['###TRANSACTOR_' . strtoupper($key) . '###'] =  strip_tags($parameter);
-
-            
         }
 
         $gatewayStatus = array();

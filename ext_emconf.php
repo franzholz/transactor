@@ -24,9 +24,6 @@ $EM_CONF[$_EXTKEY] = array(
         ),
         'conflicts' => array(
         ),
-        'suggests' => array(
-            'migration_core' => '0.0.0-0.99.99',
-        ),
     ),
 );
 

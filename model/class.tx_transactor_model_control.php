@@ -34,6 +34,7 @@
 *
 */
 
+use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 
 class tx_transactor_model_control {
@@ -80,7 +81,7 @@ class tx_transactor_model_control {
             self::$prefixId &&
             !isset(self::$piVars[self::$prefixId])
         ) {
-            self::$piVars = t3lib_div::_GPmerged(self::$prefixId);
+            self::$piVars = GeneralUtility::_GPmerged(self::$prefixId);
         }
         $result = self::$piVars;
         return $result;

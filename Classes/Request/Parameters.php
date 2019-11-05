@@ -35,6 +35,7 @@
 *
 */
 
+use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 
 class Parameters implements \TYPO3\CMS\Core\SingletonInterface
@@ -89,7 +90,7 @@ class Parameters implements \TYPO3\CMS\Core\SingletonInterface
             self::$prefixId &&
             !isset(self::$piVars[self::$prefixId])
         ) {
-            self::$piVars = t3lib_div::_GPmerged(self::$prefixId);
+            self::$piVars = GeneralUtility::_GPmerged(self::$prefixId);
         }
         $result = self::$piVars;
         return $result;
