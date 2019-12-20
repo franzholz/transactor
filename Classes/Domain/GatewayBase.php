@@ -482,22 +482,16 @@ abstract class GatewayBase implements GatewayInterface, \TYPO3\CMS\Core\Singleto
                 }
             }
             $xmlOptions =
-                GeneralUtility::array2xml_cs(
-                    $this->getConfig(),
-                    'phparray',
-                    array(),
-                    'utf-8'
+                '<?xml version=”1.0” encoding=”utf-8” standalone=”yes” ?>' . LF . 
+                GeneralUtility::array2xml(
+                    $this->getConfig()
                 );
         }
-        $conf = $this->getConf();
         $xmlExtensionConfiguration =
-            GeneralUtility::array2xml_cs(
-                $conf,
-                'phparray',
-                array(),
-                'utf-8'
-            );
-        
+            '<?xml version=”1.0” encoding=”utf-8” standalone=”yes” ?>' . LF .
+            GeneralUtility::array2xml(
+                $this->getConf()
+            );        
 
         // Store order id in database
         $dataArray = array(

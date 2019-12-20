@@ -84,11 +84,9 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
             $conf['_LOCAL_LANG.'],
             TRANSACTOR_LANGUAGE_PATH
         );
-
         $languageObj->loadLocalLang(
             TRANSACTOR_LANGUAGE_PATH . 'locallang_marker.xlf'
         );
-
         $locallang = $languageObj->getLocalLang();
         $localLangKey = $languageObj->getLocalLangkey();
 
@@ -96,6 +94,13 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
             $langArray = array_merge($locallang['default'], $locallang[$localLangKey]);
         } else {
             $langArray = $locallang['default'];
+        }
+		$parser = $cObj;
+        if (
+            defined('TYPO3_version') &&
+            version_compare(TYPO3_version, '7.0.0', '>=')
+        ) {
+            $parser = \tx_div2007_core::newHtmlParser(false);
         }
 
         if (is_array($conf['marks.'])) {
@@ -116,7 +121,7 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
                     $value = $value[0]['target'];
                 }
                 $newMarkerArray['###' . strtoupper($key) . '###'] =
-                    $cObj->substituteMarkerArray($value, $markerArray);
+                    $parser->substituteMarkerArray($value, $markerArray);
             }
         } else {
             $langArray = array();
@@ -516,7 +521,7 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
                                         $templateFilename = $gatewayProxyObject->getTemplateFilename();
                                     }
                                 }
-                                $localTemplateCode = $cObj->fileResource($templateFilename);
+                                $localTemplateCode = \JambageCom\Div2007\Utility\FrontendUtility::fileResource($templateFilename);
 
                                 if (
                                     !$localTemplateCode &&
@@ -595,7 +600,7 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
                                     ) {
                                         $imageOut = $cObj->getContentObject($lConf['extImage'])->render($lConf['extImage.']);
                                     } else {
-                                        $imageOut = $cObj->fileResource($lConf['extImage']);
+                                        $imageOut = \JambageCom\Div2007\Utility\FrontendUtility::fileResource($lConf['extImage']);
                                     }
                                     $markerArray['###TRANSACTOR_IMAGE###'] = $imageOut;
                                     $markerArray['###TRANSACTOR_WWW###'] = $lConf['extWww'];

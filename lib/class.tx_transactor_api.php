@@ -109,7 +109,7 @@ class tx_transactor_api {
                     $value = $value[0]['target'];
                 }
                 $newMarkerArray['###' . strtoupper($key) . '###'] =
-                    $cObj->substituteMarkerArray($value, $markerArray);
+                    tx_div2007_core::substituteMarkerArray($value, $markerArray);
             }
         } else {
             $langArray = array();
@@ -431,7 +431,7 @@ class tx_transactor_api {
                                 if (!$templateFilename) {
                                     $templateFilename = ($lConf['templateFile'] ? $lConf['templateFile'] : 'EXT:transactor/template/transactor.tmpl');
                                 }
-                                $localTemplateCode = self::$cObj->fileResource($templateFilename);
+                                $localTemplateCode = \JambageCom\Div2007\Utility\FrontendUtility::fileResource($templateFilename);
 
                                 if (!$localTemplateCode && $templateFilename != '') {
                                     $errorMessage =
@@ -493,7 +493,7 @@ class tx_transactor_api {
                                     ) {
                                         $imageOut = self::$cObj->getContentObject($lConf['extImage'])->render($lConf['extImage.']);
                                     } else {
-                                        $imageOut = self::$cObj->fileResource($lConf['extImage']);
+                                        $imageOut = \JambageCom\Div2007\Utility\FrontendUtility::fileResource($lConf['extImage']);
                                     }
                                     $markerArray['###TRANSACTOR_IMAGE###'] = $imageOut;
                                     $markerArray['###TRANSACTOR_WWW###'] = $lConf['extWww'];

@@ -11,7 +11,7 @@ $result = array (
         'crdate' => 'crdate',
         'default_sortby' => 'ORDER BY crdate',
         'dividers2tabs' => true,
-        'iconfile' => \TYPO3\CMS\Core\Utility\ExtensionManagementUtility::extRelPath('transactor') . 'ext_icon.gif',
+        'iconfile' => 'EXT:' . TRANSACTOR_EXT . '/ext_icon.gif',
         'searchFields' => 'uid,reference,orderuid,message,user',
     ),
     'interface' => array (

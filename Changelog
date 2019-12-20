@@ -1,3 +1,7 @@
+2019-12-20  Franz Holzinger <franz@ttproducts.de>
+    * compatibility for TYPO3 9: transactor 0.8.0 now runs fully under TYPO3 9.5.
+    * set compatibility = 0 to use the new API by default.
+    * Deprecation 75371: replace GeneralUtility::array2xml_cs() by GeneralUtility::array2xml()
 
 2019-11-05  Franz Holzinger <franz@ttproducts.de>
     * bugfix: paymentmethods.xml must be used in the old API for the payment methods, and not paymentmethods.xlf.
