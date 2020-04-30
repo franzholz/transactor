@@ -148,7 +148,7 @@ class tx_transactor_api {
         $handleLib,
         $confScript
     ) {
-        GeneralUtility::requireOnce(ExtensionManagementUtility::extPath($handleLib) . 'model/class.tx_' . $handleLib . '_gatewayfactory.php');
+        require_once(ExtensionManagementUtility::extPath($handleLib) . 'model/class.tx_' . $handleLib . '_gatewayfactory.php');
 
         if (is_array($confScript)) {
             $gatewayExtKey = $confScript['extName'];

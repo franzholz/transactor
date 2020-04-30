@@ -82,7 +82,7 @@ class GatewayProxy implements \JambageCom\Transactor\Domain\GatewayInterface
         ) {
             $this->gatewayClass = $this->extensionManagerConf['gatewayClass'];
         } else {
-            $composerFile = ExtensionManagementUtility::siteRelPath($extensionKey) . 'composer.json';
+            $composerFile = \TYPO3\CMS\Core\Utility\PathUtility::stripPathSitePrefix(ExtensionManagementUtility::extPath($extensionKey)) . 'composer.json';
             if (file_exists($composerFile)) {
                 $content = file_get_contents($composerFile);
                 $content = json_decode($content, true);

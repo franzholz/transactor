@@ -1,3 +1,6 @@
+2020-04-30  Franz Holzinger <franz@ttproducts.de>
+    * compatibility for TYPO3 9: replace deprecated methods
+
 2019-12-20  Franz Holzinger <franz@ttproducts.de>
     * compatibility for TYPO3 9: transactor 0.8.0 now runs fully under TYPO3 9.5.
     * set compatibility = 0 to use the new API by default.
