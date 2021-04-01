@@ -1,3 +1,6 @@
+2020-08-27  Franz Holzinger <franz@ttproducts.de>
+    * new feature: make the orderuid a varchar to allow even characters inside of order numbers.
+
 2020-04-30  Franz Holzinger <franz@ttproducts.de>
     * compatibility for TYPO3 9: replace deprecated methods
 

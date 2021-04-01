@@ -41,7 +41,7 @@ $result = array (
             'config' => array (
                 'type' => 'input',
                 'size' => '100',
-                'max' => '256'
+                'max' => '255'
             )
         ),
         'gatewayid' => array ( // gateway internal transaction id
@@ -50,7 +50,7 @@ $result = array (
             'config' => array (
                 'type' => 'input',
                 'size' => '40',
-                'max' => '256'
+                'max' => '255'
             )
         ),
         'orderuid' => array (
@@ -58,8 +58,9 @@ $result = array (
             'label' => TRANSACTOR_LANGUAGE_PATH_LL .  'locallang_db.xlf:tx_transactor_transactions.orderuid',
             'config' => array (
                 'type' => 'input',
-                'size' => '20',
-                'readOnly' => '1',
+                'size' => '25',
+                'max' => '255',
+                'readOnly' => '1'
             )
         ),
         'currency' => array (
@@ -108,7 +109,7 @@ $result = array (
             'config' => array (
                 'type' => 'input',
                 'size' => '40',
-                'max' => '256'
+                'max' => '255'
             )
         ),
         'ext_key' => array (

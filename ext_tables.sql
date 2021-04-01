@@ -4,7 +4,7 @@ CREATE TABLE tx_transactor_transactions (
 	crdate int(11) unsigned DEFAULT '0' NOT NULL,
 	reference varchar(255) DEFAULT '0' NOT NULL,
 	gatewayid varchar(255) DEFAULT '0' NOT NULL,
-	orderuid int(11) DEFAULT '0' NOT NULL,
+	orderuid varchar(255) DEFAULT '0' NOT NULL,
 	currency varchar(3) DEFAULT '' NOT NULL,
 	amount decimal(19,2) DEFAULT '0.00' NOT NULL,
 	state int(3) unsigned DEFAULT '0' NOT NULL,
