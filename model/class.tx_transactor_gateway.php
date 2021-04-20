@@ -72,8 +72,29 @@ abstract class tx_transactor_gateway implements tx_transactor_gateway_int, \TYPO
     */
     public function __construct () {
         $this->clearErrors();
-        $conf = unserialize($GLOBALS['TYPO3_CONF_VARS']['EXT']['extConf']['transactor']);
-        $extManagerConf = unserialize($GLOBALS['TYPO3_CONF_VARS']['EXT']['extConf'][$this->getExtKey()]);
+        $conf = [];
+        $extManagerConf = [];
+        if (
+            defined('TYPO3_version') &&
+            version_compare(TYPO3_version, '9.0.0', '>=')
+        ) {
+            $conf = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(
+                \TYPO3\CMS\Core\Configuration\ExtensionConfiguration::class
+            )->get('transactor');
+        } else { // before TYPO3 9
+            $conf = unserialize($GLOBALS['TYPO3_CONF_VARS']['EXT']['extConf']['transactor']);
+        }
+
+        if (
+            defined('TYPO3_version') &&
+            version_compare(TYPO3_version, '9.0.0', '>=')
+        ) {
+            $extManagerConf = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(
+                \TYPO3\CMS\Core\Configuration\ExtensionConfiguration::class
+            )->get($this->getExtKey());
+        } else { // before TYPO3 9
+            $extManagerConf = unserialize($GLOBALS['TYPO3_CONF_VARS']['EXT']['extConf'][$this->getExtKey()]);
+        }
 
         if ($this->bMergeConf && is_array($this->conf)) {
             if (is_array($extManagerConf)) {

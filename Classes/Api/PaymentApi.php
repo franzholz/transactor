@@ -41,8 +41,37 @@ namespace JambageCom\Transactor\Api;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 
+
 class PaymentApi
 {
+    static public function getTransactorConf ($handleLib, $key = '') 
+    {
+        $transactorConf = [];
+        $result = '';
+
+        if (
+            defined('TYPO3_version') &&
+            version_compare(TYPO3_version, '9.0.0', '>=')
+        ) {
+            $transactorConf = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(
+                \TYPO3\CMS\Core\Configuration\ExtensionConfiguration::class
+            )->get($handleLib);
+        } else { // before TYPO3 9
+            $transactorConf = unserialize($GLOBALS['TYPO3_CONF_VARS']['EXT']['extConf'][$handleLib]);
+        }
+
+        if (
+            $key != '' &&
+            isset($transactorConf[$key])
+        ) {
+            $result = $transactorConf[$key];
+        } else {
+            $result = $transactorConf;
+        }
+
+        return $result;
+    }
+
     /**
     * @param        string      $extensionKey: Extension key
     * @param        boolean     $mergeConf: if the conf of the extension shall be merged
@@ -55,12 +84,33 @@ class PaymentApi
         array $conf = array()
     )
     {
-        $result = unserialize($GLOBALS['TYPO3_CONF_VARS']['EXT']['extConf'][TRANSACTOR_EXT]);
+        $result = [];
+        if (
+            defined('TYPO3_version') &&
+            version_compare(TYPO3_version, '9.0.0', '>=')
+        ) {
+            $result = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(
+                \TYPO3\CMS\Core\Configuration\ExtensionConfiguration::class
+            )->get(TRANSACTOR_EXT);
+        } else { // before TYPO3 9
+            $result = unserialize($GLOBALS['TYPO3_CONF_VARS']['EXT']['extConf'][TRANSACTOR_EXT]);
+        }
+
         if (
             $extensionKey != '' &&
             isset($GLOBALS['TYPO3_CONF_VARS']['EXT']['extConf'][$extensionKey])
         ) {
-            $extManagerConf = unserialize($GLOBALS['TYPO3_CONF_VARS']['EXT']['extConf'][$extensionKey]);
+            $extManagerConf = [];
+            if (
+                defined('TYPO3_version') &&
+                version_compare(TYPO3_version, '9.0.0', '>=')
+            ) {
+                $extManagerConf = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(
+                    \TYPO3\CMS\Core\Configuration\ExtensionConfiguration::class
+                )->get($extensionKey);
+            } else { // before TYPO3 9
+                $extManagerConf = unserialize($GLOBALS['TYPO3_CONF_VARS']['EXT']['extConf'][$extensionKey]);
+            }
         }
 
         if ($mergeConf && is_array($conf)) {

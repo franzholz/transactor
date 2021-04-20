@@ -322,9 +322,6 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
 
         if ($paramsValid) {
             $lConf = $confScript;
-            if (isset($confScript['em.'])) {
-                $emConf = $confScript['em.'];
-            }
             $gatewayExtKey = $confScript['extName'];
             $ok = static::checkLoaded($errorMessage, $languageObj, $gatewayExtKey);
             $paymentMethod = $confScript['paymentMethod'];
@@ -356,6 +353,11 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
                     }
 
                     $gatewayConf = $gatewayProxyObject->getConf();
+                    $emConf = $gatewayProxyObject->getExtensionManagerConf();
+                    if (isset($confScript['em.'])) {
+                        $emConf = array_replace_recursive($emConf, $confScript['em.']);
+                    }
+        
                     if ($emConf) {
                         $gatewayConf = array_replace_recursive($gatewayConf, $emConf);
                         $gatewayProxyObject->setConf($gatewayConf);
@@ -859,11 +861,13 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
             $successLinkParams = array_merge($successLinkParams, $linkParams);
         }
 
-        $notifyUrlParams =
-            array(
-                'eID' => str_replace('transactor_', '', $gatewayExtKey),
-                'transactor' => PaymentApi::getRequestId($referenceId)
-            );
+        $notifyUrlParams = [];
+        if (
+            version_compare(TYPO3_version, '9.5.0', '<')
+        ) {
+            $notifyUrlParams['eID'] = str_replace('transactor_', '', $gatewayExtKey);
+        }
+        $notifyUrlParams['transactor'] = PaymentApi::getRequestId($referenceId);
 
         if (isset($linkParams) && is_array($linkParams)) {
             $notifyUrlParams = array_merge($notifyUrlParams, $linkParams);
@@ -1480,6 +1484,5 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
 
         return $result;
     }
-// neu Ende
 }
 

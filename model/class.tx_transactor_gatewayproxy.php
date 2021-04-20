@@ -52,9 +52,31 @@ class tx_transactor_gatewayproxy implements tx_transactor_gateway_int, \TYPO3\CM
     */
     public function init ($extKey) {
 
-        $this->extensionManagerConf = unserialize($GLOBALS['TYPO3_CONF_VARS']['EXT']['extConf']['transactor']);
+        $this->extensionManagerConf = [];
+        if (
+            defined('TYPO3_version') &&
+            version_compare(TYPO3_version, '9.0.0', '>=')
+        ) {
+            $this->extensionManagerConf = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(
+                \TYPO3\CMS\Core\Configuration\ExtensionConfiguration::class
+            )->get('transactor');
+        } else { // before TYPO3 9
+            $this->extensionManagerConf = unserialize($GLOBALS['TYPO3_CONF_VARS']['EXT']['extConf']['transactor']);
+        }
+
         if (isset($GLOBALS['TYPO3_CONF_VARS']['EXT']['extConf'][$extKey])) {
-            $newExtensionManagerConf = unserialize($GLOBALS['TYPO3_CONF_VARS']['EXT']['extConf'][$extKey]);
+            $newExtensionManagerConf = [];
+            if (
+                defined('TYPO3_version') &&
+                version_compare(TYPO3_version, '9.0.0', '>=')
+            ) {
+                $newExtensionManagerConf = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(
+                    \TYPO3\CMS\Core\Configuration\ExtensionConfiguration::class
+                )->get($extKey);
+            } else { // before TYPO3 9
+                $newExtensionManagerConf = unserialize($GLOBALS['TYPO3_CONF_VARS']['EXT']['extConf'][$extKey]);
+            }
+
             if (is_array($this->extensionManagerConf)) {
                 if (is_array($newExtensionManagerConf)) {
                     $this->extensionManagerConf = array_merge($this->extensionManagerConf, $newExtensionManagerConf);
@@ -65,7 +87,6 @@ class tx_transactor_gatewayproxy implements tx_transactor_gateway_int, \TYPO3\CM
         }
         $this->gatewayClass = 'tx_' . str_replace('_', '', $extKey) . '_gateway';
         $this->gatewayExt = $extKey;
-//         require_once(ExtensionManagementUtility::extPath($extKey) . 'model/class.' . $this->gatewayClass . '.php');
     }
 
 
