@@ -4,7 +4,7 @@
 * Extension Manager/Repository config file for ext "transactor".
 ***************************************************************/
 
-$EM_CONF[$_EXTKEY] = array(
+$EM_CONF[$_EXTKEY] = [
     'title' => 'Payment Transactor API',
     'description' => 'This is a basic API to develop extensions which connect to different payment transaction gateways.',
     'category' => 'misc',
@@ -14,17 +14,17 @@ $EM_CONF[$_EXTKEY] = array(
     'author' => 'Franz Holzinger',
     'author_email' => 'franz@ttproducts.de',
     'author_company' => '',
-    'constraints' => array(
-        'depends' => array(
+    'constraints' => [
+        'depends' => [
             'php' => '7.1.0-7.4.99',
             'typo3' => '7.6.0-10.4.99',
             'div2007' => '1.11.0-0.0.0',
-        ),
-        'conflicts' => array(
-        ),
-		'suggests' => array(
+        ],
+        'conflicts' => [
+        ],
+		'suggests' => [
             'typo3db_legacy' => '1.0.0-1.1.99',
-		)
-    ),
-);
+		]
+    ],
+];
 
