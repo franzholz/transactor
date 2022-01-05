@@ -5,7 +5,7 @@ Set the compatibility mode (basic.compatibility) to 0 for the new API.
 Older extension versions might need the old API and a 1 here.
 
 
-Since version 0.9.0 the transactor extension contains a middleware, which payment extensions can use for a gateway instant message after the payment.
+Since version 0.9.0 the transactor extension contains a middleware, which payment extensions can use for dealing with a gateway instant message after the payment.
 
 Use the transactor parameter as
 transactor=mygateway

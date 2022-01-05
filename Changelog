@@ -1,8 +1,11 @@
-2020-04-20  Franz Holzinger <franz@ttproducts.de>
+2021-12-31  Franz Holzinger <franz@ttproducts.de>
+    * add compatibility for TYPO3 11
+
+2021-04-20  Franz Holzinger <franz@ttproducts.de>
     * bugfix extension manager configuration
     * compatibility for TYPO3 10: replace eID parameter by Middleware and the parameter transactor.
 
-2020-04-01  Franz Holzinger <franz@ttproducts.de>
+2021-04-01  Franz Holzinger <franz@ttproducts.de>
     * add compatibility for TYPO3 10
     * remove compatibility for TYPO3 6.2
 
