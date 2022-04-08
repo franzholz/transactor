@@ -24,9 +24,9 @@
     "GPL-2.0-or-later"
   ],
   "require": {
-    "php": "^7.3",
+    "php": "^7.4 || ^8.0",
     "typo3/cms-core": "^7.6 || ^8.7 || ^9.5 || ^10.4 || ^11.5",
-    "jambagecom/div2007": "^1.11 || ^1.12"
+    "jambagecom/div2007": "^1.11 || ^1.12 || ^1.13 || ^1.14"
   },
   "suggest": {
     "friendsoftypo3/typo3db-legacy": "^1"
@@ -43,7 +43,7 @@
     ]
   },
   "replace": {
-    "jambagecom/transactor": "self.version"
+    "typo3-ter/transactor": "self.version"
   },
   "extra": {
     "typo3/cms": {
