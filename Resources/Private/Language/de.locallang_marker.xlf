@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" version="1.2">
+  <file source-language="en" datatype="plaintext" original="EXT:transactor/Resources/Private/Language/locallang_marker.xlf" date="2018-05-09T17:24:37Z" product-name="transactor" target-language="de">
+    <header/>
+    <body>
+      <trans-unit id="message_redirect" resname="message_redirect">
+        <source>After completing the payment you need to return back to ###HOST### to complete the order.</source>
+        <target state="needs-translation">After completing the payment you need to return back to ###HOST### to complete the order.</target>
+      </trans-unit>
+      <trans-unit id="message_place_order" resname="message_place_order">
+        <source>buy now</source>
+        <target state="needs-translation">buy now</target>
+      </trans-unit>
+      <trans-unit id="message_credit_card" resname="message_credit_card">
+        <source>Credit card</source>
+        <target state="needs-translation">Credit card</target>
+      </trans-unit>
+      <trans-unit id="message_card_number" resname="message_card_number">
+        <source>Card number</source>
+        <target state="needs-translation">Card number</target>
+      </trans-unit>
+      <trans-unit id="message_card_holder" resname="message_card_holder">
+        <source>Card holder</source>
+        <target state="needs-translation">Card holder</target>
+      </trans-unit>
+      <trans-unit id="message_valid_until" resname="message_valid_until">
+        <source>Valid until (MM/YYYY)</source>
+        <target state="needs-translation">Valid until (MM/YYYY)</target>
+      </trans-unit>
+      <trans-unit id="message_account_holder" resname="message_account_holder">
+        <source>Account holder</source>
+        <target state="needs-translation">Account holder</target>
+      </trans-unit>
+      <trans-unit id="message_account_number" resname="message_account_number">
+        <source>Account number</source>
+        <target state="needs-translation">Account number</target>
+      </trans-unit>
+      <trans-unit id="message_bank_code" resname="message_bank_code">
+        <source>Bank code</source>
+        <target state="needs-translation">Bank code</target>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>
