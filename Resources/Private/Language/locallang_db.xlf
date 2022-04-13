@@ -1,57 +1,57 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
-<xliff version="1.0">
-	<file source-language="en" datatype="plaintext" original="messages" date="2018-05-09T17:24:27Z" product-name="transactor">
+<xliff version="1.2" xmlns="urn:oasis:names:tc:xliff:document:1.2">
+	<file source-language="en" datatype="plaintext" original="EXT:transactor/Resources/Private/Language/locallang_db.xlf" date="2018-05-09T17:24:27Z" product-name="transactor">
 		<header/>
 		<body>
-			<trans-unit id="tstamp" xml:space="preserve">
+			<trans-unit id="tstamp" resname="tstamp">
 				<source>Time stamp</source>
 			</trans-unit>
-			<trans-unit id="crdate" xml:space="preserve">
+			<trans-unit id="crdate" resname="crdate">
 				<source>Creation date</source>
 			</trans-unit>
-			<trans-unit id="tx_transactor_transactions" xml:space="preserve">
+			<trans-unit id="tx_transactor_transactions" resname="tx_transactor_transactions">
 				<source>Transactions</source>
 			</trans-unit>
-			<trans-unit id="tx_transactor_transactions.gatewayid" xml:space="preserve">
+			<trans-unit id="tx_transactor_transactions.gatewayid" resname="tx_transactor_transactions.gatewayid">
 				<source>Gateway internal transaction identifier:</source>
 			</trans-unit>
-			<trans-unit id="tx_transactor_transactions.reference" xml:space="preserve">
+			<trans-unit id="tx_transactor_transactions.reference" resname="tx_transactor_transactions.reference">
 				<source>Reference of transaction:</source>
 			</trans-unit>
-			<trans-unit id="tx_transactor_transactions.orderuid" xml:space="preserve">
+			<trans-unit id="tx_transactor_transactions.orderuid" resname="tx_transactor_transactions.orderuid">
 				<source>Order number:</source>
 			</trans-unit>
-			<trans-unit id="tx_transactor_transactions.currency" xml:space="preserve">
+			<trans-unit id="tx_transactor_transactions.currency" resname="tx_transactor_transactions.currency">
 				<source>Currency of amount:</source>
 			</trans-unit>
-			<trans-unit id="tx_transactor_transactions.amount" xml:space="preserve">
+			<trans-unit id="tx_transactor_transactions.amount" resname="tx_transactor_transactions.amount">
 				<source>Amount:</source>
 			</trans-unit>
-			<trans-unit id="tx_transactor_transactions.state" xml:space="preserve">
+			<trans-unit id="tx_transactor_transactions.state" resname="tx_transactor_transactions.state">
 				<source>State:</source>
 			</trans-unit>
-			<trans-unit id="tx_transactor_transactions.state_time" xml:space="preserve">
+			<trans-unit id="tx_transactor_transactions.state_time" resname="tx_transactor_transactions.state_time">
 				<source>State time:</source>
 			</trans-unit>
-			<trans-unit id="tx_transactor_transactions.message" xml:space="preserve">
+			<trans-unit id="tx_transactor_transactions.message" resname="tx_transactor_transactions.message">
 				<source>Message:</source>
 			</trans-unit>
-			<trans-unit id="tx_transactor_transactions.ext_key" xml:space="preserve">
+			<trans-unit id="tx_transactor_transactions.ext_key" resname="tx_transactor_transactions.ext_key">
 				<source>Extension key:</source>
 			</trans-unit>
-			<trans-unit id="tx_transactor_transactions.paymethod_key" xml:space="preserve">
+			<trans-unit id="tx_transactor_transactions.paymethod_key" resname="tx_transactor_transactions.paymethod_key">
 				<source>Key of payment method:</source>
 			</trans-unit>
-			<trans-unit id="tx_transactor_transactions.paymethod_method" xml:space="preserve">
+			<trans-unit id="tx_transactor_transactions.paymethod_method" resname="tx_transactor_transactions.paymethod_method">
 				<source>Payment method:</source>
 			</trans-unit>
-			<trans-unit id="tx_transactor_transactions.config" xml:space="preserve">
+			<trans-unit id="tx_transactor_transactions.config" resname="tx_transactor_transactions.config">
 				<source>Configuration:</source>
 			</trans-unit>
-			<trans-unit id="tx_transactor_transactions.config_ext" xml:space="preserve">
+			<trans-unit id="tx_transactor_transactions.config_ext" resname="tx_transactor_transactions.config_ext">
 				<source>Extension Configuration:</source>
 			</trans-unit>config_ext
-			<trans-unit id="tx_transactor_transactions.user" xml:space="preserve">
+			<trans-unit id="tx_transactor_transactions.user" resname="tx_transactor_transactions.user">
 				<source>Gateway specific:</source>
 			</trans-unit>
 		</body>

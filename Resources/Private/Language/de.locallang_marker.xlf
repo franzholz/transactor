@@ -1,41 +1,41 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
-<xliff version="1.0">
-	<file source-language="en" target-language="de" datatype="plaintext" original="messages" date="2018-05-09T17:24:37Z" product-name="transactor">
+<xliff version="1.2" xmlns="urn:oasis:names:tc:xliff:document:1.2">
+	<file source-language="en" target-language="de" datatype="plaintext" original="EXT:transactor/Resources/Private/Language/locallang_marker.xlf" date="2018-05-09T17:24:37Z" product-name="transactor">
 		<header/>
 		<body>
-			<trans-unit id="message_redirect" xml:space="preserve" approved="yes">
+			<trans-unit id="message_redirect" resname="message_redirect">
 				<source>After completing the payment you need to return back to ###HOST### to complete the order.</source>
 				<target>Nach abgeschlossener Bezahlung müssen Sie zu ###HOST### zurückkehren, um die Bestellung abzuschließen.</target>
 			</trans-unit>
-			<trans-unit id="message_place_order" xml:space="preserve" approved="yes">
+			<trans-unit id="message_place_order" resname="message_place_order">
 				<source>buy now</source>
 				<target>bezahlen und kostenpflichtig bestellen</target>
 			</trans-unit>
-			<trans-unit id="message_credit_card" xml:space="preserve" approved="yes">
+			<trans-unit id="message_credit_card" resname="message_credit_card">
 				<source>Credit card</source>
 				<target>Kreditkarte</target>
 			</trans-unit>
-			<trans-unit id="message_card_number" xml:space="preserve" approved="yes">
+			<trans-unit id="message_card_number" resname="message_card_number">
 				<source>Card number</source>
 				<target>Kartennummer</target>
 			</trans-unit>
-			<trans-unit id="message_card_holder" xml:space="preserve" approved="yes">
+			<trans-unit id="message_card_holder" resname="message_card_holder">
 				<source>Card holder</source>
 				<target>Karteninhaber</target>
 			</trans-unit>
-			<trans-unit id="message_valid_until" xml:space="preserve" approved="yes">
+			<trans-unit id="message_valid_until" resname="message_valid_until">
 				<source>Valid until (MM/YYYY)</source>
 				<target>Gültig bis (MM/JJJJ)</target>
 			</trans-unit>
-			<trans-unit id="message_account_holder" xml:space="preserve" approved="yes">
+			<trans-unit id="message_account_holder" resname="message_account_holder">
 				<source>Account holder</source>
 				<target>Kontoinhaber</target>
 			</trans-unit>
-			<trans-unit id="message_account_number" xml:space="preserve" approved="yes">
+			<trans-unit id="message_account_number" resname="message_account_number">
 				<source>Account number</source>
 				<target>Kontonummer</target>
 			</trans-unit>
-			<trans-unit id="message_bank_code" xml:space="preserve" approved="yes">
+			<trans-unit id="message_bank_code" resname="message_bank_code">
 				<source>Bank code</source>
 				<target>Bankleitzahl</target>
 			</trans-unit>

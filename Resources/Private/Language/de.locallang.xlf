@@ -1,65 +1,65 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
-<xliff version="1.0">
-	<file source-language="en" target-language="de" datatype="plaintext" original="messages" date="2018-05-09T17:24:14Z" product-name="transactor">
+<xliff version="1.2" xmlns="urn:oasis:names:tc:xliff:document:1.2">
+	<file source-language="en" target-language="de" datatype="plaintext" original="EXT:transactor/Resources/Private/Language/locallang.xlf" date="2018-05-09T17:24:14Z" product-name="transactor">
 		<header/>
 		<body>
-			<trans-unit id="error_feature_class" xml:space="preserve">
+			<trans-unit id="error_feature_class" resname="error_feature_class">
 				<source>ERROR: Could not find the class %s for the feature %s.</source>
 				<target>FEHLER: Die Klasse %s für das Feature %s konnte nicht gefunden werden.</target>
 			</trans-unit>
-			<trans-unit id="error_feature_class_interface" xml:space="preserve">
+			<trans-unit id="error_feature_class_interface" resname="error_feature_class_interface">
 				<source>ERROR: The feature class %s does not fit the required interface.</source>
 				<target>FEHLER: Die Feature Klasse %s passt nicht zum geforderten Interface.</target>
 			</trans-unit>
-			<trans-unit id="error_gateway_missing" xml:space="preserve" approved="yes">
+			<trans-unit id="error_gateway_missing" approved="yes" resname="error_gateway_missing" approved="yes">
 				<source>ERROR: Could not find gateway object for payment method '|'.</source>
 				<target>FEHLER: Es konnte kein Gateway Objeḱt für die Bezahlmethode '|' erzeugt werden.</target>
 			</trans-unit>
-			<trans-unit id="error_gateway_unknown" xml:space="preserve" approved="yes">
+			<trans-unit id="error_gateway_unknown" approved="yes" resname="error_gateway_unknown" approved="yes">
 				<source>ERROR: Unknown failure after Gateway processing!</source>
 				<target>FEHLER: Unbekannter Fehler nach der Bearbeitung durch den Gateway!</target>
 			</trans-unit>
-			<trans-unit id="error_no_template" xml:space="preserve" approved="yes">
+			<trans-unit id="error_no_template" approved="yes" resname="error_no_template" approved="yes">
 				<source>ERROR: The payment template file &quot;%s&quot; has not been found.</source>
 				<target>FEHLER: Die Bezahlung Template Datei &quot;%s&quot; wurde nicht gefunden.</target>
 			</trans-unit>
-			<trans-unit id="error_transaction_init" xml:space="preserve" approved="yes">
+			<trans-unit id="error_transaction_init" approved="yes" resname="error_transaction_init" approved="yes">
 				<source>ERROR: Could not initialize transaction.</source>
 				<target>FEHLER: Die Transaktion konnte nicht gestartet werden.</target>
 			</trans-unit>
-			<trans-unit id="error_reference_id" xml:space="preserve" approved="yes">
+			<trans-unit id="error_reference_id" approved="yes" resname="error_reference_id" approved="yes">
 				<source>ERROR: reference ID could not be generated.</source>
 				<target>FEHLER: Es konnte keine Referenz ID erzeugt werden.</target>
 			</trans-unit>
-			<trans-unit id="error_transaction_details" xml:space="preserve" approved="yes">
+			<trans-unit id="error_transaction_details" approved="yes" resname="error_transaction_details" approved="yes">
 				<source>ERROR: Setting details of transaction failed.</source>
 				<target>FEHLER: Das Setzen der Details der Transaktion ist fehlgeschlagen.</target>
 			</trans-unit>
-			<trans-unit id="error_transaction_no" xml:space="preserve" approved="yes">
+			<trans-unit id="error_transaction_no" approved="yes" resname="error_transaction_no" approved="yes">
 				<source>ERROR: No transaction has been executed.</source>
 				<target>FEHLER: Es ist keine Transaktion durchgeführt worden.</target>
 			</trans-unit>
-			<trans-unit id="error_relay_url" xml:space="preserve" approved="yes">
+			<trans-unit id="error_relay_url" approved="yes" resname="error_relay_url" approved="yes">
 				<source>ERROR: No relay URL given!</source>
 				<target>FEHLER: Es ist keine Weiterleitungs-URL angegeben worden!</target>
 			</trans-unit>
-			<trans-unit id="error_api_parameters" xml:space="preserve" approved="yes">
+			<trans-unit id="error_api_parameters" approved="yes" resname="error_api_parameters" approved="yes">
 				<source>ERROR: Wrong parameter in the call of the Transactor API.</source>
 				<target>FEHLER: Falscher Parameter beim Aufruf der Transactor API.</target>
 			</trans-unit>
-			<trans-unit id="error_invalid_data" xml:space="preserve" approved="yes">
+			<trans-unit id="error_invalid_data" approved="yes" resname="error_invalid_data" approved="yes">
 				<source>ERROR: invalid data.</source>
 				<target>FEHLER: ungültige Daten.</target>
 			</trans-unit>
-			<trans-unit id="extension_payment_missing" xml:space="preserve">
+			<trans-unit id="extension_payment_missing" resname="extension_payment_missing">
 				<source>ERROR: No extension has been configured for the payment method.</source>
 				<target>FEHLER: Es ist keine Extension als Bezahlmethode konfiguriert worden.</target>
 			</trans-unit>
-			<trans-unit id="extension_missing" xml:space="preserve">
+			<trans-unit id="extension_missing" resname="extension_missing">
 				<source>ERROR: The extension '|' has not been installed.</source>
 				<target>FEHLER: Die Extension '|' wurde nicht installiert.</target>
 			</trans-unit>
-			<trans-unit id="feature_address_input" xml:space="preserve">
+			<trans-unit id="feature_address_input" resname="feature_address_input">
 				<source>address input</source>
 				<target>Adresseingabe</target>
 			</trans-unit>
