@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" version="1.2">
-  <file source-language="en" datatype="plaintext" original="EXT:transactor/Resources/Private/Language/locallang.xlf" date="2018-05-09T17:24:14Z" product-name="transactor" target-language="pt-BR">
+  <file source-language="en" datatype="plaintext" original="EXT:transactor/Resources/Private/Language/locallang.xlf" date="2018-05-09T17:24:14Z" product-name="transactor" target-language="pt-PT">
     <header/>
     <body>
       <trans-unit id="error_feature_class" resname="error_feature_class">
