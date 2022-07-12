@@ -3,65 +3,65 @@
   <file source-language="en" datatype="plaintext" original="EXT:transactor/Resources/Private/Language/locallang.xlf" date="2018-05-09T17:24:14Z" product-name="transactor" target-language="da">
     <header/>
     <body>
-      <trans-unit id="error_feature_class" resname="error_feature_class">
+      <trans-unit id="error_feature_class" resname="error_feature_class" approved="yes">
         <source>ERROR: Could not find the class %s for the feature %s.</source>
-        <target state="translated">FEJL: Kunne ikke finde klassen %s for funktionen %s.</target>
+        <target state="final">FEJL: Kunne ikke finde klassen %s for funktionen %s.</target>
       </trans-unit>
-      <trans-unit id="error_feature_class_interface" resname="error_feature_class_interface">
+      <trans-unit id="error_feature_class_interface" resname="error_feature_class_interface" approved="yes">
         <source>ERROR: The feature class %s does not fit the required interface.</source>
-        <target state="translated">FEJL: Funktionsklasse %s passer ikke til den påkrævede grænseflade.</target>
+        <target state="final">FEJL: Funktionsklasse %s passer ikke til den påkrævede grænseflade.</target>
       </trans-unit>
-      <trans-unit id="error_gateway_missing" resname="error_gateway_missing">
+      <trans-unit id="error_gateway_missing" resname="error_gateway_missing" approved="yes">
         <source>ERROR: Could not find gateway object for payment method '|'.</source>
-        <target state="translated">FEJL: Kunne ikke finde gateway objekt for betalingsmetode '|'.</target>
+        <target state="final">FEJL: Kunne ikke finde gateway objekt for betalingsmetode '|'.</target>
       </trans-unit>
-      <trans-unit id="error_gateway_unknown" resname="error_gateway_unknown">
+      <trans-unit id="error_gateway_unknown" resname="error_gateway_unknown" approved="yes">
         <source>ERROR: Unknown failure after Gateway processing!</source>
-        <target state="translated">FEJL: Ukendt fejl efter Gateway behandling!</target>
+        <target state="final">FEJL: Ukendt fejl efter Gateway behandling!</target>
       </trans-unit>
-      <trans-unit id="error_no_template" resname="error_no_template">
+      <trans-unit id="error_no_template" resname="error_no_template" approved="yes">
         <source>ERROR: The payment template file &quot;%s&quot; has not been found.</source>
-        <target state="translated">FEJL: Betalingsskabelonfilen "%s" er ikke blevet fundet.</target>
+        <target state="final">FEJL: Betalingsskabelonfilen "%s" er ikke blevet fundet.</target>
       </trans-unit>
-      <trans-unit id="error_transaction_init" resname="error_transaction_init">
+      <trans-unit id="error_transaction_init" resname="error_transaction_init" approved="yes">
         <source>ERROR: Could not initialize transaction.</source>
-        <target state="translated">FEJL: Kunne ikke initialisere transaktionen.</target>
+        <target state="final">FEJL: Kunne ikke initialisere transaktionen.</target>
       </trans-unit>
-      <trans-unit id="error_reference_id" resname="error_reference_id">
+      <trans-unit id="error_reference_id" resname="error_reference_id" approved="yes">
         <source>ERROR: reference ID could not be generated.</source>
-        <target state="translated">FEJL: reference ID kunne ikke genereres.</target>
+        <target state="final">FEJL: Reference ID kunne ikke genereres.</target>
       </trans-unit>
-      <trans-unit id="error_transaction_details" resname="error_transaction_details">
+      <trans-unit id="error_transaction_details" resname="error_transaction_details" approved="yes">
         <source>ERROR: Setting details of transaction failed.</source>
-        <target state="translated">FEJL: Indstilling af detaljer om transaktionen mislykkedes.</target>
+        <target state="final">FEJL: Indstilling af detaljer om transaktionen mislykkedes.</target>
       </trans-unit>
-      <trans-unit id="error_transaction_no" resname="error_transaction_no">
+      <trans-unit id="error_transaction_no" resname="error_transaction_no" approved="yes">
         <source>ERROR: No transaction has been executed.</source>
-        <target state="translated">FEJL: Ingen transaktion er blevet udført.</target>
+        <target state="final">FEJL: Ingen transaktion er blevet udført.</target>
       </trans-unit>
-      <trans-unit id="error_relay_url" resname="error_relay_url">
+      <trans-unit id="error_relay_url" resname="error_relay_url" approved="yes">
         <source>ERROR: No relay URL given!</source>
-        <target state="translated">FEJL: Ingen relæ-URL angivet!</target>
+        <target state="final">FEJL: Ingen relæ-URL angivet!</target>
       </trans-unit>
-      <trans-unit id="error_api_parameters" resname="error_api_parameters">
+      <trans-unit id="error_api_parameters" resname="error_api_parameters" approved="yes">
         <source>ERROR: Wrong parameter in the call of the Transactor API.</source>
-        <target state="translated">FEJL: Forkert parameter i opkaldet af Transaktor API.</target>
+        <target state="final">FEJL: Forkert parameter i opkaldet af Transaktor API.</target>
       </trans-unit>
-      <trans-unit id="error_invalid_data" resname="error_invalid_data">
+      <trans-unit id="error_invalid_data" resname="error_invalid_data" approved="yes">
         <source>ERROR: invalid data.</source>
-        <target state="translated">FEJL: Ugyldige data.</target>
+        <target state="final">FEJL: Ugyldige data.</target>
       </trans-unit>
-      <trans-unit id="extension_payment_missing" resname="extension_payment_missing">
+      <trans-unit id="extension_payment_missing" resname="extension_payment_missing" approved="yes">
         <source>ERROR: No extension has been configured for the payment method.</source>
-        <target state="translated">FEJL: Ingen udvidelse er konfigureret til betalingsmetoden.</target>
+        <target state="final">FEJL: Ingen udvidelse er konfigureret til betalingsmetoden.</target>
       </trans-unit>
-      <trans-unit id="extension_missing" resname="extension_missing">
+      <trans-unit id="extension_missing" resname="extension_missing" approved="yes">
         <source>ERROR: The extension '|' has not been installed.</source>
-        <target state="translated">FEJL: Udvidelsen '|' er ikke blevet installeret.</target>
+        <target state="final">FEJL: Udvidelsen '|' er ikke blevet installeret.</target>
       </trans-unit>
-      <trans-unit id="feature_address_input" resname="feature_address_input">
+      <trans-unit id="feature_address_input" resname="feature_address_input" approved="yes">
         <source>address input</source>
-        <target state="translated">adresse input</target>
+        <target state="final">adresse input</target>
       </trans-unit>
     </body>
   </file>
