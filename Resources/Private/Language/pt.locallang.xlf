@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" version="1.2">
-  <file source-language="en" datatype="plaintext" original="EXT:transactor/Resources/Private/Language/locallang.xlf" date="2018-05-09T17:24:14Z" product-name="transactor" target-language="pt-BR">
+  <file source-language="en" datatype="plaintext" original="EXT:transactor/Resources/Private/Language/locallang.xlf" date="2018-05-09T17:24:14Z" product-name="transactor" target-language="pt-PT">
     <header/>
     <body>
       <trans-unit id="error_feature_class" resname="error_feature_class">
@@ -13,7 +13,7 @@
       </trans-unit>
       <trans-unit id="error_gateway_missing" resname="error_gateway_missing">
         <source>ERROR: Could not find gateway object for payment method '|'.</source>
-        <target state="translated">ERRO: Não foi possível encontrar o objeto de gateway para o método de pagamento "|".</target>
+        <target state="needs-translation">ERROR: Could not find gateway object for payment method '|'.</target>
       </trans-unit>
       <trans-unit id="error_gateway_unknown" resname="error_gateway_unknown">
         <source>ERROR: Unknown failure after Gateway processing!</source>
@@ -21,35 +21,35 @@
       </trans-unit>
       <trans-unit id="error_no_template" resname="error_no_template">
         <source>ERROR: The payment template file &quot;%s&quot; has not been found.</source>
-        <target state="translated">ERRO: O arquivo template de pagamanto "%s" não foi encontrado.</target>
+        <target state="needs-translation">ERROR: The payment template file "%s" has not been found.</target>
       </trans-unit>
       <trans-unit id="error_transaction_init" resname="error_transaction_init">
         <source>ERROR: Could not initialize transaction.</source>
-        <target state="translated">ERRO: Não foi possível inicializar a transação.</target>
+        <target state="needs-translation">ERROR: Could not initialize transaction.</target>
       </trans-unit>
       <trans-unit id="error_reference_id" resname="error_reference_id">
         <source>ERROR: reference ID could not be generated.</source>
-        <target state="translated">ERRO: ID de referência não pôde ser gerado.</target>
+        <target state="needs-translation">ERROR: reference ID could not be generated.</target>
       </trans-unit>
       <trans-unit id="error_transaction_details" resname="error_transaction_details">
         <source>ERROR: Setting details of transaction failed.</source>
-        <target state="translated">ERRO: Detalhes dos ajustes da transação falhou.</target>
+        <target state="needs-translation">ERROR: Setting details of transaction failed.</target>
       </trans-unit>
       <trans-unit id="error_transaction_no" resname="error_transaction_no">
         <source>ERROR: No transaction has been executed.</source>
-        <target state="translated">ERRO: Nenhuma transação foi executada.</target>
+        <target state="needs-translation">ERROR: No transaction has been executed.</target>
       </trans-unit>
       <trans-unit id="error_relay_url" resname="error_relay_url">
         <source>ERROR: No relay URL given!</source>
-        <target state="translated">ERRO: Nenhum re-envio de URL foi dado!</target>
+        <target state="needs-translation">ERROR: No relay URL given!</target>
       </trans-unit>
       <trans-unit id="error_api_parameters" resname="error_api_parameters">
         <source>ERROR: Wrong parameter in the call of the Transactor API.</source>
-        <target state="translated">ERRO: Parâmetro errado na chamada do API do Transator.</target>
+        <target state="needs-translation">ERROR: Wrong parameter in the call of the Transactor API.</target>
       </trans-unit>
       <trans-unit id="error_invalid_data" resname="error_invalid_data">
         <source>ERROR: invalid data.</source>
-        <target state="translated">ERRO: dados inválidos.</target>
+        <target state="needs-translation">ERROR: invalid data.</target>
       </trans-unit>
       <trans-unit id="extension_payment_missing" resname="extension_payment_missing">
         <source>ERROR: No extension has been configured for the payment method.</source>
