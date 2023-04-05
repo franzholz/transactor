@@ -303,7 +303,7 @@ abstract class tx_transactor_gateway implements tx_transactor_gateway_int, \TYPO
         }
 
         // Store order id in database
-        $dataArray = array(
+        $dataArray = [
             'crdate' => time(),
             'gatewayid' => '',
             'ext_key' => $this->callingExtension,
@@ -317,7 +317,7 @@ abstract class tx_transactor_gateway implements tx_transactor_gateway_int, \TYPO
             'message' => TX_TRANSACTOR_TRANSACTION_MESSAGE_NOT_PROCESSED,
             'config' => $xmlOptions,
             'user' => $detailsArray['user']
-        );
+        ];
         $res =
             $GLOBALS['TYPO3_DB']->exec_DELETEquery(
                 'tx_transactor_transactions',
@@ -618,10 +618,10 @@ abstract class tx_transactor_gateway implements tx_transactor_gateway_int, \TYPO
         if (
             in_array(
                 $resultsArray['state'],
-                array(
+                [
                     TX_TRANSACTOR_TRANSACTION_STATE_APPROVE_OK,
                     TX_TRANSACTOR_TRANSACTION_STATE_APPROVE_DUPLICATE
-                )
+                ]
             )
         ) {
             $result = true;

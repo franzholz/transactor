@@ -650,7 +650,7 @@ class GatewayProxy implements \JambageCom\Transactor\Domain\GatewayInterface
     {
         $result = false;
         if (method_exists($this, $method)) {
-            $result = call_user_func_array(array($this->getGatewayObj(), $method), $params);
+            $result = call_user_func_array([$this->getGatewayObj(), $method], $params);
         } else {
             debug ('ERROR: unkown method "' . $method . '" in call of transactor GatewayProxy object'); // keep this
             throw new \RuntimeException('ERROR in transactor: unkown method "' . $method . '" in call of transactor GatewayProxy object ' . $this->getGatewayClass() . '"', 2020290001);

@@ -849,13 +849,13 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
     )
     {
         $paramNameActivity = $extensionKey . '[activity][' . $paymentActivity . ']';
-        $failLinkParams = array($paramNameActivity => '0');
+        $failLinkParams = [$paramNameActivity => '0'];
 
         if (isset($linkParams) && is_array($linkParams)) {
             $failLinkParams = array_merge($failLinkParams, $linkParams);
         }
 
-        $successLinkParams = array($paramNameActivity => '1');
+        $successLinkParams = [$paramNameActivity => '1'];
 
         if (isset($linkParams) && is_array($linkParams)) {
             $successLinkParams = array_merge($successLinkParams, $linkParams);
@@ -932,7 +932,7 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
             }
         }
 
-        $conf = array('returnLast' => 'url');
+        $conf = ['returnLast' => 'url'];
         $urlDir = GeneralUtility::getIndpEnv('TYPO3_REQUEST_DIR');
         $retlink = $urlDir . static::getUrl($conf, $GLOBALS['TSFE']->id, $linkParams);
         $returi = $retlink . $paramReturi;
@@ -940,24 +940,24 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
         $successlink = $urlDir . static::getUrl($conf, $successPid, $successLinkParams);
         $notifyurl = $urlDir . static::getUrl($conf, $GLOBALS['TSFE']->id, $notifyUrlParams);
 
-        $extensions = array(
+        $extensions = [
             'calling' => $extensionKey,
             'gateway' => $gatewayExtKey,
             'library' => TRANSACTOR_EXT
-        );
+        ];
         $extensionInfo = [];
         foreach ($extensions as $type => $extension) {
             $info = \JambageCom\Div2007\Utility\ExtensionUtility::getExtensionInfo($extension);
-            $extensionInfo[$type] = array(
+            $extensionInfo[$type] = [
                 'key' => $extension,
                 'version' => $info['version'],
                 'title' => $info['title'],
                 'author' => $info['author']
-            );
+            ];
         }
 
-        $transactionDetailsArray = array(
-            'transaction' => array(
+        $transactionDetailsArray = [
+            'transaction' => [
                 'amount' => $totalPrice,
                 'currency' => $confScript['currency'] ? $confScript['currency'] : $confScript['Currency'],
                 'orderuid' => $orderUid,
@@ -965,7 +965,7 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
                 'faillink' => $faillink,
                 'successlink' => $successlink,
                 'notifyurl' => $notifyurl
-            ),
+            ],
             'total' => $totalArray,
             'tracking' => $trackingCode,
             'address' => $addressArray,
@@ -974,7 +974,7 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
             'language' => static::getLanguage(),
             'extension' => $extensionInfo,
             'confScript' => $confScript
-        );
+        ];
 
         if ($paymentActivity == 'verify') {
             $verifyLink =
@@ -993,7 +993,7 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
         $transactionDetailsArray['reference'] = $referenceId;
         $transactionDetailsArray['order'] = [];
         $transactionDetailsArray['order']['orderNumber'] = $orderNumber;
-        $transactionDetailsArray['order']['notificationEmail'] = array($notificationEmail);
+        $transactionDetailsArray['order']['notificationEmail'] = [$notificationEmail];
 
         return $transactionDetailsArray;
     }
@@ -1135,7 +1135,7 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
         $totalArray['totaltax'] = static::fFloat($totalArray['amounttax'] - $totalArray['amountnotax']);
 
         // Setting up address info values
-        $mapAddrFields = array(
+        $mapAddrFields = [
             'first_name' => 'first_name',
             'last_name' => 'last_name',
             'address' => 'address1',
@@ -1144,11 +1144,11 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
             'telephone' => 'phone',
             'email' => 'email',
             'country' => 'country'
-        );
-        $tmpAddrArray = array(
+        ];
+        $tmpAddrArray = [
             'person' => $infoArray['billing'],
             'delivery' => $infoArray['delivery']
-        );
+        ];
         $addressArray = [];
 
         foreach($tmpAddrArray as $key => $basketAddressArray) {
@@ -1205,11 +1205,11 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
         // Fill the basket array
         $basketArray = [];
         $newTotalArray =
-            array(
+            [
                 'payment'  => '0',
                 'shipping' => '0',
                 'handling' => '0'
-            );
+            ];
         $lastSort = '';
         $lastKey = 0;
 
@@ -1245,7 +1245,7 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
 
                 $count = intval($actItem['count']);
 
-                $basketRow = array(
+                $basketRow = [
                     'item_name'  => $row['title'],
                     'quantity'   => $count,
                     'amount'     => static::fFloat($actItem['priceNoTax']),
@@ -1256,7 +1256,7 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
                     'tax' => static::fFloat($actItem['priceTax'] - $actItem['priceNoTax']),
                     'totaltax' => static::fFloat($actItem['totalTax'] - $actItem['totalNoTax']),
                     'item_number' => $row['itemnumber'],
-                );
+                ];
 
                 for ($i = 0; $i <= 7; ++$i) {
 
@@ -1326,14 +1326,14 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
                     'voucher_payment_article'
                 );
             $basketArray['VOUCHER'][] =
-                array(
+                [
                     'item_name' => $voucherText,
                     'on0' => $voucherText,
                     'quantity' => 1,
                     'amount' => $voucherAmount,
                     'taxpercent' => 0,
                     'item_number' => 'VOUCHER'
-                );
+                ];
 
             $totalArray['goodsnotax'] = static::fFloat($goodsTotalNoTax + $voucherAmount);
 

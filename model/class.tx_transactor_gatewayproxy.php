@@ -485,7 +485,7 @@ class tx_transactor_gatewayproxy implements tx_transactor_gateway_int, \TYPO3\CM
     public function __call ($method, $params) {
         $result = false;
         if (method_exists($this, $method)) {
-            $result = call_user_func_array(array($this->getGatewayObj(), $method), $params);
+            $result = call_user_func_array([$this->getGatewayObj(), $method], $params);
         } else {
             debug ('ERROR: unkown method "' . $method . '" in call of tx_transactor_gatewayproxy object'); // keep this
             throw new RuntimeException('ERROR in transactor: unkown method "' . $method . '" in call of tx_transactor_gatewayproxy object ' . $this->gatewayClass . '"', 2020290001);

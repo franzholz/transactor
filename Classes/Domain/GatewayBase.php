@@ -497,7 +497,7 @@ abstract class GatewayBase implements GatewayInterface, \TYPO3\CMS\Core\Singleto
             );        
 
         // Store order id in database
-        $dataArray = array(
+        $dataArray = [
             'crdate' => time(),
             'ext_key' => $this->callingExtension,
             'reference' => $reference,
@@ -511,7 +511,7 @@ abstract class GatewayBase implements GatewayInterface, \TYPO3\CMS\Core\Singleto
             'config' => $xmlOptions,
             'config_ext' => $xmlExtensionConfiguration,
             'user' => $detailsArray['user']
-        );
+        ];
 
         if (($row = $this->getTransaction($reference)) === false) {
             $res =
@@ -860,7 +860,7 @@ abstract class GatewayBase implements GatewayInterface, \TYPO3\CMS\Core\Singleto
 
     public function getEmptyResultsArray ($reference, $currency)
     {
-        $resultsArray = array(
+        $resultsArray = [
             'gatewayid' => '',
             'reference' => $reference,
             'currency' => $config['currency_code'],
@@ -871,7 +871,7 @@ abstract class GatewayBase implements GatewayInterface, \TYPO3\CMS\Core\Singleto
             'ext_key' => $this->getCallingExtension(),
             'paymethod_key' => $this->getExtensionKey(),
             'paymethod_method' => $this->getPaymentMethod()
-        );
+        ];
 
         return $resultsArray;
     }
@@ -882,10 +882,10 @@ abstract class GatewayBase implements GatewayInterface, \TYPO3\CMS\Core\Singleto
         if (
             in_array(
                 $resultsArray['state'],
-                array(
+                [
                     State::APPROVE_OK,
                     State::APPROVE_DUPLICATE
-                )
+                ]
             )
         ) {
             $result = true;

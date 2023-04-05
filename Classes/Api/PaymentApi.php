@@ -369,7 +369,7 @@ class PaymentApi
     static private function field2array ($field)
     {
         if (!$field = @unserialize ($field)) {
-            $field = array($field);
+            $field = [$field];
         }
         return $field;
     }

@@ -126,11 +126,11 @@ class tx_transactor_api {
         $confScript
     ) {
         $gatewayModeArray =
-            array(
+            [
                 'form' => TX_TRANSACTOR_GATEWAYMODE_FORM,
                 'ajax' => TX_TRANSACTOR_GATEWAYMODE_AJAX,
                 'webservice' => TX_TRANSACTOR_GATEWAYMODE_WEBSERVICE
-            );
+            ];
         $gatewayMode = $gatewayModeArray[$confScript['gatewaymode']];
         if (!$gatewayMode) {
             $gatewayMode = $gatewayModeArray['form'];
@@ -686,19 +686,19 @@ class tx_transactor_api {
         &$paymentBasketArray
     ) {
         $paramNameActivity = $extKey . '[activity][' . $paymentActivity . ']';
-        $failLinkParams = array($paramNameActivity => '0');
+        $failLinkParams = [$paramNameActivity => '0'];
 
         if (isset($linkParams) && is_array($linkParams)) {
             $failLinkParams = array_merge($failLinkParams, $linkParams);
         }
 
-        $successLinkParams = array($paramNameActivity => '1');
+        $successLinkParams = [$paramNameActivity => '1'];
 
         if (isset($linkParams) && is_array($linkParams)) {
             $successLinkParams = array_merge($successLinkParams, $linkParams);
         }
 
-        $notifyUrlParams = array('eID' => str_replace('transactor_', '', $gatewayExtKey));
+        $notifyUrlParams = ['eID' => str_replace('transactor_', '', $gatewayExtKey)];
 
         if (isset($linkParams) && is_array($linkParams)) {
             $notifyUrlParams = array_merge($notifyUrlParams, $linkParams);
@@ -759,7 +759,7 @@ class tx_transactor_api {
             }
         }
 
-        $conf = array('returnLast' => 'url');
+        $conf = ['returnLast' => 'url'];
         $urlDir = GeneralUtility::getIndpEnv('TYPO3_REQUEST_DIR');
         $retlink = $urlDir . self::getUrl($conf, $GLOBALS['TSFE']->id, $linkParams);
         $returi = $retlink . $paramReturi;
@@ -768,8 +768,8 @@ class tx_transactor_api {
         $successlink = $urlDir . self::getUrl($conf, $successPid, $successLinkParams);
         $notifyurl = $urlDir . self::getUrl($conf, $GLOBALS['TSFE']->id, $notifyUrlParams);
 
-        $transactionDetailsArray = array (
-            'transaction' => array (
+        $transactionDetailsArray = [
+            'transaction' => [
                 'amount' => $totalPrice,
                 'currency' => $confScript['currency'] ? $confScript['currency'] : $confScript['Currency'],
                 'orderuid' => $orderUid,
@@ -777,7 +777,7 @@ class tx_transactor_api {
                 'faillink' => $faillink,
                 'successlink' => $successlink,
                 'notifyurl' => $notifyurl
-            ),
+            ],
             'total' => $totalArray,
             'tracking' => $trackingCode,
             'address' => $addressArray,
@@ -786,7 +786,7 @@ class tx_transactor_api {
             'language' => self::getLanguage(),
             'calling_extension' => $extKey,
             'confScript' => $confScript
-        );
+        ];
 
         if ($paymentActivity == 'verify') {
             $verifyLink = $urlDir . self::getUrl($conf, $GLOBALS['TSFE']->id, $successLinkParams);
@@ -905,7 +905,7 @@ class tx_transactor_api {
         $totalArray['totaltax'] = self::fFloat($totalArray['amounttax'] - $totalArray['amountnotax']);
 
         // Setting up address info values
-        $mapAddrFields = array(
+        $mapAddrFields = [
             'first_name' => 'first_name',
             'last_name' => 'last_name',
             'address' => 'address1',
@@ -914,11 +914,11 @@ class tx_transactor_api {
             'telephone' => 'phone',
             'email' => 'email',
             'country' => 'country'
-        );
-        $tmpAddrArray = array(
+        ];
+        $tmpAddrArray = [
             'person' => $infoArray['billing'],
             'delivery' => $infoArray['delivery']
-        );
+        ];
         $addressArray = [];
 
         foreach($tmpAddrArray as $key => $basketAddressArray) {
@@ -971,11 +971,11 @@ class tx_transactor_api {
         // Fill the basket array
         $basketArray = [];
         $newTotalArray =
-            array(
+            [
                 'payment'  => '0',
                 'shipping' => '0',
                 'handling' => '0'
-            );
+            ];
         $lastSort = '';
         $lastKey = 0;
 
@@ -1011,7 +1011,7 @@ class tx_transactor_api {
 
                 $count = intval($actItem['count']);
 
-                $basketRow = array(
+                $basketRow = [
                     'item_name'  => $row['title'],
                     'quantity'   => $count,
                     'amount'     => self::fFloat($actItem['priceNoTax']),
@@ -1022,7 +1022,7 @@ class tx_transactor_api {
                     'tax' => self::fFloat($actItem['priceTax'] - $actItem['priceNoTax']),
                     'totaltax' => self::fFloat($actItem['totalTax'] - $actItem['totalNoTax']),
                     'item_number' => $row['itemnumber'],
-                );
+                ];
 
                 for ($i = 0; $i <= 7; ++$i) {
 
@@ -1086,14 +1086,14 @@ class tx_transactor_api {
                     'voucher_payment_article'
                 );
             $basketArray['VOUCHER'][] =
-                array(
+                [
                     'item_name' => $voucherText,
                     'on0' => $voucherText,
                     'quantity' => 1,
                     'amount' => $voucherAmount,
                     'taxpercent' => 0,
                     'item_number' => 'VOUCHER'
-                );
+                ];
 
             $totalArray['goodsnotax'] = self::fFloat($goodsTotalNoTax + $voucherAmount);
             if (isset($calculatedArray['depositnotax'])) {

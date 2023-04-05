@@ -4,8 +4,8 @@ defined('TYPO3_MODE') || die('Access denied.');
 // ******************************************************************
 // transactions table
 // ******************************************************************
-$result = array (
-    'ctrl' => array (
+$result = [
+    'ctrl' => [
         'title' => TRANSACTOR_LANGUAGE_PATH_LL . 'locallang_db.xlf:tx_transactor_transactions',
         'label' => 'reference',
         'crdate' => 'crdate',
@@ -13,167 +13,167 @@ $result = array (
         'dividers2tabs' => true,
         'iconfile' => 'EXT:' . TRANSACTOR_EXT . '/ext_icon.gif',
         'searchFields' => 'uid,reference,orderuid,message,user',
-    ),
-    'interface' => array (
+    ],
+    'interface' => [
         'showRecordFieldList' => 'uid,reference,gatewayid,orderuid,currency,amount,state,state_time,message,ext_key,paymethod_key,paymethod_method,config,config_ext,user'
-    ),
-    'columns' => array (
-        'uid' => array (
+    ],
+    'columns' => [
+        'uid' => [
             'label' => TRANSACTOR_LANGUAGE_PATH_LL . 'locallang_db.xlf:tx_transactor_transactions_uid',
-            'config' => array (
+            'config' => [
                 'type' => 'none',
-            )
-        ),
-        'crdate' => array (
+            ]
+        ],
+        'crdate' => [
             'exclude' => 1,
             'label' => TRANSACTOR_LANGUAGE_PATH_LL . 'locallang_db.xlf:crdate',
-            'config' => array (
+            'config' => [
                 'type' => 'input',
                 'size' => '8',
                 'max' => '20',
                 'eval' => 'date',
                 'default' => '0'
-            )
-        ),
-        'reference' => array (
+            ]
+        ],
+        'reference' => [
             'exclude' => 0,
             'label' => TRANSACTOR_LANGUAGE_PATH_LL .  'locallang_db.xlf:tx_transactor_transactions.reference',
-            'config' => array (
+            'config' => [
                 'type' => 'input',
                 'size' => '100',
                 'max' => '255'
-            )
-        ),
-        'gatewayid' => array ( // gateway internal transaction id
+            ]
+        ],
+        'gatewayid' => [ // gateway internal transaction id
             'exclude' => 0,
             'label' => TRANSACTOR_LANGUAGE_PATH_LL .  'locallang_db.xlf:tx_transactor_transactions.gatewayid',
-            'config' => array (
+            'config' => [
                 'type' => 'input',
                 'size' => '40',
                 'max' => '255'
-            )
-        ),
-        'orderuid' => array (
+            ]
+        ],
+        'orderuid' => [
             'exclude' => 1,
             'label' => TRANSACTOR_LANGUAGE_PATH_LL .  'locallang_db.xlf:tx_transactor_transactions.orderuid',
-            'config' => array (
+            'config' => [
                 'type' => 'input',
                 'size' => '25',
                 'max' => '255',
                 'readOnly' => '1'
-            )
-        ),
-        'currency' => array (
+            ]
+        ],
+        'currency' => [
             'exclude' => 0,
             'label' => TRANSACTOR_LANGUAGE_PATH_LL . 'locallang_db.xlf:tx_transactor_transactions.currency',
-            'config' => array (
+            'config' => [
                 'type' => 'input',
                 'size' => '3',
                 'max' => '3'
-            )
-        ),
-        'amount' => array (
+            ]
+        ],
+        'amount' => [
             'exclude' => 1,
             'label' => TRANSACTOR_LANGUAGE_PATH_LL .  'locallang_db.xlf:tx_transactor_transactions.amount',
-            'config' => array (
+            'config' => [
                 'type' => 'input',
                 'size' => '12',
                 'eval' => 'trim,double2',
                 'max' => '20'
-            )
-        ),
-        'state' => array (
+            ]
+        ],
+        'state' => [
             'exclude' => 1,
             'label' => TRANSACTOR_LANGUAGE_PATH_LL . 'locallang_db.xlf:tx_transactor_transactions.state',
-            'config' => array (
+            'config' => [
                 'type' => 'input',
                 'size' => '3',
                 'eval' => 'int',
                 'max' => '3'
-            )
-        ),
-        'state_time' => array (
+            ]
+        ],
+        'state_time' => [
             'exclude' => 1,
             'label' => TRANSACTOR_LANGUAGE_PATH_LL .  'locallang_db.xlf:tx_transactor_transactions.state_time',
-            'config' => array (
+            'config' => [
                 'type' => 'input',
                 'size' => '8',
                 'max' => '20',
                 'eval' => 'date',
                 'default' => '0'
-            )
-        ),
-        'message' => array (
+            ]
+        ],
+        'message' => [
             'exclude' => 0,
             'label' => TRANSACTOR_LANGUAGE_PATH_LL .  'locallang_db.xlf:tx_transactor_transactions.message',
-            'config' => array (
+            'config' => [
                 'type' => 'input',
                 'size' => '40',
                 'max' => '255'
-            )
-        ),
-        'ext_key' => array (
+            ]
+        ],
+        'ext_key' => [
             'exclude' => 0,
             'label' => TRANSACTOR_LANGUAGE_PATH_LL .  'locallang_db.xlf:tx_transactor_transactions.ext_key',
-            'config' => array (
+            'config' => [
                 'type' => 'input',
                 'size' => '40',
                 'max' => '100'
-            )
-        ),
-        'paymethod_key' => array (
+            ]
+        ],
+        'paymethod_key' => [
             'exclude' => 0,
             'label' => TRANSACTOR_LANGUAGE_PATH_LL .  'locallang_db.xlf:tx_transactor_transactions.paymethod_key',
-            'config' => array (
+            'config' => [
                 'type' => 'input',
                 'size' => '40',
                 'max' => '100'
-            )
-        ),
-        'paymethod_method' => array (
+            ]
+        ],
+        'paymethod_method' => [
             'exclude' => 0,
             'label' => TRANSACTOR_LANGUAGE_PATH_LL .  'locallang_db.xlf:tx_transactor_transactions.paymethod_method',
-            'config' => array (
+            'config' => [
                 'type' => 'input',
                 'size' => '40',
                 'max' => '100'
-            )
-        ),
-        'config' => array (
+            ]
+        ],
+        'config' => [
             'exclude' => 1,
             'label' => TRANSACTOR_LANGUAGE_PATH_LL .  'locallang_db.xlf:tx_transactor_transactions.config',
-            'config' => array (
+            'config' => [
                 'type' => 'text',
                 'cols' => '48',
                 'rows' => '15'
-            )
-        ),
-        'config_ext' => array (
+            ]
+        ],
+        'config_ext' => [
             'exclude' => 1,
             'label' => TRANSACTOR_LANGUAGE_PATH_LL .  'locallang_db.xlf:tx_transactor_transactions.config_ext',
-            'config' => array (
+            'config' => [
                 'type' => 'text',
                 'cols' => '48',
                 'rows' => '15'
-            )
-        ),
-        'user' => array (
+            ]
+        ],
+        'user' => [
             'exclude' => 1,
             'label' => TRANSACTOR_LANGUAGE_PATH_LL . 'locallang_db.xlf:tx_transactor_transactions.user',
-            'config' => array (
+            'config' => [
                 'type' => 'text',
                 'cols' => '48',
                 'rows' => '5'
-            )
-        ),
-    ),
-    'types' => array (
-        '0' => array('showitem' => 'reference,gatewayid,orderuid,currency,amount,state,state_time,message,ext_key,paymethod_key,paymethod_method, config, config_ext,user')
-    ),
-    'palettes' => array (
-        '1' => array('showitem' => '')
-    )
-);
+            ]
+        ],
+    ],
+    'types' => [
+        '0' => ['showitem' => 'reference,gatewayid,orderuid,currency,amount,state,state_time,message,ext_key,paymethod_key,paymethod_method, config, config_ext,user']
+    ],
+    'palettes' => [
+        '1' => ['showitem' => '']
+    ]
+];
 
 
 return $result;
