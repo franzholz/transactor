@@ -45,8 +45,8 @@
 			<trans-unit id="extension_missing" resname="extension_missing">
 				<source>ERROR: The extension '|' has not been installed.</source>
 			</trans-unit>
-			<trans-unit id="feature_address_input" resname="feature_address_input">
-				<source>address input</source>
+			<trans-unit id="feature_address_gatewayaccout" resname="feature_address_gatewayaccout">
+				<source>fetch address from gateway account</source>
 			</trans-unit>
 		</body>
 	</file>
