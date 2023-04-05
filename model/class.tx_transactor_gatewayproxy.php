@@ -170,7 +170,7 @@ class tx_transactor_gatewayproxy implements tx_transactor_gateway_int, \TYPO3\CM
     * @return	void
     * @access	public
     */
-    public function transaction_init ($action, $method, $gatewaymode, $extKey, $config = array()) {
+    public function transaction_init ($action, $method, $gatewaymode, $extKey, $config = []) {
         $this->getGatewayObj()->setTransactionUid(0);
         $result = $this->getGatewayObj()->transaction_init(
             $action,

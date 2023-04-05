@@ -41,13 +41,13 @@ use TYPO3\CMS\Core\Utility\ExtensionManagementUtility;
 abstract class tx_transactor_gateway implements tx_transactor_gateway_int, \TYPO3\CMS\Core\SingletonInterface {
     protected $gatewayKey = 'transactor';	// must be overridden
     protected $extKey = 'transactor';		// must be overridden
-    protected $supportedGatewayArray = array();	// must be overridden
+    protected $supportedGatewayArray = [];	// must be overridden
     protected $bTaxIncluded = false; 	// can be overridden
     protected $conf;
     protected $bSendBasket = false;	// Submit detailled basket informations like single products
     protected $optionsArray;
-    protected $resultsArray = array();
-    protected $config = array();
+    protected $resultsArray = [];
+    protected $config = [];
     protected $bMergeConf = true;
     protected $formActionURI = '';	// The action uri for the submit form
 
@@ -59,8 +59,8 @@ abstract class tx_transactor_gateway implements tx_transactor_gateway_int, \TYPO
     private $detailsArray;
     private $transactionId;
     private $reference;
-    private $cookieArray = array();
-    private $internalArray = array(); // internal options
+    private $cookieArray = [];
+    private $internalArray = []; // internal options
 
 
     /**
@@ -106,7 +106,7 @@ abstract class tx_transactor_gateway implements tx_transactor_gateway_int, \TYPO
 
         $this->setConf($conf);
         $this->setCookieArray(
-            array('fe_typo_user' => $_COOKIE['fe_typo_user'])
+            ['fe_typo_user' => $_COOKIE['fe_typo_user']]
         );
     }
 
@@ -211,7 +211,7 @@ abstract class tx_transactor_gateway implements tx_transactor_gateway_int, \TYPO
         $paymentMethod,
         $gatewayMode,
         $callingExtKey,
-        $conf = array()
+        $conf = []
     ) {
         if ($this->supportsGatewayMode($gatewayMode)) {
             $this->action = $action;
@@ -242,7 +242,7 @@ abstract class tx_transactor_gateway implements tx_transactor_gateway_int, \TYPO
     public function getCookies () {
         $result = '';
         if (count($this->cookieArray)) {
-            $tmpArray = array();
+            $tmpArray = [];
             foreach ($this->cookieArray as $k => $v) {
                 $tmpArray[] = $k . '=' . $v;
             }
@@ -297,7 +297,7 @@ abstract class tx_transactor_gateway implements tx_transactor_gateway_int, \TYPO
                     '',
                     0,
                     'phparray',
-                    array(),
+                    [],
                     'utf-8'
                 );
         }
@@ -595,7 +595,7 @@ abstract class tx_transactor_gateway implements tx_transactor_gateway_int, \TYPO
 
 
     protected function transaction_getResultsMessage ($state, $message) {
-        $resultsArray = array();
+        $resultsArray = [];
         $resultsArray['message'] = $message;
         $resultsArray['state'] = $state;
         $this->setResultsArray($resultsArray);
@@ -656,7 +656,7 @@ abstract class tx_transactor_gateway implements tx_transactor_gateway_int, \TYPO
 
 
     public function clearErrors () {
-        $this->errorStack = array();
+        $this->errorStack = [];
     }
 
 

@@ -40,7 +40,7 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
 class tx_transactor_model_control {
 
     static private $prefixId = '';
-    static private $piVars = array();
+    static private $piVars = [];
     static private $callingExtensionVar = 'calling_extension';
     static private $orderVar = 'order';
     static private $returiVar = 'returi';

@@ -44,7 +44,7 @@ class Localization extends \JambageCom\Div2007\Base\TranslationBase implements \
 {
     public function init1 (
         $pObj,
-        $confLocalLang = array(),
+        $confLocalLang = [],
         $scriptRelPath = '',
         $keepLanguageSettings = true
     )

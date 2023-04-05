@@ -41,7 +41,7 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
 class Parameters implements \TYPO3\CMS\Core\SingletonInterface
 {
     static private $prefixId = '';
-    static private $piVars = array();
+    static private $piVars = [];
     static private $callingExtensionVar = 'calling_extension';
     static private $orderVar = 'order';
     static private $returiVar = 'returi';

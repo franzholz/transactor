@@ -38,7 +38,7 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
 final class tx_transactor_gatewayfactory {
 
     private static $instance = false;					// Holds an instance of this class
-    private static $gatewayProxyObjects = array();		// An array of proxy objects, each pointing to a registered gateway object
+    private static $gatewayProxyObjects = [];		// An array of proxy objects, each pointing to a registered gateway object
     private static $errorMessage = '';
     private static $errorStack;
 
@@ -174,7 +174,7 @@ final class tx_transactor_gatewayfactory {
         );
 
         if ($res && $GLOBALS['TYPO3_DB']->sql_num_rows($res)) {
-            $transactionsArray = array();
+            $transactionsArray = [];
             while ($row = $GLOBALS['TYPO3_DB']->sql_fetch_assoc($res)) {
                 $row['user'] = self::field2array($row['user']);
                 $transactionsArray[$row['uid']] = $row;
@@ -225,7 +225,7 @@ final class tx_transactor_gatewayfactory {
 
 
     public static function clearErrors () {
-        self::$errorStack = array();
+        self::$errorStack = [];
     }
 
 

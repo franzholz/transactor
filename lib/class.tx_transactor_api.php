@@ -101,7 +101,7 @@ class tx_transactor_api {
             }
         }
 
-        $newMarkerArray = array();
+        $newMarkerArray = [];
 
         if(isset($langArray) && is_array($langArray)) {
             foreach ($langArray as $key => $value) {
@@ -112,7 +112,7 @@ class tx_transactor_api {
                     tx_div2007_core::substituteMarkerArray($value, $markerArray);
             }
         } else {
-            $langArray = array();
+            $langArray = [];
         }
         $markerArray = array_merge($markerArray, $newMarkerArray);
     }
@@ -571,9 +571,9 @@ class tx_transactor_api {
 
             if (is_object($gatewayProxyObject)) {
                 $gatewayKey = $gatewayProxyObject->getGatewayKey();
-                $paymentBasketArray = array();
-                $addressArray = array();
-                $totalArray = array();
+                $paymentBasketArray = [];
+                $addressArray = [];
+                $totalArray = [];
 
                 $transactionDetailsArray =
                     self::getTransactionDetails(
@@ -610,7 +610,7 @@ class tx_transactor_api {
                     $result =
                         htmlspecialchars(
                             $gatewayProxyObject->transaction_message(
-                                array()
+                                []
                             )
                         );
                 }
@@ -630,7 +630,7 @@ class tx_transactor_api {
         }
         $target = '';
         $linkParams = '';
-        $linkArray = array();
+        $linkArray = [];
         if (isset($linkParamArray) && is_array($linkParamArray)) {
             foreach ($linkParamArray as $k => $v) {
                 $linkArray[] = $k . '=' . $v;
@@ -820,7 +820,7 @@ class tx_transactor_api {
         }
 
         // Setting up total values
-        $totalArray = array();
+        $totalArray = [];
         $goodsTotalTax = 0;
         $goodsTotalNoTax = 0;
         $goodsTotalDepositTax = 0;
@@ -919,10 +919,10 @@ class tx_transactor_api {
             'person' => $infoArray['billing'],
             'delivery' => $infoArray['delivery']
         );
-        $addressArray = array();
+        $addressArray = [];
 
         foreach($tmpAddrArray as $key => $basketAddressArray) {
-            $addressArray[$key] = array();
+            $addressArray[$key] = [];
 
             // Correct firstname- and lastname-field if they have no value
             if (
@@ -969,7 +969,7 @@ class tx_transactor_api {
         }
 
         // Fill the basket array
-        $basketArray = array();
+        $basketArray = [];
         $newTotalArray =
             array(
                 'payment'  => '0',
@@ -984,7 +984,7 @@ class tx_transactor_api {
                 $sort = 'basketsort';
             }
             $lastSort = $sort;
-            $basketArray[$sort] = array();
+            $basketArray[$sort] = [];
 
             foreach ($actItemArray as $key => $actItem) {
                 $row = $actItem['rec'];

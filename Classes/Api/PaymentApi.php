@@ -44,7 +44,7 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 class PaymentApi
 {
-    static public function getTransactorConf ($handleLib, $key = '') 
+    static public function getTransactorConf ($gatewayExtensionKey, $key = '') 
     {
         $transactorConf = [];
         $result = '';
@@ -55,9 +55,9 @@ class PaymentApi
         ) {
             $transactorConf = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(
                 \TYPO3\CMS\Core\Configuration\ExtensionConfiguration::class
-            )->get($handleLib);
+            )->get($gatewayExtensionKey);
         } else { // before TYPO3 9
-            $transactorConf = unserialize($GLOBALS['TYPO3_CONF_VARS']['EXT']['extConf'][$handleLib]);
+            $transactorConf = unserialize($GLOBALS['TYPO3_CONF_VARS']['EXT']['extConf'][$gatewayExtensionKey]);
         }
 
         if (
@@ -81,7 +81,7 @@ class PaymentApi
     static public function getConf (
         $extensionKey = '',
         $mergeConf = true,
-        array $conf = array()
+        array $conf = []
     )
     {
         $result = [];
@@ -255,7 +255,7 @@ class PaymentApi
         );
 
         if ($res && $GLOBALS['TYPO3_DB']->sql_num_rows($res)) {
-            $transactionsArray = array();
+            $transactionsArray = [];
             while ($row = $GLOBALS['TYPO3_DB']->sql_fetch_assoc($res)) {
                 $row['user'] = self::field2array($row['user']);
                 $transactionsArray[$row['uid']] = $row;
@@ -288,7 +288,7 @@ class PaymentApi
         $tablename = 'tx_transactor_transactions'
     )
     {
-        $fields = array();
+        $fields = [];
         $fields['message'] = $message;
         $fields['state'] = $state;
         $fields['state_time'] = $time;

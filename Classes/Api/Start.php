@@ -63,7 +63,7 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
         $languageObj = GeneralUtility::makeInstance(Localization::class);
         $languageObj->init1(
             $pLangObj,
-            $conf['_LOCAL_LANG.'],
+            $conf['_LOCAL_LANG.'] ?? '',
             TRANSACTOR_LANGUAGE_PATH,
             $keepLanguageSettings
         );
@@ -107,7 +107,7 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
             }
         }
 
-        $newMarkerArray = array();
+        $newMarkerArray = [];
 
         if(isset($langArray) && is_array($langArray)) {
             foreach ($langArray as $key => $value) {
@@ -118,7 +118,7 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
                     $parser->substituteMarkerArray($value, $markerArray);
             }
         } else {
-            $langArray = array();
+            $langArray = [];
         }
         $markerArray = array_merge($markerArray, $newMarkerArray);
     }
@@ -301,7 +301,7 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
         ...$options // TODO: not yet used
     )
     {
-        $gatewayStatus = array();
+        $gatewayStatus = [];
         $languageObj = GeneralUtility::makeInstance(Localization::class);
         $cObj = \JambageCom\Div2007\Utility\FrontendUtility::getContentObjectRenderer();
         $finalize = false;
@@ -546,7 +546,7 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
                                 $script = '';
                                 if (is_array($scriptParametersArray)) {
                                     $script = '<script ';
-                                    $scriptLines = array();
+                                    $scriptLines = [];
                                     foreach ($scriptParametersArray as $key => $value) {
                                         $scriptLines[] = htmlspecialchars($key) . '="' . htmlspecialchars($value) . '"';
                                     }
@@ -678,12 +678,12 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
             }
         }
 
-        $gatewayStatus = array();
+        $gatewayStatus = [];
         if (
             isset($transactionResults) &&
             is_array($transactionResults)
         ) {
-            $gatewayStatus = array();
+            $gatewayStatus = [];
             $gatewayStatus['result'] = $transactionResults;
         }
 
@@ -718,9 +718,9 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
                 );
 
             if (is_object($gatewayProxyObject)) {
-                $paymentBasketArray = array();
-                $addressArray = array();
-                $totalArray = array();
+                $paymentBasketArray = [];
+                $addressArray = [];
+                $totalArray = [];
                 $transactionDetailsArray =
                     static::getTransactionDetails(
                         $referenceId,
@@ -762,7 +762,7 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
                     $result =
                         htmlspecialchars(
                             $gatewayProxyObject->transactionMessage(
-                                array()
+                                []
                             )
                         );
                 }
@@ -783,7 +783,7 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
         }
         $target = '';
         $linkParams = '';
-        $linkArray = array();
+        $linkArray = [];
         if (isset($linkParamArray) && is_array($linkParamArray)) {
             foreach ($linkParamArray as $k => $v) {
                 $linkArray[] = $k . '=' . $v;
@@ -945,7 +945,7 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
             'gateway' => $gatewayExtKey,
             'library' => TRANSACTOR_EXT
         );
-        $extensionInfo = array();
+        $extensionInfo = [];
         foreach ($extensions as $type => $extension) {
             $info = \JambageCom\Div2007\Utility\ExtensionUtility::getExtensionInfo($extension);
             $extensionInfo[$type] = array(
@@ -991,7 +991,7 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
             $transactionDetailsArray['options'] = $confScript['conf.'];
         }
         $transactionDetailsArray['reference'] = $referenceId;
-        $transactionDetailsArray['order'] = array();
+        $transactionDetailsArray['order'] = [];
         $transactionDetailsArray['order']['orderNumber'] = $orderNumber;
         $transactionDetailsArray['order']['notificationEmail'] = array($notificationEmail);
 
@@ -1017,7 +1017,7 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
         }
 
         // Setting up total values
-        $totalArray = array();
+        $totalArray = [];
         $goodsTotalTax = 0;
         $goodsTotalNoTax = 0;
         $goodsTotalVoucherTax = 0;
@@ -1149,10 +1149,10 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
             'person' => $infoArray['billing'],
             'delivery' => $infoArray['delivery']
         );
-        $addressArray = array();
+        $addressArray = [];
 
         foreach($tmpAddrArray as $key => $basketAddressArray) {
-            $addressArray[$key] = array();
+            $addressArray[$key] = [];
 
             // Correct firstname- and lastname-field if they have no value
             if (
@@ -1203,7 +1203,7 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
         }
 
         // Fill the basket array
-        $basketArray = array();
+        $basketArray = [];
         $newTotalArray =
             array(
                 'payment'  => '0',
@@ -1218,7 +1218,7 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
                 $sort = 'basketsort';
             }
             $lastSort = $sort;
-            $basketArray[$sort] = array();
+            $basketArray[$sort] = [];
 
             foreach ($actItemArray as $key => $actItem) {
                 $row = $actItem['rec'];
@@ -1404,7 +1404,7 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
                 );
 
             if (is_object($gatewayProxyObject)) {
-                $addressFeatureClass = $gatewayProxyObject->getFeatureClass(Feature::ADRESS);
+                $addressFeatureClass = $gatewayProxyObject->getFeatureClass(Feature::ADDRESS);
             } else {
                 $paymentMethod = $confScript['paymentMethod'];
                 $message =
@@ -1428,27 +1428,27 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
                         $orderUid,
                         $orderNumber,
                         $currency,
-                        $confScript['conf.'],
+                        $confScript['conf.'] ?? '',
                         $basket,
                         $extraData
                     );
                 }
-                
+
                 if ($ok) {
                     if (class_exists($addressFeatureClass)) {
                         if (
                             method_exists($addressFeatureClass, 'init') &&
-                            method_exists($addressFeatureClass, 'render')
+                            method_exists($addressFeatureClass, 'fetch')
                         ) {
-                            $controller =
+                            $address =
                                 GeneralUtility::makeInstance(
                                     $addressFeatureClass
                                 );
-                            $controller->init(
+                            $address->init(
                                 $gatewayProxyObject->getGatewayObj(),
                                 $confScript
                             );
-                            $result = $controller->render();
+                            $result = $address->fetch($errorMessage);
                         } else {
                             $errorMessage =
                                 sprintf(
@@ -1462,7 +1462,7 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
                     } else {
                         $labelAdress =
                             $languageObj->getLabel(
-                                'feature_address_input'
+                                'feature_address_gatewayaccout'
                             );
                         $errorMessage =
                             sprintf(
@@ -1481,6 +1481,7 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
                 }
             }
         }
+        debug ($errorMessage, 'renderDataEntry ENDE $errorMessage');
 
         return $result;
     }

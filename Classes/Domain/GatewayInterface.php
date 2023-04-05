@@ -83,7 +83,7 @@ interface GatewayInterface
     * @return	void
     * @access	public
     */
-    public function transactionInit ($action, $paymentMethod, $callingExtensionKey, $orderUid = 0, $orderNumber = '0', $conf = array(), $basket = array(), $extraData = array());
+    public function transactionInit ($action, $paymentMethod, $callingExtensionKey, $orderUid = 0, $orderNumber = '0', $conf = [], $basket = [], $extraData = []);
 
     /**
     * Sets the payment details. Which fields can be set usually depends on the

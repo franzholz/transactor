@@ -47,7 +47,7 @@ class GatewayProxy implements \JambageCom\Transactor\Domain\GatewayInterface
 {
     private $gatewayExtension = '';
     private $gatewayClass = '';
-    protected $extensionManagerConf = array();
+    protected $extensionManagerConf = [];
 
 
     /**
@@ -295,9 +295,9 @@ class GatewayProxy implements \JambageCom\Transactor\Domain\GatewayInterface
         $orderUid = 0,
         $orderNumber = '0',
         $currency = 'EUR',
-        $config = array(),
-        $basket = array(),
-        $extraData = array()
+        $config = [],
+        $basket = [],
+        $extraData = []
     )
     {
         $this->getGatewayObj()->setTransactionUid(0);

@@ -57,18 +57,18 @@ abstract class GatewayBase implements GatewayInterface, \TYPO3\CMS\Core\Singleto
     protected $gatewayKey = 'gatewayname';	    // must be overridden
     protected $extensionKey = TRANSACTOR_EXT;	// must be overridden
     protected $taxIncluded = true;
-    protected $conf = array();
-    protected $config = array();
+    protected $conf = [];
+    protected $config = [];
     protected $mergeConf = true;
-    protected $basket = array();
-    protected $extraData = array();
+    protected $basket = [];
+    protected $extraData = [];
     protected $basketSum = 0;
     protected $currency = 'EUR';
     protected $orderUid = 0;
     protected $orderNumber = '0';
     protected $sendBasket = false;	// Submit detailed basket informations like single products
     protected $optionsArray;
-    protected $resultsArray = array();
+    protected $resultsArray = [];
     protected $formActionURI = '';	// The action uri for the submit form
     protected $gatewayModeArray = array
         (
@@ -86,8 +86,8 @@ abstract class GatewayBase implements GatewayInterface, \TYPO3\CMS\Core\Singleto
     private $detailsArray;
     private $transactionId;
     private $reference;
-    private $cookieArray = array();
-    private $internalArray = array(); // internal options
+    private $cookieArray = [];
+    private $internalArray = []; // internal options
     private $tablename = 'tx_transactor_transactions'; // name of the transactor table
 
 
@@ -110,7 +110,7 @@ abstract class GatewayBase implements GatewayInterface, \TYPO3\CMS\Core\Singleto
 
         $this->setConf($conf);
         $this->setCookieArray(
-            array('fe_typo_user' => $_COOKIE['fe_typo_user'])
+            ['fe_typo_user' => $_COOKIE['fe_typo_user']]
         );
     }
 
@@ -354,9 +354,9 @@ abstract class GatewayBase implements GatewayInterface, \TYPO3\CMS\Core\Singleto
         $orderUid = 0,
         $orderNumber = '0',
         $currency = 'EUR',
-        $conf = array(),
-        $basket = array(),
-        $extraData = array()
+        $conf = [],
+        $basket = [],
+        $extraData = []
     )
     {
         $result = true;
@@ -376,10 +376,13 @@ abstract class GatewayBase implements GatewayInterface, \TYPO3\CMS\Core\Singleto
             isset($extraData['return_url']) &&
             isset($extraData['cancel_url'])
         ) {
-            $urlDir = GeneralUtility::getIndpEnv('TYPO3_REQUEST_DIR');
-            $this->setExtraData('return_url', $urlDir . $extraData['return_url']);
-            $this->setExtraData('cancel_url', $urlDir . $extraData['cancel_url']);
+//             $urlDir = GeneralUtility::getIndpEnv('TYPO3_REQUEST_DIR');
+            $this->setExtraData('return_url', GeneralUtility::locationHeaderUrl($extraData['return_url']));
+            $this->setExtraData('cancel_url', GeneralUtility::locationHeaderUrl($extraData['cancel_url']));
+//             $this->setExtraData('return_url', $urlDir . $extraData['return_url']);
+//             $this->setExtraData('cancel_url', $urlDir . $extraData['cancel_url']);
         }
+
 
         $basketSum = 0;
         foreach ($basket as $record) {
@@ -430,7 +433,7 @@ abstract class GatewayBase implements GatewayInterface, \TYPO3\CMS\Core\Singleto
     {
         $result = '';
         if (count($this->cookieArray)) {
-            $tmpArray = array();
+            $tmpArray = [];
             foreach ($this->cookieArray as $k => $v) {
                 $tmpArray[] = $k . '=' . $v;
             }
@@ -826,7 +829,7 @@ abstract class GatewayBase implements GatewayInterface, \TYPO3\CMS\Core\Singleto
 
     protected function transactionGetResultsMessage ($state, $message)
     {
-        $resultsArray = array();
+        $resultsArray = [];
         $resultsArray['message'] = $message;
         $resultsArray['state'] = $state;
         $this->setResultsArray($resultsArray);
@@ -841,7 +844,7 @@ abstract class GatewayBase implements GatewayInterface, \TYPO3\CMS\Core\Singleto
     */
     public function transactionGetParameters ()
     {
-        $result = array();
+        $result = [];
         return $result;
     }
 
@@ -916,7 +919,7 @@ abstract class GatewayBase implements GatewayInterface, \TYPO3\CMS\Core\Singleto
 
     public function clearErrors ()
     {
-        $this->errorStack = array();
+        $this->errorStack = [];
     }
 
     public function addError ($error)

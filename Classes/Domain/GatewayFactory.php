@@ -52,7 +52,7 @@ final class GatewayFactory
     /**
      * @var \JambageCom\Transactor\Domain\GatewayProxy
      */
-    static private $gatewayProxyObjects = array();		// An array of proxy objects, each pointing to a registered gateway object
+    static private $gatewayProxyObjects = [];		// An array of proxy objects, each pointing to a registered gateway object
 
     static private $errorMessage = '';
     static private $errorStack;
@@ -174,7 +174,7 @@ final class GatewayFactory
 
     static public function clearErrors ()
     {
-        self::$errorStack = array();
+        self::$errorStack = [];
     }
 
     static public function addError ($error)
