@@ -69,8 +69,3 @@ abstract class tx_transactor_listener {
     }
 }
 
-
-if (defined('TYPO3_MODE') && $TYPO3_CONF_VARS[TYPO3_MODE]['XCLASS']['ext/transactor/class.tx_transactor_listener.php']) {
-    include_once($TYPO3_CONF_VARS[TYPO3_MODE]['XCLASS']['ext/transactor/class.tx_transactor_listener.php']);
-}
-

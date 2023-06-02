@@ -62,8 +62,3 @@ class tx_transactor_language extends tx_div2007_alpha_language_base implements \
     }
 }
 
-
-if (defined('TYPO3_MODE') && $GLOBALS['TYPO3_CONF_VARS'][TYPO3_MODE]['XCLASS']['ext/transactor/model/class.tx_transactor_language.php']) {
-    include_once($GLOBALS['TYPO3_CONF_VARS'][TYPO3_MODE]['XCLASS']['ext/transactor/model/class.tx_transactor_language.php']);
-}
-

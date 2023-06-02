@@ -1,5 +1,5 @@
 <?php
-defined('TYPO3_MODE') || die('Access denied.');
+defined('TYPO3') || die('Access denied.');
 
 if (!defined ('TRANSACTOR_EXT')) {
     define('TRANSACTOR_EXT', 'transactor');

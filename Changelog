@@ -1,3 +1,8 @@
+2023-06-02 Franz Holzinger <franz@ttproducts.de>
+    * compatibility Deprecation no.92947: replace TYPO3_MODE by TYPO3 or remove this constant
+    * add compatibility for TYPO3 12
+    * use feature no. 85160: auto create management DB fields from TCA ctrl
+
 2022-04-08 Franz Holzinger <franz@ttproducts.de>
     * add compatibility for PHP 8
 
