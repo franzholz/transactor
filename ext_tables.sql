@@ -1,7 +1,4 @@
 CREATE TABLE tx_transactor_transactions (
-	uid int(11) unsigned NOT NULL auto_increment,
-	pid int(11) unsigned DEFAULT '0' NOT NULL,
-	crdate int(11) unsigned DEFAULT '0' NOT NULL,
 	reference varchar(255) DEFAULT '0' NOT NULL,
 	gatewayid varchar(255) DEFAULT '0' NOT NULL,
 	orderuid varchar(255) DEFAULT '0' NOT NULL,
@@ -17,8 +14,6 @@ CREATE TABLE tx_transactor_transactions (
 	config_ext text,
 	user text,
 
-	PRIMARY KEY (uid),
-	KEY parent (pid),
 	KEY reference (reference),
 	KEY orderuid (orderuid)
 );
