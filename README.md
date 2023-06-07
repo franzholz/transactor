@@ -4,6 +4,7 @@ You must configure it in the Extension Configuration of the Settings backend mod
 Set the compatibility mode (basic.compatibility) to 0 for the new API.
 Older extension versions might need the old API and a 1 here.
 
+The old API is deprecated and will be removed in 2024.
 
 Since version 0.9.0 the transactor extension contains a middleware, which payment extensions can use for dealing with a gateway instant message after the payment.
 
