@@ -1,3 +1,6 @@
+2023-06-07 Franz Holzinger <franz@ttproducts.de>
+    * Declare all classes under lib and model as deprecated. They will be removed in 2024.
+
 2023-06-02 Franz Holzinger <franz@ttproducts.de>
     * compatibility Deprecation no.92947: replace TYPO3_MODE by TYPO3 or remove this constant
     * add compatibility for TYPO3 12

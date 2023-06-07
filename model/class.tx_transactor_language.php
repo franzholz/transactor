@@ -37,6 +37,7 @@
 *
 */
 
+// deprecated: will be removed in 2024
 
 class tx_transactor_language extends tx_div2007_alpha_language_base implements \TYPO3\CMS\Core\SingletonInterface {
     public function init1 ($pObj, $cObj, $conf, $scriptRelPath) {

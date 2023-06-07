@@ -27,6 +27,9 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Core\Utility\ExtensionManagementUtility;
 
 
+// deprecated: will be removed in 2024
+
+
 /**
 * Abstract class defining the interface for gateway implementations.
 *

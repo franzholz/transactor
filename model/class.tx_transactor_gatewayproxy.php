@@ -27,6 +27,10 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Core\Utility\ExtensionManagementUtility;
 
 
+
+// deprecated: will be removed in 2024
+
+
 /**
 * Proxy class implementing the interface for gateway implementations. This
 * class hangs between the real gateway implementation and the application

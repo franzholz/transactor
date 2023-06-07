@@ -36,6 +36,8 @@
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 
+// deprecated: will be removed in 2024
+
 abstract class tx_transactor_listener {
 
     /**

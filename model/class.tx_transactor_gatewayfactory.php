@@ -35,6 +35,9 @@ use TYPO3\CMS\Core\Utility\ExtensionManagementUtility;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 
+// deprecated: will be removed in 2024
+
+
 final class tx_transactor_gatewayfactory {
 
     private static $instance = false;					// Holds an instance of this class
