@@ -38,8 +38,10 @@ namespace JambageCom\Transactor\Api;
 *
 */
 
+use TYPO3\CMS\Core\Service\MarkerBasedTemplateService;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Core\Utility\ExtensionManagementUtility;
+
 
 use JambageCom\Transactor\Constants\Action;
 use JambageCom\Transactor\Constants\Feature;
@@ -95,7 +97,7 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
         } else {
             $langArray = $locallang['default'];
         }
-        $parser = \tx_div2007_core::newHtmlParser(false);
+        $templateService = GeneralUtility::makeInstance(MarkerBasedTemplateService::class);
 
         if (is_array($conf['marks.'])) {
                 // Substitute Marker Array from TypoScript Setup
@@ -115,7 +117,7 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
                     $value = $value[0]['target'];
                 }
                 $newMarkerArray['###' . strtoupper($key) . '###'] =
-                    $parser->substituteMarkerArray($value, $markerArray);
+                    $templateService->substituteMarkerArray($value, $markerArray);
             }
         } else {
             $langArray = [];
