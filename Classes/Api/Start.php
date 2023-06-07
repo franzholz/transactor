@@ -864,11 +864,6 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
         }
 
         $notifyUrlParams = [];
-        if (
-            version_compare(TYPO3_version, '9.5.0', '<')
-        ) {
-            $notifyUrlParams['eID'] = str_replace('transactor_', '', $gatewayExtKey);
-        }
         $notifyUrlParams['transactor'] = PaymentApi::getRequestId($referenceId);
 
         if (isset($linkParams) && is_array($linkParams)) {

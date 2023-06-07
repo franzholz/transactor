@@ -60,29 +60,13 @@ class GatewayProxy implements \JambageCom\Transactor\Domain\GatewayInterface
     public function init ($extensionKey)
     {
         $this->gatewayClass = '';
-        $this->extensionManagerConf = [];
-        if (
-            defined('TYPO3_version') &&
-            version_compare(TYPO3_version, '9.0.0', '>=')
-        ) {
-            $this->extensionManagerConf = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(
-                \TYPO3\CMS\Core\Configuration\ExtensionConfiguration::class
-            )->get(TRANSACTOR_EXT);
-        } else { // before TYPO3 9
-            $this->extensionManagerConf = unserialize($GLOBALS['TYPO3_CONF_VARS']['EXT']['extConf'][TRANSACTOR_EXT]);
-        }
-        $newExtensionManagerConf = [];
+        $this->extensionManagerConf = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(
+            \TYPO3\CMS\Core\Configuration\ExtensionConfiguration::class
+        )->get(TRANSACTOR_EXT);
 
-        if (
-            defined('TYPO3_version') &&
-            version_compare(TYPO3_version, '9.0.0', '>=')
-        ) {
-            $newExtensionManagerConf = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(
-                \TYPO3\CMS\Core\Configuration\ExtensionConfiguration::class
-            )->get($extensionKey);
-        } else if (isset($GLOBALS['TYPO3_CONF_VARS']['EXT']['extConf'][$extensionKey])) { // before TYPO3 9
-            $newExtensionManagerConf = unserialize($GLOBALS['TYPO3_CONF_VARS']['EXT']['extConf'][$extensionKey]);
-        }
+        $newExtensionManagerConf = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(
+            \TYPO3\CMS\Core\Configuration\ExtensionConfiguration::class
+        )->get($extensionKey);
 
         if (is_array($this->extensionManagerConf)) {
             if (is_array($newExtensionManagerConf)) {

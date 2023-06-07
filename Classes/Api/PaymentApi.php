@@ -49,16 +49,9 @@ class PaymentApi
         $transactorConf = [];
         $result = '';
 
-        if (
-            defined('TYPO3_version') &&
-            version_compare(TYPO3_version, '9.0.0', '>=')
-        ) {
-            $transactorConf = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(
-                \TYPO3\CMS\Core\Configuration\ExtensionConfiguration::class
-            )->get($gatewayExtensionKey);
-        } else { // before TYPO3 9
-            $transactorConf = unserialize($GLOBALS['TYPO3_CONF_VARS']['EXT']['extConf'][$gatewayExtensionKey]);
-        }
+        $transactorConf = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(
+            \TYPO3\CMS\Core\Configuration\ExtensionConfiguration::class
+        )->get($gatewayExtensionKey);
 
         if (
             $key != '' &&
@@ -85,32 +78,17 @@ class PaymentApi
     )
     {
         $result = [];
-        if (
-            defined('TYPO3_version') &&
-            version_compare(TYPO3_version, '9.0.0', '>=')
-        ) {
-            $result = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(
-                \TYPO3\CMS\Core\Configuration\ExtensionConfiguration::class
-            )->get(TRANSACTOR_EXT);
-        } else { // before TYPO3 9
-            $result = unserialize($GLOBALS['TYPO3_CONF_VARS']['EXT']['extConf'][TRANSACTOR_EXT]);
-        }
+        $result = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(
+            \TYPO3\CMS\Core\Configuration\ExtensionConfiguration::class
+        )->get(TRANSACTOR_EXT);
 
         if (
             $extensionKey != '' &&
             isset($GLOBALS['TYPO3_CONF_VARS']['EXT']['extConf'][$extensionKey])
         ) {
-            $extManagerConf = [];
-            if (
-                defined('TYPO3_version') &&
-                version_compare(TYPO3_version, '9.0.0', '>=')
-            ) {
-                $extManagerConf = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(
-                    \TYPO3\CMS\Core\Configuration\ExtensionConfiguration::class
-                )->get($extensionKey);
-            } else { // before TYPO3 9
-                $extManagerConf = unserialize($GLOBALS['TYPO3_CONF_VARS']['EXT']['extConf'][$extensionKey]);
-            }
+            $extManagerConf = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(
+                \TYPO3\CMS\Core\Configuration\ExtensionConfiguration::class
+            )->get($extensionKey);
         }
 
         if ($mergeConf && is_array($conf)) {

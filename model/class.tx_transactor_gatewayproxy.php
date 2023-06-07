@@ -57,29 +57,15 @@ class tx_transactor_gatewayproxy implements tx_transactor_gateway_int, \TYPO3\CM
     public function init ($extKey) {
 
         $this->extensionManagerConf = [];
-        if (
-            defined('TYPO3_version') &&
-            version_compare(TYPO3_version, '9.0.0', '>=')
-        ) {
-            $this->extensionManagerConf = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(
-                \TYPO3\CMS\Core\Configuration\ExtensionConfiguration::class
-            )->get('transactor');
-        } else { // before TYPO3 9
-            $this->extensionManagerConf = unserialize($GLOBALS['TYPO3_CONF_VARS']['EXT']['extConf']['transactor']);
-        }
+        $this->extensionManagerConf = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(
+            \TYPO3\CMS\Core\Configuration\ExtensionConfiguration::class
+        )->get('transactor');
 
         if (isset($GLOBALS['TYPO3_CONF_VARS']['EXT']['extConf'][$extKey])) {
             $newExtensionManagerConf = [];
-            if (
-                defined('TYPO3_version') &&
-                version_compare(TYPO3_version, '9.0.0', '>=')
-            ) {
-                $newExtensionManagerConf = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(
-                    \TYPO3\CMS\Core\Configuration\ExtensionConfiguration::class
-                )->get($extKey);
-            } else { // before TYPO3 9
-                $newExtensionManagerConf = unserialize($GLOBALS['TYPO3_CONF_VARS']['EXT']['extConf'][$extKey]);
-            }
+            $newExtensionManagerConf = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(
+                \TYPO3\CMS\Core\Configuration\ExtensionConfiguration::class
+            )->get($extKey);
 
             if (is_array($this->extensionManagerConf)) {
                 if (is_array($newExtensionManagerConf)) {

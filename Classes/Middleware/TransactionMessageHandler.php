@@ -23,7 +23,9 @@ use TYPO3\CMS\Core\Exception;
 use TYPO3\CMS\Core\Http\Dispatcher;
 use TYPO3\CMS\Core\Http\NullResponse;
 use TYPO3\CMS\Core\Http\Response;
+use TYPO3\CMS\Core\Information\Typo3Version;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
+
 
 /**
  *
@@ -41,6 +43,9 @@ class TransactionMessageHandler implements MiddlewareInterface
      */
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
+        $typo3Version = GeneralUtility::makeInstance(Typo3Version::class);
+        $version = $typo3Version->getVersion();
+
         $eID = $request->getParsedBody()['eID'] ?? $request->getQueryParams()['eID'] ?? null;
         $transactor = $request->getParsedBody()['transactor'] ?? $request->getQueryParams()['transactor'] ?? null;
 
@@ -66,10 +71,9 @@ class TransactionMessageHandler implements MiddlewareInterface
         $configuration = $GLOBALS['TYPO3_CONF_VARS']['FE']['transactor_include'][$transactor];
 
         // Simple check to make sure that it is not an absolute file (to use the fallback)
-        if (strpos($configuration, '::') !== false || is_callable($configuration)) {
+        if (strpos($configuration, '::') !== false || is_callable($configuration)) {        
             if (
-                defined('TYPO3_version') &&
-                version_compare(TYPO3_version, '10.4.0', '>=')
+                version_compare($version, '10.4.0', '>=')
             ) {
                 $container = GeneralUtility::getContainer();
                 /** @var Dispatcher $dispatcher */
