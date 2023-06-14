@@ -1375,6 +1375,43 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
         return $result;
     }
 
+    
+    static public function addMainWindowJavascript (
+        &$errorMessage,
+        array $confScript
+    )
+    {
+        $languageObj = GeneralUtility::makeInstance(Localization::class);
+        $addressFeatureClass = false;
+        $gatewayExtKey = $confScript['extName'];
+        $ok = static::checkLoaded($errorMessage, $languageObj, $gatewayExtKey);
+        $result = false;
+
+        if ($ok) {
+            $gatewayProxyObject =
+                PaymentApi::getGatewayProxyObject(
+                    $confScript
+                );
+
+            if (is_object($gatewayProxyObject)) {
+                $addressFeatureClass = $gatewayProxyObject->getFeatureClass(Feature::ADDRESS);
+                if (
+                    $addressFeatureClass != '' &&
+                    $errorMessage == ''
+                ) {
+                    $parameters = [
+                        $errorMessage,
+                        $confScript,
+                    ];
+                    call_user_func_array(
+                        $addressFeatureClass . '::addMainWindowJavascript',
+                        $parameters
+                    );
+                }
+            }
+        }
+    }
+    
     /**
     * Render data entry forms for the user billing and shipping address
     */
@@ -1478,7 +1515,6 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
                 }
             }
         }
-        debug ($errorMessage, 'renderDataEntry ENDE $errorMessage');
 
         return $result;
     }
