@@ -16,7 +16,7 @@ $result = [
         'crdate' => 'crdate',
         'default_sortby' => 'ORDER BY crdate',
         'dividers2tabs' => true,
-        'iconfile' => 'EXT:' . $extensionKey . '/ext_icon.gif',
+        'iconfile' => 'EXT:' . $extensionKey . '/Resources/Public/Icons/Extension.gif',
         'searchFields' => 'uid,reference,orderuid,message,user',
     ],
     'interface' => [
