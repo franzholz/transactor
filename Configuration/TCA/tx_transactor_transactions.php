@@ -1,17 +1,22 @@
 <?php
 defined('TYPO3') || die('Access denied.');
 
+$extensionKey = 'transactor';
+$languageSubpath = '/Resources/Private/Language/';
+$languagePath = 'LLL:EXT:' . $extensionKey . $languageSubpath . 'locallang_db.xlf:';
+
+
 // ******************************************************************
 // transactions table
 // ******************************************************************
 $result = [
     'ctrl' => [
-        'title' => TRANSACTOR_LANGUAGE_PATH_LL . 'locallang_db.xlf:tx_transactor_transactions',
+        'title' => $languagePath . 'tx_transactor_transactions',
         'label' => 'reference',
         'crdate' => 'crdate',
         'default_sortby' => 'ORDER BY crdate',
         'dividers2tabs' => true,
-        'iconfile' => 'EXT:' . TRANSACTOR_EXT . '/ext_icon.gif',
+        'iconfile' => 'EXT:' . $extensionKey . '/ext_icon.gif',
         'searchFields' => 'uid,reference,orderuid,message,user',
     ],
     'interface' => [
@@ -19,14 +24,14 @@ $result = [
     ],
     'columns' => [
         'uid' => [
-            'label' => TRANSACTOR_LANGUAGE_PATH_LL . 'locallang_db.xlf:tx_transactor_transactions_uid',
+            'label' => $languagePath .  'tx_transactor_transactions_uid',
             'config' => [
                 'type' => 'none',
             ]
         ],
         'crdate' => [
             'exclude' => 1,
-            'label' => TRANSACTOR_LANGUAGE_PATH_LL . 'locallang_db.xlf:crdate',
+            'label' => $languagePath .  'crdate',
             'config' => [
                 'type' => 'input',
                 'size' => '8',
@@ -37,7 +42,7 @@ $result = [
         ],
         'reference' => [
             'exclude' => 0,
-            'label' => TRANSACTOR_LANGUAGE_PATH_LL .  'locallang_db.xlf:tx_transactor_transactions.reference',
+            'label' => $languagePath .  'tx_transactor_transactions.reference',
             'config' => [
                 'type' => 'input',
                 'size' => '100',
@@ -46,7 +51,7 @@ $result = [
         ],
         'gatewayid' => [ // gateway internal transaction id
             'exclude' => 0,
-            'label' => TRANSACTOR_LANGUAGE_PATH_LL .  'locallang_db.xlf:tx_transactor_transactions.gatewayid',
+            'label' => $languagePath .  'tx_transactor_transactions.gatewayid',
             'config' => [
                 'type' => 'input',
                 'size' => '40',
@@ -55,7 +60,7 @@ $result = [
         ],
         'orderuid' => [
             'exclude' => 1,
-            'label' => TRANSACTOR_LANGUAGE_PATH_LL .  'locallang_db.xlf:tx_transactor_transactions.orderuid',
+            'label' => $languagePath .  'tx_transactor_transactions.orderuid',
             'config' => [
                 'type' => 'input',
                 'size' => '25',
@@ -65,7 +70,7 @@ $result = [
         ],
         'currency' => [
             'exclude' => 0,
-            'label' => TRANSACTOR_LANGUAGE_PATH_LL . 'locallang_db.xlf:tx_transactor_transactions.currency',
+            'label' => $languagePath .  'tx_transactor_transactions.currency',
             'config' => [
                 'type' => 'input',
                 'size' => '3',
@@ -74,7 +79,7 @@ $result = [
         ],
         'amount' => [
             'exclude' => 1,
-            'label' => TRANSACTOR_LANGUAGE_PATH_LL .  'locallang_db.xlf:tx_transactor_transactions.amount',
+            'label' => $languagePath .  'tx_transactor_transactions.amount',
             'config' => [
                 'type' => 'input',
                 'size' => '12',
@@ -84,7 +89,7 @@ $result = [
         ],
         'state' => [
             'exclude' => 1,
-            'label' => TRANSACTOR_LANGUAGE_PATH_LL . 'locallang_db.xlf:tx_transactor_transactions.state',
+            'label' => $languagePath .  'tx_transactor_transactions.state',
             'config' => [
                 'type' => 'input',
                 'size' => '3',
@@ -94,7 +99,7 @@ $result = [
         ],
         'state_time' => [
             'exclude' => 1,
-            'label' => TRANSACTOR_LANGUAGE_PATH_LL .  'locallang_db.xlf:tx_transactor_transactions.state_time',
+            'label' => $languagePath .  'tx_transactor_transactions.state_time',
             'config' => [
                 'type' => 'input',
                 'size' => '8',
@@ -105,7 +110,7 @@ $result = [
         ],
         'message' => [
             'exclude' => 0,
-            'label' => TRANSACTOR_LANGUAGE_PATH_LL .  'locallang_db.xlf:tx_transactor_transactions.message',
+            'label' => $languagePath .  'tx_transactor_transactions.message',
             'config' => [
                 'type' => 'input',
                 'size' => '40',
@@ -114,7 +119,7 @@ $result = [
         ],
         'ext_key' => [
             'exclude' => 0,
-            'label' => TRANSACTOR_LANGUAGE_PATH_LL .  'locallang_db.xlf:tx_transactor_transactions.ext_key',
+            'label' => $languagePath .  'tx_transactor_transactions.ext_key',
             'config' => [
                 'type' => 'input',
                 'size' => '40',
@@ -123,7 +128,7 @@ $result = [
         ],
         'paymethod_key' => [
             'exclude' => 0,
-            'label' => TRANSACTOR_LANGUAGE_PATH_LL .  'locallang_db.xlf:tx_transactor_transactions.paymethod_key',
+            'label' => $languagePath .  'tx_transactor_transactions.paymethod_key',
             'config' => [
                 'type' => 'input',
                 'size' => '40',
@@ -132,7 +137,7 @@ $result = [
         ],
         'paymethod_method' => [
             'exclude' => 0,
-            'label' => TRANSACTOR_LANGUAGE_PATH_LL .  'locallang_db.xlf:tx_transactor_transactions.paymethod_method',
+            'label' => $languagePath .  'tx_transactor_transactions.paymethod_method',
             'config' => [
                 'type' => 'input',
                 'size' => '40',
@@ -141,7 +146,7 @@ $result = [
         ],
         'config' => [
             'exclude' => 1,
-            'label' => TRANSACTOR_LANGUAGE_PATH_LL .  'locallang_db.xlf:tx_transactor_transactions.config',
+            'label' => $languagePath .  'tx_transactor_transactions.config',
             'config' => [
                 'type' => 'text',
                 'cols' => '48',
@@ -150,7 +155,7 @@ $result = [
         ],
         'config_ext' => [
             'exclude' => 1,
-            'label' => TRANSACTOR_LANGUAGE_PATH_LL .  'locallang_db.xlf:tx_transactor_transactions.config_ext',
+            'label' => $languagePath .  'tx_transactor_transactions.config_ext',
             'config' => [
                 'type' => 'text',
                 'cols' => '48',
@@ -159,7 +164,7 @@ $result = [
         ],
         'user' => [
             'exclude' => 1,
-            'label' => TRANSACTOR_LANGUAGE_PATH_LL . 'locallang_db.xlf:tx_transactor_transactions.user',
+            'label' => $languagePath .  'tx_transactor_transactions.user',
             'config' => [
                 'type' => 'text',
                 'cols' => '48',

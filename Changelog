@@ -1,3 +1,6 @@
+2023-06-26 Franz Holzinger <franz@ttproducts.de>
+    * remove all TRANSACTOR constants from file ext_localconf.php: TRANSACTOR_EXT, TRANSACTOR_LANGUAGE_PATH, TRANSACTOR_LANGUAGE_PATH_LL .
+
 2023-06-07 Franz Holzinger <franz@ttproducts.de>
     * Declare all classes under lib and model as deprecated. They will be removed in 2024.
 
