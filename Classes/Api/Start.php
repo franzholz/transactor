@@ -41,6 +41,7 @@ namespace JambageCom\Transactor\Api;
 use TYPO3\CMS\Core\Service\MarkerBasedTemplateService;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Core\Utility\ExtensionManagementUtility;
+use TYPO3\CMS\Frontend\ContentObject\ContentObjectRenderer;
 
 
 use JambageCom\Transactor\Constants\Action;
@@ -940,7 +941,7 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
         $extensions = [
             'calling' => $extensionKey,
             'gateway' => $gatewayExtKey,
-            'library' => TRANSACTOR_EXT
+            'library' => 'transactor'
         ];
         $extensionInfo = [];
         foreach ($extensions as $type => $extension) {
@@ -1359,10 +1360,10 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
         $result = '';
 
         if (
-            isset($GLOBALS['TYPO3_CONF_VARS']['EXTCONF'][TRANSACTOR_EXT]['listener']) &&
-            is_array($GLOBALS['TYPO3_CONF_VARS']['EXTCONF'][TRANSACTOR_EXT]['listener'])
+            isset($GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['transactor']['listener']) &&
+            is_array($GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['transactor']['listener'])
         ) {
-            foreach ($GLOBALS['TYPO3_CONF_VARS']['EXTCONF'][TRANSACTOR_EXT]['listener'] as $extensionKey => $classRef) {
+            foreach ($GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['transactor']['listener'] as $extensionKey => $classRef) {
                 if ($extensionKey != '') {
                     $result = $extensionKey;
                     // Todo: Determine the extension key from the plugins of the current page and by Typoscript settings
@@ -1375,6 +1376,33 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
         return $result;
     }
 
+
+    static public function readActionParameters (
+        ContentObjectRenderer $cObj,
+        &$errorMessage,
+        array $confScript
+    ) {
+        $result = false;
+        $languageObj = GeneralUtility::makeInstance(Localization::class);
+        $gatewayExtKey = $confScript['extName'];
+        $ok = static::checkLoaded($errorMessage, $languageObj, $gatewayExtKey);
+        if ($ok) {
+            $gatewayProxyObject =
+                PaymentApi::getGatewayProxyObject(
+                    $confScript
+                );
+        debug (get_class($gatewayProxyObject), 'readActionParameters Klasse von $gatewayProxyObject');
+
+            if (
+                is_object($gatewayProxyObject) &&
+                method_exists($gatewayProxyObject, 'readActionParameters')
+            ) {
+                $result = $gatewayProxyObject->readActionParameters($cObj);
+            }
+        }
+        debug ($result, 'readActionParameters ENDE $result');
+        return $result;
+    }
     
     static public function addMainWindowJavascript (
         &$errorMessage,

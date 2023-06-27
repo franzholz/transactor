@@ -28,6 +28,7 @@ namespace JambageCom\Transactor\Domain;
 
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Core\Utility\ExtensionManagementUtility;
+use TYPO3\CMS\Frontend\ContentObject\ContentObjectRenderer;
 
 use JambageCom\Transactor\Domain\Gateway;
 use JambageCom\Transactor\Constants\GatewayMode;
@@ -62,7 +63,7 @@ class GatewayProxy implements \JambageCom\Transactor\Domain\GatewayInterface
         $this->gatewayClass = '';
         $this->extensionManagerConf = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(
             \TYPO3\CMS\Core\Configuration\ExtensionConfiguration::class
-        )->get(TRANSACTOR_EXT);
+        )->get('transactor');
 
         $newExtensionManagerConf = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(
             \TYPO3\CMS\Core\Configuration\ExtensionConfiguration::class
@@ -798,6 +799,17 @@ class GatewayProxy implements \JambageCom\Transactor\Domain\GatewayInterface
     public function needsVerificationMessage ()
     {
         $result = $this->getGatewayObj()->needsVerificationMessage();
+        return $result;
+    }
+
+    /**
+    * Returns the parameters which can lead into an action started by the calling application
+    * Such parameters are added by the gateway to the redirection link. 
+    *
+    * @access	public
+    */
+    public function readActionParameters (ContentObjectRenderer $cObj) {
+        $result = $this->getGatewayObj()->readActionParameters($cObj);
         return $result;
     }
 

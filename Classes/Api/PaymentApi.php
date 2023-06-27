@@ -80,7 +80,7 @@ class PaymentApi
         $result = [];
         $result = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(
             \TYPO3\CMS\Core\Configuration\ExtensionConfiguration::class
-        )->get(TRANSACTOR_EXT);
+        )->get('transactor');
 
         if (
             $extensionKey != '' &&

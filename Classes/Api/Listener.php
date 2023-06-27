@@ -53,8 +53,8 @@ abstract class Listener {
     */
     public function execute ($params)
     {
-        if (is_array ($GLOBALS['TYPO3_CONF_VARS']['EXTCONF'][TRANSACTOR_EXT]['listener'])) {
-            foreach ($GLOBALS['TYPO3_CONF_VARS']['EXTCONF'][TRANSACTOR_EXT]['listener'] as $classRef) {
+        if (is_array ($GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['transactor']['listener'])) {
+            foreach ($GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['transactor']['listener'] as $classRef) {
                 $hookObj = 
                     \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance($classRef);
 

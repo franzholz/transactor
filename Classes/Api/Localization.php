@@ -50,7 +50,7 @@ class Localization extends \JambageCom\Div2007\Base\TranslationBase implements \
     )
     {
         $this->init(
-            TRANSACTOR_EXT,
+            'transactor',
             $confLocalLang,
             $scriptRelPath
         );

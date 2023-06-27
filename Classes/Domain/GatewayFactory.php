@@ -142,7 +142,7 @@ final class GatewayFactory
                     isset($paymentMethodsArray) &&
                     is_array($paymentMethodsArray)
                 ) {
-                    $prefix = substr($extensionKey, strlen(TRANSACTOR_EXT . '_'));
+                    $prefix = substr($extensionKey, strlen('transactor_'));
                     $key = $prefix . '_' . $paymentMethod;
 
                     if (

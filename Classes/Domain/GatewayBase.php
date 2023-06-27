@@ -54,8 +54,8 @@ use TYPO3\CMS\Core\Utility\ExtensionManagementUtility;
 **/
 
 abstract class GatewayBase implements GatewayInterface, \TYPO3\CMS\Core\SingletonInterface {
-    protected $gatewayKey = 'gatewayname';	    // must be overridden
-    protected $extensionKey = TRANSACTOR_EXT;	// must be overridden
+    protected $gatewayKey = 'gatewayname';	   // must be overridden
+    protected $extensionKey = 'transactor';    // must be overridden
     protected $taxIncluded = true;
     protected $conf = [];
     protected $config = [];
@@ -414,7 +414,7 @@ abstract class GatewayBase implements GatewayInterface, \TYPO3\CMS\Core\Singleto
         if (isset($paymentMethodsArray[$paymentMethod]['template'])) {
             $templateFilename = $paymentMethodsArray[$paymentMethod]['template'];
         } else {
-            $templateFilename = 'EXT:' . TRANSACTOR_EXT . '/Resources/Private/Templates/PaymentHtmlTemplate.html';
+            $templateFilename = 'EXT:transactor/Resources/Private/Templates/PaymentHtmlTemplate.html';
         }
 
         $this->setTemplateFilename($templateFilename);
