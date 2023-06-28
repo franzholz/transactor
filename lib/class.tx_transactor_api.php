@@ -50,6 +50,10 @@ class tx_transactor_api {
         $cObj,
         $conf
     ) {
+        $extensionKey = 'transactor';
+        $languageSubpath = '/Resources/Private/Language/';
+        $languagePath = 'LLL:EXT:' . $extensionKey . $languageSubpath;
+
         if (!is_object($cObj)) {
             $cObj = \JambageCom\Div2007\Utility\FrontendUtility::getContentObjectRenderer();
         }
@@ -58,10 +62,10 @@ class tx_transactor_api {
         $languageObj->init1(
             $pLangObj,
             $conf['_LOCAL_LANG.'],
-            TRANSACTOR_LANGUAGE_PATH
+            $languageSubpath
         );
         $languageObj->loadLocalLang(
-            TRANSACTOR_LANGUAGE_PATH . 'locallang.xlf'
+            $languagePath . 'locallang.xlf'
         );
 
         self::$cObj = $cObj;
@@ -72,6 +76,9 @@ class tx_transactor_api {
         $conf,
         &$markerArray
     ) {
+        $extensionKey = 'transactor';
+        $languageSubpath = '/Resources/Private/Language/';
+        $languagePath = 'LLL:EXT:' . $extensionKey . $languageSubpath;
         $cObj = \JambageCom\Div2007\Utility\FrontendUtility::getContentObjectRenderer();
         $languageObj = GeneralUtility::makeInstance(\JambageCom\Transactor\Api\Localization::class);
         $languageObj->init1(
@@ -80,7 +87,7 @@ class tx_transactor_api {
         );
 
         $languageObj->loadLocalLang(
-            TRANSACTOR_LANGUAGE_PATH . 'locallang_marker.xlf'
+            $languagePath . 'locallang_marker.xlf'
         );
 
         $locallang = $languageObj->getLocalLang();

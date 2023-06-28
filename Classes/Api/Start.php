@@ -63,15 +63,18 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
         $keepLanguageSettings = true
     )
     {
+        $extensionKey = 'transactor';
+        $languageSubpath = '/Resources/Private/Language/';
+        $languagePath = 'LLL:EXT:' . $extensionKey . $languageSubpath;
         $languageObj = GeneralUtility::makeInstance(Localization::class);
         $languageObj->init1(
             $pLangObj,
             $conf['_LOCAL_LANG.'] ?? '',
-            TRANSACTOR_LANGUAGE_PATH,
+            $languageSubpath,
             $keepLanguageSettings
         );
         $languageObj->loadLocalLang(
-            TRANSACTOR_LANGUAGE_PATH . 'locallang.xlf'
+            $languagePath . 'locallang.xlf'
         );
     }
 
@@ -80,15 +83,18 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
         &$markerArray
     )
     {
+        $extensionKey = 'transactor';
+        $languageSubpath = '/Resources/Private/Language/';
+        $languagePath = 'LLL:EXT:' . $extensionKey . $languageSubpath;
         $cObj = \JambageCom\Div2007\Utility\FrontendUtility::getContentObjectRenderer();
         $languageObj = GeneralUtility::makeInstance(Localization::class);
         $languageObj->init1(
             '',
             $conf['_LOCAL_LANG.'],
-            TRANSACTOR_LANGUAGE_PATH
+            $languageSubpath
         );
         $languageObj->loadLocalLang(
-            TRANSACTOR_LANGUAGE_PATH . 'locallang_marker.xlf'
+            $languagePath . 'locallang_marker.xlf'
         );
         $locallang = $languageObj->getLocalLang();
         $localLangKey = $languageObj->getLocalLangkey();
