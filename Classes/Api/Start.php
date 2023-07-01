@@ -1397,7 +1397,6 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
                 PaymentApi::getGatewayProxyObject(
                     $confScript
                 );
-        debug (get_class($gatewayProxyObject), 'readActionParameters Klasse von $gatewayProxyObject');
 
             if (
                 is_object($gatewayProxyObject) &&
@@ -1406,7 +1405,6 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
                 $result = $gatewayProxyObject->readActionParameters($cObj);
             }
         }
-        debug ($result, 'readActionParameters ENDE $result');
         return $result;
     }
     
@@ -1451,6 +1449,7 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
     */
     static public function renderDataEntry (
         &$errorMessage,
+        &$addressModel,
         array $confScript,
         $extensionKey,
         array $basket,
@@ -1516,7 +1515,8 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
                                 $gatewayProxyObject->getGatewayObj(),
                                 $confScript
                             );
-                            $result = $address->fetch($errorMessage);
+
+                            $result = $address->fetch($errorMessage, $addressModel);
                         } else {
                             $errorMessage =
                                 sprintf(
