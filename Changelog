@@ -1,3 +1,6 @@
+2023-07-11 Franz Holzinger <franz@ttproducts.de>
+    * add class Address for a base of user data retrieved from a payment gateway login box
+
 2023-06-26 Franz Holzinger <franz@ttproducts.de>
     * remove all TRANSACTOR constants from file ext_localconf.php: TRANSACTOR_EXT, TRANSACTOR_LANGUAGE_PATH, TRANSACTOR_LANGUAGE_PATH_LL .
 
