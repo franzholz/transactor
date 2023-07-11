@@ -52,7 +52,7 @@ class tx_transactor_api {
     ) {
         $extensionKey = 'transactor';
         $languageSubpath = '/Resources/Private/Language/';
-        $languagePath = 'LLL:EXT:' . $extensionKey . $languageSubpath;
+        $languagePath = 'EXT:' . $extensionKey . $languageSubpath;
 
         if (!is_object($cObj)) {
             $cObj = \JambageCom\Div2007\Utility\FrontendUtility::getContentObjectRenderer();
@@ -78,7 +78,7 @@ class tx_transactor_api {
     ) {
         $extensionKey = 'transactor';
         $languageSubpath = '/Resources/Private/Language/';
-        $languagePath = 'LLL:EXT:' . $extensionKey . $languageSubpath;
+        $languagePath = 'EXT:' . $extensionKey . $languageSubpath;
         $cObj = \JambageCom\Div2007\Utility\FrontendUtility::getContentObjectRenderer();
         $languageObj = GeneralUtility::makeInstance(\JambageCom\Transactor\Api\Localization::class);
         $languageObj->init1(
