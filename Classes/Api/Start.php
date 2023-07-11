@@ -65,7 +65,7 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
     {
         $extensionKey = 'transactor';
         $languageSubpath = '/Resources/Private/Language/';
-        $languagePath = 'LLL:EXT:' . $extensionKey . $languageSubpath;
+        $languagePath = 'EXT:' . $extensionKey . $languageSubpath;
         $languageObj = GeneralUtility::makeInstance(Localization::class);
         $languageObj->init1(
             $pLangObj,
@@ -85,7 +85,7 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
     {
         $extensionKey = 'transactor';
         $languageSubpath = '/Resources/Private/Language/';
-        $languagePath = 'LLL:EXT:' . $extensionKey . $languageSubpath;
+        $languagePath = 'EXT:' . $extensionKey . $languageSubpath;
         $cObj = \JambageCom\Div2007\Utility\FrontendUtility::getContentObjectRenderer();
         $languageObj = GeneralUtility::makeInstance(Localization::class);
         $languageObj->init1(
