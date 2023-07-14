@@ -70,13 +70,12 @@ abstract class GatewayBase implements GatewayInterface, \TYPO3\CMS\Core\Singleto
     protected $optionsArray;
     protected $resultsArray = [];
     protected $formActionURI = '';	// The action uri for the submit form
-    protected $gatewayModeArray = array
-        (
+    protected $gatewayModeArray =
+        [
             'form' => GatewayMode::FORM,
             'ajax' => GatewayMode::AJAX,
             'webservice' => GatewayMode::WEBSERVICE
-        );
-
+        ];
     private $errorStack;
     private $action;
     private $paymentMethod;
@@ -263,11 +262,6 @@ abstract class GatewayBase implements GatewayInterface, \TYPO3\CMS\Core\Singleto
     public function getCurrency ()
     {
         return $this->currency;
-    }
-
-    public function setSupportedGatewayArray ($value)
-    {
-        $this->supportedGatewayArray = $value;
     }
 
     /**
@@ -863,7 +857,7 @@ abstract class GatewayBase implements GatewayInterface, \TYPO3\CMS\Core\Singleto
         $resultsArray = [
             'gatewayid' => '',
             'reference' => $reference,
-            'currency' => $config['currency_code'],
+            'currency' => $currency,
             'amount' => '0.00',
             'state' => State::IDLE,
             'state_time' => time(),
