@@ -1,3 +1,10 @@
+
+2023-08-12 Franz Holzinger <franz@ttproducts.de>
+    * bugfix: Add 4th parameter $templateFilename to transactionInit. Otherwise the template file could not be overwritten.
+
+2023-07-13 Franz Holzinger <franz@ttproducts.de>
+    * remove unused method setSupportedGatewayArray
+
 2023-07-11 Franz Holzinger <franz@ttproducts.de>
     * add class Address for a base of user data retrieved from a payment gateway login box
 

@@ -345,6 +345,7 @@ abstract class GatewayBase implements GatewayInterface, \TYPO3\CMS\Core\Singleto
         $action,
         $paymentMethod,
         $callingExtensionKey,
+        $templateFilename = '',
         $orderUid = 0,
         $orderNumber = '0',
         $currency = 'EUR',
@@ -405,10 +406,12 @@ abstract class GatewayBase implements GatewayInterface, \TYPO3\CMS\Core\Singleto
         }
         $this->setGatewayMode($gatewayMode);
 
-        if (isset($paymentMethodsArray[$paymentMethod]['template'])) {
-            $templateFilename = $paymentMethodsArray[$paymentMethod]['template'];
-        } else {
-            $templateFilename = 'EXT:transactor/Resources/Private/Templates/PaymentHtmlTemplate.html';
+        if (empty($templateFilename)) {
+            if (isset($paymentMethodsArray[$paymentMethod]['template'])) {
+                $templateFilename = $paymentMethodsArray[$paymentMethod]['template'];
+            } else {
+                $templateFilename = 'EXT:transactor/Resources/Private/Templates/PaymentHtmlTemplate.html';
+            }
         }
 
         $this->setTemplateFilename($templateFilename);
@@ -872,6 +875,7 @@ abstract class GatewayBase implements GatewayInterface, \TYPO3\CMS\Core\Singleto
 
     public function transactionSucceeded ($resultsArray)
     {
+        $result = false;
 
         if (
             in_array(
@@ -883,25 +887,22 @@ abstract class GatewayBase implements GatewayInterface, \TYPO3\CMS\Core\Singleto
             )
         ) {
             $result = true;
-        } else {
-            $result = false;
         }
         return $result;
     }
 
     public function transactionFailed ($resultsArray)
     {
+        $result = false;
         if ($resultsArray['state'] == State::APPROVE_NOK) {
             $result = true;
-        } else {
-            $result = false;
         }
-
         return $result;
     }
 
     public function transactionMessage ($resultsArray)
     {
+        $result = '';
 
         if (isset($resultsArray['message'])) {
             $result = $resultsArray['message'];

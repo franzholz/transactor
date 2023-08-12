@@ -44,6 +44,8 @@ use TYPO3\CMS\Core\Utility\ExtensionManagementUtility;
 use TYPO3\CMS\Frontend\ContentObject\ContentObjectRenderer;
 
 
+use JambageCom\Div2007\Utility\FrontendUtility;
+
 use JambageCom\Transactor\Constants\Action;
 use JambageCom\Transactor\Constants\Feature;
 use JambageCom\Transactor\Constants\GatewayMode;
@@ -86,7 +88,7 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
         $extensionKey = 'transactor';
         $languageSubpath = '/Resources/Private/Language/';
         $languagePath = 'EXT:' . $extensionKey . $languageSubpath;
-        $cObj = \JambageCom\Div2007\Utility\FrontendUtility::getContentObjectRenderer();
+        $cObj = FrontendUtility::getContentObjectRenderer();
         $languageObj = GeneralUtility::makeInstance(Localization::class);
         $languageObj->init1(
             '',
@@ -312,9 +314,10 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
     {
         $gatewayStatus = [];
         $languageObj = GeneralUtility::makeInstance(Localization::class);
-        $cObj = \JambageCom\Div2007\Utility\FrontendUtility::getContentObjectRenderer();
+        $cObj = FrontendUtility::getContentObjectRenderer();
         $finalize = false;
         $finalVerify = false;
+        $isError = false;
         $gatewayExtKey = '';
         $result = '';
         $emConf = '';
@@ -348,6 +351,7 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
                         Action::AUTHORIZE_TRANSFER,
                         $paymentMethod,
                         $extensionKey,
+                        $confScript['templateFile'] ?? '',
                         $confScript['conf.']
                     );
 
@@ -487,7 +491,7 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
                                 $result = $gatewayProxyObject->transactionProcess($errorMessage);
 
                                 if ($result) {
-                                    $resultsArray = $gatewayProxyObject->transactionGetResults($referenceId); //array holen mit allen daten
+                                    $resultsArray = $gatewayProxyObject->transactionGetResults($referenceId); // Array holen mit allen daten
 
                                     if (
                                         $paymentActivity == 'verify' &&
@@ -526,7 +530,8 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
                                         $templateFilename = $gatewayProxyObject->getTemplateFilename();
                                     }
                                 }
-                                $localTemplateCode = \JambageCom\Div2007\Utility\FrontendUtility::fileResource($templateFilename);
+
+                                $localTemplateCode = FrontendUtility::fileResource($templateFilename);
 
                                 if (
                                     !$localTemplateCode &&
@@ -547,7 +552,10 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
 
                                 if (is_array($hiddenFieldsArray)) {
                                     foreach ($hiddenFieldsArray as $key => $value) {
-                                        $hiddenFields .= '<input type="hidden" name="' . htmlspecialchars($key) . '" value="' . htmlspecialchars($value) . '"' . $xhtmlFix . '>' . chr(10);
+                                        $hiddenFields .= 
+                                            '<input type="hidden" name="' . htmlspecialchars($key) .
+                                            '" value="' . htmlspecialchars($value) . '"' . $xhtmlFix . '>' .
+                                            chr(10);
                                     }
                                 }
                                 $scriptParametersArray =
@@ -585,10 +593,10 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
                                     stripos($formuri, 'ERROR') !== false ||
                                     !$formuri
                                 ) {
-                                    $bError = true;
+                                    $isError = true;
                                 }
 
-                                if ($formuri && !$bError) {
+                                if ($formuri && !$isError) {
                                     $markerArray['###HIDDENFIELDS###'] .= $hiddenFields;
                                     $markerArray['###SCRIPT###'] = $script;
                                     $markerArray['###REDIRECT_URL###'] = htmlspecialchars($formuri);
@@ -605,7 +613,7 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
                                     ) {
                                         $imageOut = $cObj->getContentObject($lConf['extImage'])->render($lConf['extImage.']);
                                     } else {
-                                        $imageOut = \JambageCom\Div2007\Utility\FrontendUtility::fileResource($lConf['extImage']);
+                                        $imageOut = FrontendUtility::fileResource($lConf['extImage']);
                                     }
                                     $markerArray['###TRANSACTOR_IMAGE###'] = $imageOut;
                                     $markerArray['###TRANSACTOR_WWW###'] = $lConf['extWww'];
@@ -614,7 +622,7 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
                                         $markerArray
                                     );
                                 } else {
-                                    if ($bError) {
+                                    if ($isError) {
                                         if (stripos($formuri, 'ERROR') !== false) {
                                             $errorMessage = $formuri;
                                         } else {
@@ -786,7 +794,7 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
         $linkParamArray
     )
     {
-        $cObj = \JambageCom\Div2007\Utility\FrontendUtility::getContentObjectRenderer();
+        $cObj = FrontendUtility::getContentObjectRenderer();
         if (!$pid) {
             $pid = $GLOBLAS['TSFE']->id;
         }
@@ -800,7 +808,7 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
         }
         $linkParams = implode('&', $linkArray);
         $url =
-            \JambageCom\Div2007\Utility\FrontendUtility::getTypoLink_URL(
+            FrontendUtility::getTypoLink_URL(
                 $cObj,
                 $pid,
                 $linkParamArray,
