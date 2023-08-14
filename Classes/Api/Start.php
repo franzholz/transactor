@@ -1500,6 +1500,7 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
                         Action::AUTHORIZE_TRANSFER,
                         $confScript['paymentMethod'],
                         $extensionKey,
+                        $confScript['templateFile'] ?? '',
                         $orderUid,
                         $orderNumber,
                         $currency,
@@ -1508,7 +1509,7 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
                         $extraData
                     );
                 }
-
+ 
                 if ($ok) {
                     if (class_exists($addressFeatureClass)) {
                         if (

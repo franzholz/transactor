@@ -6,7 +6,7 @@ namespace JambageCom\Transactor\Domain;
 *
 *  Copyright notice
 *
-*  (c) 2019 Franz Holzinger (franz@ttproducts.de)
+*  (c) 2023 Franz Holzinger (franz@ttproducts.de)
 *  All rights reserved
 *
 *  This script is part of the TYPO3 project. The TYPO3 project is
@@ -371,17 +371,13 @@ abstract class GatewayBase implements GatewayInterface, \TYPO3\CMS\Core\Singleto
             isset($extraData['return_url']) &&
             isset($extraData['cancel_url'])
         ) {
-//             $urlDir = GeneralUtility::getIndpEnv('TYPO3_REQUEST_DIR');
             $this->setExtraData('return_url', GeneralUtility::locationHeaderUrl($extraData['return_url']));
             $this->setExtraData('cancel_url', GeneralUtility::locationHeaderUrl($extraData['cancel_url']));
-//             $this->setExtraData('return_url', $urlDir . $extraData['return_url']);
-//             $this->setExtraData('cancel_url', $urlDir . $extraData['cancel_url']);
         }
-
 
         $basketSum = 0;
         foreach ($basket as $record) {
-            $recordSum = $record[Field::PRICE_TAX] * $record[Field::QUANTITY];
+            $recordSum = ($record[Field::PRICE_TAX] ?? 0) * ($record[Field::QUANTITY] ?? 0);
             $basketSum += $recordSum;
         }
         $this->setBasketSum($basketSum);
@@ -1092,4 +1088,3 @@ abstract class GatewayBase implements GatewayInterface, \TYPO3\CMS\Core\Singleto
         return false;
     }
 }
-

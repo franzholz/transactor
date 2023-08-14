@@ -276,7 +276,8 @@ class GatewayProxy implements \JambageCom\Transactor\Domain\GatewayInterface
     public function transactionInit (
         $action,
         $method,
-        $extensionKey,
+        $callingExtensionKey,
+        $templateFilename = '',
         $orderUid = 0,
         $orderNumber = '0',
         $currency = 'EUR',
@@ -289,7 +290,8 @@ class GatewayProxy implements \JambageCom\Transactor\Domain\GatewayInterface
         $result = $this->getGatewayObj()->transactionInit(
             $action,
             $method,
-            $extensionKey,
+            $callingExtensionKey,
+            $templateFilename,
             $orderUid,
             $orderNumber,
             $currency,
