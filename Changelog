@@ -1,3 +1,28 @@
+2023-08-19 Franz Holzinger <franz@ttproducts.de>
+    * use constants JambageCom\Transactor\Constants\Field for field names :
+        'item_name'         => Field::NAME,
+        'quantity'          => Field::QUANTITY,
+        'amount'            => Field::PRICE_NOTAX,
+        'amountnotax'       => Field::PRICE_NOTAX,
+        'amounttax'         => Field::PRICE_TAX,
+        'goodstax'          => Field::GOODS_TAX,
+        'goodsnotax'        => Field::GOODS_NOTAX,
+        'goodsvouchertax'   => Field::GOODSVOUCHER_TAX,
+        'goodsvouchernotax' => Field::GOODSVOUCHER_NOTAX,
+        'payment'           => Field::PAYMENT_TAX,
+        'paymenttax'        => Field::PAYMENT_TAX,
+        'paymentnotax'      => Field::PAYMENT_NOTAX,
+        'shipping'          => Field::SHIPPING_TAX,
+        'shippingtax'       => Field::SHIPPING_TAX,
+        'shippingnotax'     => Field::SHIPPING_NOTAX,
+        'handling'          => Field::HANDLING_TAX,
+        'handlingtax'       => Field::HANDLING_TAX,
+        'handlingnotax'     => Field::HANDLING_NOTAX,
+        'taxpercent'        => Field::TAX_PERCENTAGE,
+        'taxrate'           => Field::TAX_PERCENTAGE,
+        'tax'               => Field::PRICE_ONLYTAX,
+        'totaltax'          => Field::PRICE_TOTAL_ONLYTAX,
+        'item_number'       => Field::ITEMNUMBER
 
 2023-08-12 Franz Holzinger <franz@ttproducts.de>
     * bugfix: Add 4th parameter $templateFilename to transactionInit. Otherwise the template file could not be overwritten.

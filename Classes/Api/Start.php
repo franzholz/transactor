@@ -5,7 +5,7 @@ namespace JambageCom\Transactor\Api;
 /***************************************************************
 *  Copyright notice
 *
-*  (c) 2019 Franz Holzinger <franz@ttproducts.de>
+*  (c) 2023 Franz Holzinger <franz@ttproducts.de>
 *  All rights reserved
 *
 *  This script is part of the TYPO3 project. The TYPO3 project is
@@ -48,6 +48,7 @@ use JambageCom\Div2007\Utility\FrontendUtility;
 
 use JambageCom\Transactor\Constants\Action;
 use JambageCom\Transactor\Constants\Feature;
+use JambageCom\Transactor\Constants\Field;
 use JambageCom\Transactor\Constants\GatewayMode;
 use JambageCom\Transactor\Constants\Message;
 
@@ -377,14 +378,14 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
                     }
 
                     static::getPaymentBasket(
+                        $paymentBasketArray,
+                        $totalArray,
+                        $addressArray,
                         $itemArray,
                         $calculatedArray,
                         $infoArray,
                         $deliveryNote,
-                        $gatewayConf,
-                        $totalArray,
-                        $addressArray,
-                        $paymentBasketArray
+                        $gatewayConf
                     );
 
                     $referenceId =
@@ -1011,14 +1012,14 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
     }
 
     static protected function getPaymentBasket (
+        &$basketArray,
+        &$totalArray,
+        &$addressArray,
         array $itemArray,
         array $calculatedArray,
         array $infoArray,
         $deliveryNote,
-        $gatewayConf,
-        &$totalArray,
-        &$addressArray,
-        &$basketArray
+        $gatewayConf
     )
     {
         $bUseStaticInfo = false;
@@ -1089,42 +1090,42 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
             }
         }
 
-        $totalArray['goodsnotax'] = static::fFloat($goodsTotalNoTax);
-        $totalArray['goodstax'] = static::fFloat($goodsTotalTax);
-        $totalArray['goodsvouchernotax'] = static::fFloat($goodsTotalVoucherTax);
-        $totalArray['goodsvouchertax'] = static::fFloat($goodsTotalVoucherNoTax);
-
+        $totalArray[Field::GOODS_NOTAX] = static::fFloat($goodsTotalNoTax);
+        $totalArray[Field::GOODS_TAX] = static::fFloat($goodsTotalTax);
+        $totalArray[Field::GOODSVOUCHER_NOTAX] = static::fFloat($goodsTotalVoucherNoTax);
+        $totalArray[Field::GOODSVOUCHER_TAX] = static::fFloat($goodsTotalVoucherTax);
+        
         // is the new calculatedArray format used?
         if (
             isset($calculatedArray['shipping']) &&
             is_array($calculatedArray['shipping'])
         ) {
-            $totalArray['paymentnotax'] = static::fFloat($calculatedArray['payment']['priceNoTax']);
-            $totalArray['paymenttax'] = static::fFloat($calculatedArray['payment']['priceTax']);
-            $totalArray['shippingnotax'] = static::fFloat($calculatedArray['shipping']['priceNoTax']);
-            $totalArray['shippingtax'] = static::fFloat($calculatedArray['shipping']['priceTax']);
+            $totalArray[Field::PAYMENT_NOTAX] = static::fFloat($calculatedArray['payment']['priceNoTax']);
+            $totalArray[Field::PAYMENT_TAX] = static::fFloat($calculatedArray['payment']['priceTax']);
+            $totalArray[Field::SHIPPING_NOTAX] = static::fFloat($calculatedArray['shipping']['priceNoTax']);
+            $totalArray[Field::SHIPPING_TAX] = static::fFloat($calculatedArray['shipping']['priceTax']);
             if (
                 isset($calculatedArray['handling']) &&
                 is_array($calculatedArray['handling'])
             ) {
-                $totalArray['handlingnotax'] = 0;
-                $totalArray['handlingtax'] = 0;
+                $totalArray[Field::HANDLING_NOTAX] = 0;
+                $totalArray[Field::HANDLING_TAX] = 0;
                 foreach ($calculatedArray['handling'] as $key => $priceArray) {
-                    $totalArray['handlingnotax'] += static::fFloat($priceArray['priceNoTax']);
-                    $totalArray['handlingtax'] += static::fFloat($priceArray['priceTax']);
+                    $totalArray[Field::HANDLING_NOTAX] += static::fFloat($priceArray['priceNoTax']);
+                    $totalArray[Field::HANDLING_TAX] += static::fFloat($priceArray['priceTax']);
                 }
             }
         } else {
-            $totalArray['paymentnotax'] = static::fFloat($calculatedArray['priceNoTax']['payment']);
-            $totalArray['paymenttax'] = static::fFloat($calculatedArray['priceTax']['payment']);
-            $totalArray['shippingnotax'] = static::fFloat($calculatedArray['priceNoTax']['shipping']);
-            $totalArray['shippingtax'] = static::fFloat($calculatedArray['priceTax']['shipping']);
-            $totalArray['handlingnotax'] = static::fFloat($calculatedArray['priceNoTax']['handling']);
-            $totalArray['handlingtax'] = static::fFloat($calculatedArray['priceTax']['handling']);
+            $totalArray[Field::PAYMENT_NOTAX] = static::fFloat($calculatedArray['priceNoTax']['payment']);
+            $totalArray[Field::PAYMENT_TAX] = static::fFloat($calculatedArray['priceTax']['payment']);
+            $totalArray[Field::SHIPPING_NOTAX] = static::fFloat($calculatedArray['priceNoTax']['shipping']);
+            $totalArray[Field::SHIPPING_TAX] = static::fFloat($calculatedArray['priceTax']['shipping']);
+            $totalArray[Field::HANDLING_NOTAX] = static::fFloat($calculatedArray['priceNoTax']['handling']);
+            $totalArray[Field::HANDLING_TAX] = static::fFloat($calculatedArray['priceTax']['handling']);
         }
 
-        $totalArray['amountnotax'] = static::fFloat($calculatedArray['priceNoTax']['vouchertotal']);
-        $totalArray['amounttax'] = static::fFloat($calculatedArray['priceTax']['vouchertotal']);
+        $totalArray[Field::PRICE_NOTAX] = static::fFloat($calculatedArray['priceNoTax']['vouchertotal']);
+        $totalArray[Field::PRICE_TAX] = static::fFloat($calculatedArray['priceTax']['vouchertotal']);
         $maxTax = 0;
 
         if (
@@ -1143,8 +1144,8 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
             }
         }
 
-        $totalArray['taxrate'] = $maxTax;
-        $totalArray['totaltax'] = static::fFloat($totalArray['amounttax'] - $totalArray['amountnotax']);
+        $totalArray[Field::TAX_PERCENTAGE] = $maxTax;
+        $totalArray[Field::PRICE_TOTAL_ONLYTAX] = static::fFloat($totalArray[Field::PRICE_TAX] - $totalArray[Field::PRICE_NOTAX]);
 
         // Setting up address info values
         $mapAddrFields = [
@@ -1218,9 +1219,9 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
         $basketArray = [];
         $newTotalArray =
             [
-                'payment'  => '0',
-                'shipping' => '0',
-                'handling' => '0'
+                Field::PAYMENT_TAX  => '0',
+                Field::SHIPPING_TAX => '0',
+                Field::HANDLING_TAX => '0'
             ];
         $lastSort = '';
         $lastKey = 0;
@@ -1248,26 +1249,26 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
                     }
                 }
 
-                $payment = static::fFloat($count * $totalArray['paymenttax'] / $totalCount, 2);
-                $newTotalArray['payment'] += $payment;
-                $shipping = static::fFloat($count * $totalArray['shippingtax'] / $totalCount, 2);
-                $newTotalArray['shipping'] += $shipping;
+                $payment = static::fFloat($count * $totalArray[Field::PAYMENT_TAX] / $totalCount, 2);
+                $newTotalArray[Field::PAYMENT_TAX] += $payment;
+                $shipping = static::fFloat($count * $totalArray[Field::SHIPPING_TAX] / $totalCount, 2);
+                $newTotalArray[Field::SHIPPING_TAX] += $shipping;
                 $handling = static::fFloat($actItem['handling'], 2);
-                $newTotalArray['handling'] += $handling;
+                $newTotalArray[Field::HANDLING_TAX] += $handling;
 
                 $count = intval($actItem['count']);
 
                 $basketRow = [
-                    'item_name'  => $row['title'],
-                    'quantity'   => $count,
-                    'amount'     => static::fFloat($actItem['priceNoTax']),
-                    'payment'    => $payment,
-                    'shipping'   => $shipping,
-                    'handling'   => $handling,
-                    'taxpercent' => $tax,
-                    'tax' => static::fFloat($actItem['priceTax'] - $actItem['priceNoTax']),
-                    'totaltax' => static::fFloat($actItem['totalTax'] - $actItem['totalNoTax']),
-                    'item_number' => $row['itemnumber'],
+                    Field::NAME        => $row['title'],
+                    Field::QUANTITY    => $count,
+                    Field::PRICE_NOTAX => static::fFloat($actItem['priceNoTax']),
+                    Field::PAYMENT_TAX => $payment,
+                    Field::SHIPPING_TAX => $shipping,
+                    Field::HANDLING_TAX => $handling,
+                    Field::TAX_PERCENTAGE => $tax,
+                    Field::PRICE_ONLYTAX => static::fFloat($actItem['priceTax'] - $actItem['priceNoTax']),
+                    Field::PRICE_TOTAL_ONLYTAX => static::fFloat($actItem['totalTax'] - $actItem['totalNoTax']),
+                    Field::ITEMNUMBER => $row['itemnumber'],
                 ];
 
                 for ($i = 0; $i <= 7; ++$i) {
@@ -1304,8 +1305,8 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
 
         // fix rounding errors
         foreach ($newTotalArray as $newType => $newAmount) {
-            if ($newTotalArray[$newType] != $totalArray[$newType . 'tax']) {
-                $basketArray[$lastSort][$lastKey][$newType] += $totalArray[$newType . 'tax'] - $newTotalArray[$newType];
+            if ($newTotalArray[$newType] != $totalArray[$newType]) {
+                $basketArray[$lastSort][$lastKey][$newType] += $totalArray[$newType] - $newTotalArray[$newType];
             }
         }
 
@@ -1339,22 +1340,22 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
                 );
             $basketArray['VOUCHER'][] =
                 [
-                    'item_name' => $voucherText,
+                    Field::NAME => $voucherText,
                     'on0' => $voucherText,
-                    'quantity' => 1,
-                    'amount' => $voucherAmount,
-                    'taxpercent' => 0,
-                    'item_number' => 'VOUCHER'
+                    Field::QUANTITY => 1,
+                    Field::PRICE_NOTAX => $voucherAmount,
+                    Field::TAX_PERCENTAGE => 0,
+                    Field::ITEMNUMBER => 'VOUCHER'
                 ];
 
-            $totalArray['goodsnotax'] = static::fFloat($goodsTotalNoTax + $voucherAmount);
+            $totalArray[Field::GOODS_NOTAX] = static::fFloat($goodsTotalNoTax + $voucherAmount);
 
             if (isset($calculatedArray['depositnotax'])) {
-                $totalArray['goodsnotax'] = static::fFloat($goodsTotalNoTax + $goodsTotalDepositNoTax);
+                $totalArray[Field::GOODS_NOTAX] = static::fFloat($goodsTotalNoTax + $goodsTotalDepositNoTax);
             }
-            $totalArray['goodstax'] = static::fFloat($goodsTotalTax + $voucherAmount);
+            $totalArray[Field::GOODS_TAX] = static::fFloat($goodsTotalTax + $voucherAmount);
             if (isset($calculatedArray['deposittax'])) {
-                $totalArray['goodstax'] = static::fFloat($goodsTotalTax + $goodsTotalDepositTax);
+                $totalArray[Field::GOODS_TAX] = static::fFloat($goodsTotalTax + $goodsTotalDepositTax);
             }
         }
     }
