@@ -5,7 +5,7 @@ namespace JambageCom\Transactor\Api;
 /***************************************************************
 *  Copyright notice
 *
-*  (c) 2017 Franz Holzinger (franz@ttproducts.de)
+*  (c) 2023 Franz Holzinger (franz@ttproducts.de)
 *  All rights reserved
 *
 *  This script is part of the TYPO3 project. The TYPO3 project is
@@ -35,6 +35,15 @@ namespace JambageCom\Transactor\Api;
  * @subpackage transactor
  */
 
+use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ServerRequestInterface;
+
+use TYPO3\CMS\Core\Utility\GeneralUtility;
+
+
+use JambageCom\Transactor\Domain\GatewayFactory;
+
+
 
 abstract class Listener {
 
@@ -43,7 +52,10 @@ abstract class Listener {
     * This must class be overridden by a listener class from a specific gateway extension
     * @return	void
     */
-    abstract public function main ();
+    abstract public function main (
+        ServerRequestInterface $request
+    );
+
 
     /**
     * Main function which processes the tasks connected to the listener.
@@ -56,7 +68,7 @@ abstract class Listener {
         if (is_array ($GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['transactor']['listener'])) {
             foreach ($GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['transactor']['listener'] as $classRef) {
                 $hookObj = 
-                    \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance($classRef);
+                    GeneralUtility::makeInstance($classRef);
 
                 if (
                     is_object($hookObj) &&
@@ -79,7 +91,7 @@ abstract class Listener {
     )
     {
         $gatewayProxyObject =
-            \JambageCom\Transactor\Domain\GatewayFactory::getGatewayProxyObjectByRow(
+            GatewayFactory::getGatewayProxyObjectByRow(
                 $row
             );
         return $gatewayProxyObject;
