@@ -45,10 +45,10 @@ class TransactionMessageHandler implements MiddlewareInterface
     {
         $typo3Version = GeneralUtility::makeInstance(Typo3Version::class);
         $version = $typo3Version->getVersion();
-
+        $queryParams = $request->getQueryParams();
+        $postParams = $request->getParsedBody();
         $eID = $request->getParsedBody()['eID'] ?? $request->getQueryParams()['eID'] ?? null;
-        $transactor = $request->getParsedBody()['transactor'] ?? $request->getQueryParams()['transactor'] ?? null;
-
+        $transactor = $request->getParsedBody()['transactor'] ?? $queryParams['transactor'] ?? null;
         // Do not use any more eID for Transactor!
         if ($eID != null || $transactor === null) {
             return $handler->handle($request);
@@ -87,7 +87,7 @@ class TransactionMessageHandler implements MiddlewareInterface
         }
         trigger_error(
             'transactor "' . $transactor . '" is registered with a script to the file "' . GeneralUtility::getFileAbsFileName($configuration) . '".'
-            . ' Register transactor with a class::method syntax like "\MyVendor\MyExtension\Controller\MyTransactorController::myMethod" instead.',
+            . ' Register transactor with a class::method syntax like "\MyVendor\MyExtension\Controller\MyTransactorController::myMethod" instead!',
             E_USER_ERROR
         );
 

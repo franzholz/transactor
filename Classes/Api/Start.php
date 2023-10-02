@@ -353,7 +353,10 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
                         $paymentMethod,
                         $extensionKey,
                         $confScript['templateFile'] ?? '',
-                        $confScript['conf.']
+                        $orderUid,
+                        $orderNumber,
+                        $confScript['currency'] ? $confScript['currency'] : 'EUR',
+                        $confScript['conf.'] ?? []
                     );
 
                     $gatewayMode = $gatewayProxyObject->getGatewayMode();
@@ -387,6 +390,7 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
                         $deliveryNote,
                         $gatewayConf
                     );
+                    $gatewayProxyObject->setBasket($paymentBasketArray);
 
                     $referenceId =
                         static::getReferenceUid(
@@ -831,10 +835,7 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
     static public function getLanguage ()
     {
         if (
-            isset($GLOBALS['TSFE']->config) &&
-            is_array($GLOBALS['TSFE']->config) &&
-            isset($GLOBALS['TSFE']->config['config']) &&
-            is_array($GLOBALS['TSFE']->config['config'])
+            isset($GLOBALS['TSFE']->config['config']['language'])
         ) {
             $result = strtolower($GLOBALS['TSFE']->config['config']['language']);
         } else {
@@ -1094,7 +1095,9 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
         $totalArray[Field::GOODS_TAX] = static::fFloat($goodsTotalTax);
         $totalArray[Field::GOODSVOUCHER_NOTAX] = static::fFloat($goodsTotalVoucherNoTax);
         $totalArray[Field::GOODSVOUCHER_TAX] = static::fFloat($goodsTotalVoucherTax);
-        
+        $totalArray[Field::HANDLING_NOTAX] = 0;
+        $totalArray[Field::HANDLING_TAX] = 0;
+
         // is the new calculatedArray format used?
         if (
             isset($calculatedArray['shipping']) &&
@@ -1108,8 +1111,6 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
                 isset($calculatedArray['handling']) &&
                 is_array($calculatedArray['handling'])
             ) {
-                $totalArray[Field::HANDLING_NOTAX] = 0;
-                $totalArray[Field::HANDLING_TAX] = 0;
                 foreach ($calculatedArray['handling'] as $key => $priceArray) {
                     $totalArray[Field::HANDLING_NOTAX] += static::fFloat($priceArray['priceNoTax']);
                     $totalArray[Field::HANDLING_TAX] += static::fFloat($priceArray['priceTax']);
@@ -1169,8 +1170,8 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
 
             // Correct firstname- and lastname-field if they have no value
             if (
-                $basketAddressArray['first_name'] == '' &&
-                $basketAddressArray['last_name'] == ''
+                empty($basketAddressArray['first_name']) &&
+                empty($basketAddressArray['last_name'])
             ) {
                 $tmpNameArr = explode(' ', $basketAddressArray['name'], 2);
                 $basketAddressArray['first_name'] = $tmpNameArr[0];
@@ -1179,7 +1180,7 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
 
             // Map address fields
             foreach ($basketAddressArray as $mapKey => $value) {
-                $paymentLibKey = $mapAddrFields[$mapKey];
+                $paymentLibKey = $mapAddrFields[$mapKey] ?? '';
                 if ($paymentLibKey != '') {
                     $addressArray[$key][$paymentLibKey] = $value;
                 }
@@ -1191,10 +1192,10 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
                 // record which is found will be returned. If there is no record at all, the codes will be returned untouched
                 $countryArray =
                     \JambageCom\Div2007\Utility\StaticInfoTablesUtility::fetchCountries(
-                        $addressArray[$key]['country'],
-                        $addressArray[$key]['countryISO2'],
-                        $addressArray[$key]['countryISO3'],
-                        $addressArray[$key]['countryISONr']
+                        $addressArray[$key]['country'] ?? '',
+                        $addressArray[$key]['countryISO2'] ?? '',
+                        $addressArray[$key]['countryISO3'] ?? '',
+                        $addressArray[$key]['countryISONr'] ?? ''
                     );
                 $countryRow = $countryArray[0];
 
@@ -1227,20 +1228,16 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
         $lastKey = 0;
 
         foreach ($itemArray as $sort => $actItemArray) {
-            if ($sort == '') {
-                $sort = 'basketsort';
-            }
-            $lastSort = $sort;
-            $basketArray[$sort] = [];
-
             foreach ($actItemArray as $key => $actItem) {
-                $row = $actItem['rec'];
+                $row = $actItem['rec'] ?? [];
                 // $tax = $row['tax']; NEU
-                $tax = $actItem['tax'];
-                $extArray = $row['ext'];
+                $tax = $actItem['tax'] ?? '';
+                $count = intval($actItem['count'] ?? 0);
+
+                $extArray = $row['ext'] ?? '';
                 if (isset($extArray) && is_array($extArray)) {
-                    $mergeRow = $extArray['mergeArticles'];
-                    if (isset($mergeRow) && is_array($mergeRow)) {
+                    $mergeRow = $extArray['mergeArticles'] ?? '';
+                    if (is_array($mergeRow)) {
                         foreach ($mergeRow as $field => $value) {
                             if ($value) {
                                 $row[$field] = $value;
@@ -1253,22 +1250,30 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
                 $newTotalArray[Field::PAYMENT_TAX] += $payment;
                 $shipping = static::fFloat($count * $totalArray[Field::SHIPPING_TAX] / $totalCount, 2);
                 $newTotalArray[Field::SHIPPING_TAX] += $shipping;
-                $handling = static::fFloat($actItem['handling'], 2);
+                $handling = static::fFloat($actItem['handling'] ?? 0, 2);
                 $newTotalArray[Field::HANDLING_TAX] += $handling;
 
-                $count = intval($actItem['count']);
 
                 $basketRow = [
                     Field::NAME        => $row['title'],
                     Field::QUANTITY    => $count,
-                    Field::PRICE_NOTAX => static::fFloat($actItem['priceNoTax']),
+                    Field::PRICE_NOTAX => static::fFloat($actItem['priceNoTax'] ?? 0),
+                    Field::PRICE_TAX   => static::fFloat($actItem['priceTax'] ?? 0),
                     Field::PAYMENT_TAX => $payment,
                     Field::SHIPPING_TAX => $shipping,
                     Field::HANDLING_TAX => $handling,
                     Field::TAX_PERCENTAGE => $tax,
-                    Field::PRICE_ONLYTAX => static::fFloat($actItem['priceTax'] - $actItem['priceNoTax']),
-                    Field::PRICE_TOTAL_ONLYTAX => static::fFloat($actItem['totalTax'] - $actItem['totalNoTax']),
-                    Field::ITEMNUMBER => $row['itemnumber'],
+                    Field::PRICE_ONLYTAX => (
+                            isset($actItem['priceTax']) && isset($actItem['totalNoTax']) ? 
+                            (static::fFloat($actItem['priceTax'] - $actItem['priceNoTax'])) : 
+                            0
+                        ),
+                    Field::PRICE_TOTAL_ONLYTAX => (
+                        isset($actItem['totalTax']) && isset($actItem['totalNoTax']) ? (static::fFloat($actItem['totalTax'] - $actItem['totalNoTax'])) :
+                        0
+                    ),
+                    Field::ITEMNUMBER => $row['itemnumber'] ?? '',
+                    Field::DESCRIPTION => $row['note'] ?? ''
                 ];
 
                 for ($i = 0; $i <= 7; ++$i) {
@@ -1278,7 +1283,7 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
                         $value = '';
 
                         if ($fieldName == 'note' || $fieldName == 'note2') {
-                            $value = strip_tags(nl2br($row[$fieldName]));
+                            $value = strip_tags(nl2br($row[$fieldName] ?? ''));
                             $value = str_replace ('&nbsp;', ' ', $value);
                             $value = str_replace ('&amp;', '&', $value);
                         } else if (
@@ -1298,17 +1303,18 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
                         }
                     }
                 }
-                $basketArray[$sort][$key] = $basketRow;
+//                 $basketArray[$sort][$key] = $basketRow;
+                $basketArray[] = $basketRow;
                 $lastKey = $key;
             }
         }
 
         // fix rounding errors
-        foreach ($newTotalArray as $newType => $newAmount) {
-            if ($newTotalArray[$newType] != $totalArray[$newType]) {
-                $basketArray[$lastSort][$lastKey][$newType] += $totalArray[$newType] - $newTotalArray[$newType];
-            }
-        }
+//         foreach ($newTotalArray as $newType => $newAmount) {
+//             if ($newTotalArray[$newType] != $totalArray[$newType]) {
+//                 $basketArray[$lastSort][$lastKey][$newType] += $totalArray[$newType] - $newTotalArray[$newType];
+//             }
+//         }
 
         $value1 = 0;
         $value2 = 0;
@@ -1338,14 +1344,16 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
                 $languageObj->getLabel(
                     'voucher_payment_article'
                 );
-            $basketArray['VOUCHER'][] =
+//             $basketArray['VOUCHER'][] =
+            $basketArray['VOUCHER'] =
                 [
                     Field::NAME => $voucherText,
                     'on0' => $voucherText,
                     Field::QUANTITY => 1,
                     Field::PRICE_NOTAX => $voucherAmount,
                     Field::TAX_PERCENTAGE => 0,
-                    Field::ITEMNUMBER => 'VOUCHER'
+                    Field::ITEMNUMBER => 'VOUCHER',
+                    Field::DESCRIPTION => 'Voucher'
                 ];
 
             $totalArray[Field::GOODS_NOTAX] = static::fFloat($goodsTotalNoTax + $voucherAmount);
@@ -1441,7 +1449,7 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
                     $errorMessage == ''
                 ) {
                     $parameters = [
-                        $errorMessage,
+                        &$errorMessage,
                         $confScript,
                     ];
                     call_user_func_array(

@@ -22,6 +22,7 @@ class Field
 {
     const NAME           = 'transactor_name';           // name of a given record
     const ITEMNUMBER     = 'transactor_itemnumber';     // item number of a given record
+    const DESCRIPTION    = 'transactor_description';    // description of a given record
     const PRICE_TAX      = 'transactor_price_tax';      // price including tax of a given record
     const PRICE_NOTAX    = 'transactor_price_notax';    // price without tax of a given record
     const PRICE_ONLYTAX  = 'transactor_price_onlytax';  // price of only the tax of a given record

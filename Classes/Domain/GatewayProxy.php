@@ -793,6 +793,54 @@ class GatewayProxy implements \JambageCom\Transactor\Domain\GatewayInterface
     }
 
     /**
+    * Sets the checkout Ajax URI
+    *
+    * @param	string		checkout URI
+    * @return	void
+    * @access	public
+    */
+    public function setCheckoutURI ($checkoutURI) 
+    {
+        $this->getGatewayObj()->setCheckoutURI($checkoutURI);
+    }
+
+    /**
+    * Fetches the checkout Ajax URI
+    *
+    * @return	string		checkout URI
+    * @access	public
+    */
+    public function getCheckoutURI ()
+    {
+        $result = $this->getGatewayObj()->getCheckoutURI();
+        return $result;
+    }
+
+    /**
+    * Sets the capture Transactor URI
+    *
+    * @param	string		capture URI
+    * @return	void
+    * @access	public
+    */
+    public function setCaptureURI ($captureURI) 
+    {
+        $this->getGatewayObj()->setCaptureURI($captureURI);
+    }
+
+    /**
+    * Fetches the capture Transactor URI
+    *
+    * @return	string		capture URI
+    * @access	public
+    */
+    public function getCaptureURI ()
+    {
+        $result = $this->getGatewayObj()->getCaptureURI();
+        return $result;
+    }
+
+    /**
     * This gives the information if the order can only processed after a verification message has been received.
     *
     * @return	boolean		true if a verification message needs to be sent

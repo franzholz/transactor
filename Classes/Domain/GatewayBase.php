@@ -70,6 +70,9 @@ abstract class GatewayBase implements GatewayInterface, \TYPO3\CMS\Core\Singleto
     protected $optionsArray;
     protected $resultsArray = [];
     protected $formActionURI = '';	// The action uri for the submit form
+    protected $checkoutURI = ''; // relative URI to the checkout action listener of the payment extension
+    protected $captureURI = ''; // relative URI to the capture action listener of the payment extension
+
     protected $gatewayModeArray =
         [
             'form' => GatewayMode::FORM,
@@ -494,16 +497,16 @@ abstract class GatewayBase implements GatewayInterface, \TYPO3\CMS\Core\Singleto
             'crdate' => time(),
             'ext_key' => $this->callingExtension,
             'reference' => $reference,
-            'orderuid' => $transaction['orderuid'],
+            'orderuid' => $transaction['orderuid'] ?? 0,
             'state' => State::IDLE,
-            'amount' => $transaction['amount'],
-            'currency' => $transaction['currency'],
+            'amount' => $transaction['amount'] ?? 0,
+            'currency' => $transaction['currency'] ?? 'EUR',
             'paymethod_key' => $this->getGatewayKey(),
             'paymethod_method' => $this->getPaymentMethod(),
             'message' => Message::NOT_PROCESSED,
             'config' => $xmlOptions,
             'config_ext' => $xmlExtensionConfiguration,
-            'user' => $detailsArray['user']
+            'user' => $detailsArray['user'] ?? ''
         ];
 
         if (($row = $this->getTransaction($reference)) === false) {
@@ -532,7 +535,6 @@ abstract class GatewayBase implements GatewayInterface, \TYPO3\CMS\Core\Singleto
                             2
                         ) > 0.1
                     ) ||
-                    $row['gatewayid'] != $dataArray['gatewayid'] ||
                     $row['paymethod_key'] != $dataArray['paymethod_key'] ||
                     $row['paymethod_method'] != $dataArray['paymethod_method'] ||
                     $row['orderuid'] != $dataArray['orderuid']
@@ -1063,6 +1065,52 @@ abstract class GatewayBase implements GatewayInterface, \TYPO3\CMS\Core\Singleto
     public function getFormActionURI ()
     {
         return $this->formActionURI;
+    }
+
+    /**
+    * Sets the checkout Transactor URI
+    *
+    * @param	string		checkout URI
+    * @return	void
+    * @access	public
+    */
+    public function setCheckoutURI ($checkoutURI) 
+    {
+        $this->checkoutURI = $checkoutURI;
+    }
+
+    /**
+    * Fetches the checkout Transactor URI
+    *
+    * @return	string		checkout URI
+    * @access	public
+    */
+    public function getCheckoutURI ()
+    {
+        return $this->checkoutURI;
+    }
+
+    /**
+    * Sets the capture Transactor URI
+    *
+    * @param	string		capture URI
+    * @return	void
+    * @access	public
+    */
+    public function setCaptureURI ($captureURI) 
+    {
+        $this->captureURI = $captureURI;
+    }
+
+    /**
+    * Fetches the capture Transactor URI
+    *
+    * @return	string		capture URI
+    * @access	public
+    */
+    public function getCaptureURI ()
+    {
+        return $this->captureURI;
     }
 
     /**
