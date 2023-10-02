@@ -42,7 +42,14 @@ class Address implements \TYPO3\CMS\Core\SingletonInterface {
     protected $user_id;
     protected $email;
     protected $email_verified;
-    
+    protected $street;
+    protected $zip;
+    protected $city;
+    protected $state;
+    protected $country;
+
+
+
     public function setName ($name)
     {
         $this->name = $name;
@@ -83,6 +90,16 @@ class Address implements \TYPO3\CMS\Core\SingletonInterface {
         return $this->email_verified;
     }
 
+    public function setStreet ($street)
+    {
+        $this->street = $street;
+    }
+
+    public function getStreet ()
+    {
+        return $this->street;
+    }
+
     public function setZip ($zip)
     {
         $this->zip = $zip;
@@ -93,14 +110,14 @@ class Address implements \TYPO3\CMS\Core\SingletonInterface {
         return $this->zip;
     }
 
-    public function setCountry ($country)
+    public function setCity ($city)
     {
-        $this->country = $country;
+        $this->city = $city;
     }
 
-    public function getCountry ()
+    public function getCity ()
     {
-        return $this->country;
+        return $this->city;
     }
 
     public function setState ($state)
@@ -113,25 +130,16 @@ class Address implements \TYPO3\CMS\Core\SingletonInterface {
         return $this->state;
     }
 
-    public function setStreet ($street)
+    public function setCountry ($country)
     {
-        $this->street = $street;
+        $this->country = $country;
     }
 
-    public function getStreet ()
+    public function getCountry ()
     {
-        return $this->street;
+        return $this->country;
     }
 
-    public function setCity ($city)
-    {
-        $this->city = $city;
-    }
-
-    public function getCity ()
-    {
-        return $this->city;
-    }
 }
 
 
