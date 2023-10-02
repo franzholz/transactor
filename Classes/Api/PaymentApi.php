@@ -122,8 +122,8 @@ class PaymentApi
 
         if (
             is_array($confScript) &&
-            $confScript['extName'] != '' &&
-            $confScript['paymentMethod'] != ''
+            !empty($confScript['extName']) &&
+            !empty($confScript['paymentMethod'])
         ) {
             $gatewayExtensionKey = $confScript['extName'];
 
@@ -146,6 +146,12 @@ class PaymentApi
                         $gatewayProxyObj instanceof \JambageCom\Transactor\Domain\GatewayProxy
                     ) {
                         $gatewayProxyObj->init($gatewayExtensionKey);
+                        if (!empty($confScript['checkoutUrl'])) {
+                            $gatewayProxyObj->setCheckoutURI($confScript['checkoutUrl']);
+                        }
+                        if (!empty($confScript['captureUrl'])) {
+                            $gatewayProxyObj->setCaptureURI($confScript['captureUrl']);
+                        }
                         $result = $gatewayProxyObj;
                     } else {
                         throw new \RuntimeException('Error in transactor: Gateway object class "' . get_class($gatewayProxyObj) . '" must be an instance of  "JambageCom\Transactor\Domain\GatewayProxy"', 50200);
@@ -385,10 +391,10 @@ class PaymentApi
         $toEMail,
         $subject,
         array $fields,
-        $extKey = ''
+        $extensionKey = ''
     )
     {
-        $PLAINContent = 'The TYPO3 Transactor extension sends you an error message coming from extension "' . $extKey . '".';
+        $PLAINContent = 'The TYPO3 Transactor extension sends you an error message coming from extension "' . $extensionKey . '".';
         $PLAINContent .= chr(13) . implode('|', $fields);
         $HTMLContent = '';
 
