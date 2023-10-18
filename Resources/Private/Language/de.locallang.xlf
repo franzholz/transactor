@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" version="1.2">
+  <file source-language="en" datatype="plaintext" original="EXT:transactor/Resources/Private/Language/locallang.xlf" date="2018-05-09T17:24:14Z" product-name="transactor" target-language="de">
+    <header/>
+    <body>
+      <trans-unit id="error_feature_class" resname="error_feature_class">
+        <source>ERROR: Could not find the class %s for the feature %s.</source>
+        <target state="translated">FEHLER: Die Klasse %s für das Feature %s konnte nicht gefunden werden.</target>
+      </trans-unit>
+      <trans-unit id="error_feature_class_interface" resname="error_feature_class_interface">
+        <source>ERROR: The feature class %s does not fit the required interface.</source>
+        <target state="translated">FEHLER: Die Feature Klasse %s passt nicht zum geforderten Interface.</target>
+      </trans-unit>
+      <trans-unit id="error_gateway_missing" resname="error_gateway_missing" approved="yes">
+        <source>ERROR: Could not find gateway object for payment method '|'.</source>
+        <target state="final">FEHLER: Es konnte kein Gateway Objeḱt für die Bezahlmethode '|' erzeugt werden.</target>
+      </trans-unit>
+      <trans-unit id="error_gateway_unknown" resname="error_gateway_unknown" approved="yes">
+        <source>ERROR: Unknown failure after Gateway processing!</source>
+        <target state="final">FEHLER: Unbekannter Fehler nach der Bearbeitung durch den Gateway!</target>
+      </trans-unit>
+      <trans-unit id="error_no_template" resname="error_no_template" approved="yes">
+        <source>ERROR: The payment template file &quot;%s&quot; has not been found.</source>
+        <target state="final">FEHLER: Die Bezahlung Template Datei "%s" wurde nicht gefunden.</target>
+      </trans-unit>
+      <trans-unit id="error_transaction_init" resname="error_transaction_init" approved="yes">
+        <source>ERROR: Could not initialize transaction.</source>
+        <target state="final">FEHLER: Die Transaktion konnte nicht gestartet werden.</target>
+      </trans-unit>
+      <trans-unit id="error_reference_id" resname="error_reference_id" approved="yes">
+        <source>ERROR: reference ID could not be generated.</source>
+        <target state="final">FEHLER: Es konnte keine Referenz ID erzeugt werden.</target>
+      </trans-unit>
+      <trans-unit id="error_transaction_details" resname="error_transaction_details" approved="yes">
+        <source>ERROR: Setting details of transaction failed.</source>
+        <target state="final">FEHLER: Das Setzen der Details der Transaktion ist fehlgeschlagen.</target>
+      </trans-unit>
+      <trans-unit id="error_transaction_no" resname="error_transaction_no" approved="yes">
+        <source>ERROR: No transaction has been executed.</source>
+        <target state="final">FEHLER: Es ist keine Transaktion durchgeführt worden.</target>
+      </trans-unit>
+      <trans-unit id="error_relay_url" resname="error_relay_url" approved="yes">
+        <source>ERROR: No relay URL given!</source>
+        <target state="final">FEHLER: Es ist keine Weiterleitungs-URL angegeben worden!</target>
+      </trans-unit>
+      <trans-unit id="error_api_parameters" resname="error_api_parameters" approved="yes">
+        <source>ERROR: Wrong parameter in the call of the Transactor API.</source>
+        <target state="final">FEHLER: Falscher Parameter beim Aufruf der Transactor API.</target>
+      </trans-unit>
+      <trans-unit id="error_invalid_data" resname="error_invalid_data" approved="yes">
+        <source>ERROR: invalid data.</source>
+        <target state="final">FEHLER: ungültige Daten.</target>
+      </trans-unit>
+      <trans-unit id="extension_payment_missing" resname="extension_payment_missing">
+        <source>ERROR: No extension has been configured for the payment method.</source>
+        <target state="translated">FEHLER: Es ist keine Extension als Bezahlmethode konfiguriert worden.</target>
+      </trans-unit>
+      <trans-unit id="extension_missing" resname="extension_missing">
+        <source>ERROR: The extension '|' has not been installed.</source>
+        <target state="translated">FEHLER: Die Extension '|' wurde nicht installiert.</target>
+      </trans-unit>
+      <trans-unit id="feature_address_gatewayaccout" resname="feature_address_gatewayaccout">
+        <source>fetch address from gateway account</source>
+        <target state="needs-translation">fetch address from gateway account</target>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>
