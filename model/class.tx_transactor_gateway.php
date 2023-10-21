@@ -305,7 +305,7 @@ abstract class tx_transactor_gateway implements tx_transactor_gateway_int, \TYPO
             'paymethod_method' => $this->paymentMethod,
             'message' => TX_TRANSACTOR_TRANSACTION_MESSAGE_NOT_PROCESSED,
             'config' => $xmlOptions,
-            'user' => $detailsArray['user']
+            'user' => json_encode($detailsArray['user'] ?? '')
         ];
         $res =
             $GLOBALS['TYPO3_DB']->exec_DELETEquery(

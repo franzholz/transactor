@@ -506,7 +506,7 @@ abstract class GatewayBase implements GatewayInterface, \TYPO3\CMS\Core\Singleto
             'message' => Message::NOT_PROCESSED,
             'config' => $xmlOptions,
             'config_ext' => $xmlExtensionConfiguration,
-            'user' => $detailsArray['user'] ?? ''
+            'user' => json_encode($detailsArray['user'] ?? '')
         ];
 
         if (($row = $this->getTransaction($reference)) === false) {

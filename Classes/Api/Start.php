@@ -407,6 +407,7 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
                             );
                         return '';
                     }
+                    PaymentApi::storeReferenceUid($referenceId);
 
                     $transactionDetailsArray = static::getTransactionDetails(
                         $referenceId,

@@ -5,7 +5,7 @@ namespace JambageCom\Transactor\Api;
 /***************************************************************
 *  Copyright notice
 *
-*  (c) 2019 Franz Holzinger <franz@ttproducts.de>
+*  (c) 2023 Franz Holzinger <franz@ttproducts.de>
 *  All rights reserved
 *
 *  This script is part of the Typo3 project. The Typo3 project is
@@ -38,8 +38,11 @@ namespace JambageCom\Transactor\Api;
  *
  */
 
+use TYPO3\CMS\Core\Session\UserSessionManager;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
+use TYPO3\CMS\Frontend\Authentication\FrontendUserAuthentication;
+use TYPO3\CMS\Frontend\Controller\TypoScriptFrontendController;
 
 
 class PaymentApi
@@ -241,7 +244,7 @@ class PaymentApi
         if ($res && $GLOBALS['TYPO3_DB']->sql_num_rows($res)) {
             $transactionsArray = [];
             while ($row = $GLOBALS['TYPO3_DB']->sql_fetch_assoc($res)) {
-                $row['user'] = self::field2array($row['user']);
+                $row['user'] = json_decode($row['user']);
                 $transactionsArray[$row['uid']] = $row;
             }
             $GLOBALS['TYPO3_DB']->sql_free_result($res);
@@ -276,7 +279,7 @@ class PaymentApi
         $fields['message'] = $message;
         $fields['state'] = $state;
         $fields['state_time'] = $time;
-        $fields['user'] = $GLOBALS['TYPO3_DB']->fullQuoteStr($user, $tablename);
+        $fields['user'] = $GLOBALS['TYPO3_DB']->fullQuoteStr(json_encode($user), $tablename);
 
         $dbResult =
             $GLOBALS['TYPO3_DB']->exec_UPDATEquery(
@@ -310,7 +313,7 @@ class PaymentApi
         }
 
         $row = $GLOBALS['TYPO3_DB']->sql_fetch_assoc($res);
-        $row['user'] = self::field2array($row['user']);
+        $row['user'] = json_decode($row['user']);
 
         return $row;
     }
@@ -337,26 +340,12 @@ class PaymentApi
             is_array($row) &&
             isset($row['user'])
         ) {
-            $row['user'] = self::field2array($row['user']);
+            $row['user'] = json_decode($row['user']);
         }
 
         return $row;
     }
 
-    /**
-    * Return an array with either a single value or an unserialized array
-    *
-    * @param        mixed       $field: some value from a database field
-    * @return   array
-    * @access       private
-    */
-    static private function field2array ($field)
-    {
-        if (!$field = @unserialize ($field)) {
-            $field = [$field];
-        }
-        return $field;
-    }
 
     /**
     * Calculates the payment costs
@@ -419,6 +408,38 @@ class PaymentApi
     {
         $result = $gatewayKey . '#' . $requestId;
         return $result;
+    }
+
+    static public function storeReferenceUid ($referenceUid)
+    {
+        $key = 'transactor';
+        $sessionData = static::getFrontendUser()->getKey('ses', $key);
+        $sessionData['referenceUid'] = $referenceUid;
+        static::getFrontendUser()->setKey('ses', $key, $sessionData);
+        static::getFrontendUser()->storeSessionData();
+    }
+
+    static public function getStoredReferenceUid ()
+    {
+        $key = 'transactor';
+        $sessionData = static::getFrontendUser()->getKey('ses', $key);
+        return $sessionData['referenceUid'];
+    }
+
+    /**
+     * @return FrontendUserAuthentication
+     */
+    static protected function getFrontendUser(): FrontendUserAuthentication
+    {
+        return static::getTypoScriptFrontendController()->fe_user;
+    }
+
+    /**
+     * @return TypoScriptFrontendController|null
+     */
+    static protected function getTypoScriptFrontendController(): ?TypoScriptFrontendController
+    {
+        return $GLOBALS['TSFE'] ?? null;
     }
 }
 

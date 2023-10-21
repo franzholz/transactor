@@ -1,3 +1,9 @@
+2023-10-21 Franz Holzinger <franz@ttproducts.de>
+    * replace field2array by json_decode
+
+2023-10-10 Franz Holzinger <franz@ttproducts.de>
+    * new feature: store the reference uid in a FE user session.
+
 2023-08-19 Franz Holzinger <franz@ttproducts.de>
     * use constants JambageCom\Transactor\Constants\Field for field names :
         'item_name'         => Field::NAME,

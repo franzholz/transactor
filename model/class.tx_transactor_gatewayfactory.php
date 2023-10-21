@@ -179,7 +179,7 @@ final class tx_transactor_gatewayfactory {
         if ($res && $GLOBALS['TYPO3_DB']->sql_num_rows($res)) {
             $transactionsArray = [];
             while ($row = $GLOBALS['TYPO3_DB']->sql_fetch_assoc($res)) {
-                $row['user'] = self::field2array($row['user']);
+                $row['user'] = json_decode($row['user']);
                 $transactionsArray[$row['uid']] = $row;
             }
         }
@@ -206,24 +206,9 @@ final class tx_transactor_gatewayfactory {
         }
 
         $row = $GLOBALS['TYPO3_DB']->sql_fetch_assoc($res);
-        $row['user'] = self::field2array($row['user']);
+        $row['user'] = json_decode($row['user']);
 
         return $row;
-    }
-
-
-    /**
-    * Return an array with either a single value or an unserialized array
-    *
-    * @param		mixed		$field: some value from a database field
-    * @return 	array
-    * @access		private
-    */
-    private static function field2array ($field) {
-        if (!$field = @unserialize ($field)) {
-            $field = [$field];
-        }
-        return $field;
     }
 
 
