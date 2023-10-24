@@ -232,7 +232,6 @@ class PaymentApi
                 ) :
                 ''
             );
-
         $res = $GLOBALS['TYPO3_DB']->exec_SELECTquery(
             '*',
             $tablename,
@@ -410,20 +409,40 @@ class PaymentApi
         return $result;
     }
 
-    static public function storeReferenceUid ($referenceUid)
+    static public function storeData ($type, $data)
     {
         $key = 'transactor';
         $sessionData = static::getFrontendUser()->getKey('ses', $key);
-        $sessionData['referenceUid'] = $referenceUid;
+        $sessionData[$type] = $data;
         static::getFrontendUser()->setKey('ses', $key, $sessionData);
         static::getFrontendUser()->storeSessionData();
     }
 
-    static public function getStoredReferenceUid ()
+    static public function getStoredData ($type)
     {
         $key = 'transactor';
         $sessionData = static::getFrontendUser()->getKey('ses', $key);
-        return $sessionData['referenceUid'];
+        return $sessionData[$type] ?? null;
+    }
+
+    static public function storeReferenceUid ($referenceUid)
+    {
+        static::storeData('referenceUid', $referenceUid);
+    }
+
+    static public function getStoredReferenceUid ()
+    {
+        return static::getStoredData('referenceUid');
+    }
+
+    static public function storeConfScript ($confScript)
+    {
+        static::storeData('confScript', $confScript);
+    }
+
+    static public function getStoredConfScript ()
+    {
+        return static::getStoredData('confScript');
     }
 
     /**

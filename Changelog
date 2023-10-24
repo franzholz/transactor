@@ -1,3 +1,8 @@
+
+2023-10-24 Franz Holzinger <franz@ttproducts.de>
+    * new feature: PaymentApi storeConfScript and getStoredConfScript for storing 
+      of the config setup in the FE user session in order to have it in the listener
+
 2023-10-21 Franz Holzinger <franz@ttproducts.de>
     * replace field2array by json_decode
 
