@@ -1,4 +1,7 @@
 
+2023-10-25 Franz Holzinger <franz@ttproducts.de>
+    * remove unused method Start::getListenerExtKey
+
 2023-10-24 Franz Holzinger <franz@ttproducts.de>
     * new feature: PaymentApi storeConfScript and getStoredConfScript for storing 
       of the config setup in the FE user session in order to have it in the listener

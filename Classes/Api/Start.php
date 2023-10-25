@@ -1380,27 +1380,6 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
         return round($float, $level);
     }
 
-    static public function getListenerExtKey ()
-    {
-        $result = '';
-
-        if (
-            isset($GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['transactor']['listener']) &&
-            is_array($GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['transactor']['listener'])
-        ) {
-            foreach ($GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['transactor']['listener'] as $extensionKey => $classRef) {
-                if ($extensionKey != '') {
-                    $result = $extensionKey;
-                    // Todo: Determine the extension key from the plugins of the current page and by Typoscript settings
-
-                    break;
-                }
-            }
-        }
-
-        return $result;
-    }
-
 
     static public function readActionParameters (
         ContentObjectRenderer $cObj,
