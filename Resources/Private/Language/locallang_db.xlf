@@ -46,7 +46,7 @@
 				<source>Payment method:</source>
 			</trans-unit>
 			<trans-unit id="tx_transactor_transactions.config" resname="tx_transactor_transactions.config">
-				<source>Configuration:</source>
+				<source>Configuration options:</source>
 			</trans-unit>
 			<trans-unit id="tx_transactor_transactions.config_ext" resname="tx_transactor_transactions.config_ext">
 				<source>Extension Configuration:</source>
