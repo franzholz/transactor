@@ -435,16 +435,6 @@ class PaymentApi
         return static::getStoredData('referenceUid');
     }
 
-    static public function storeConfScript ($confScript)
-    {
-        static::storeData('confScript', $confScript);
-    }
-
-    static public function getStoredConfScript ()
-    {
-        return static::getStoredData('confScript');
-    }
-
     /**
      * @return FrontendUserAuthentication
      */
