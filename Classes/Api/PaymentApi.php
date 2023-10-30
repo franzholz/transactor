@@ -166,11 +166,40 @@ class PaymentApi
     }
 
     /**
+    * returns the gateway proxy object
+    */
+    static public function getGatewayProxyObjectForExtension (
+        $gatewayExtensionKey,
+        $paymentMethod
+    )
+    {
+        $gatewayProxyObj = null;
+
+        if (
+            \TYPO3\CMS\Core\Utility\ExtensionManagementUtility::isLoaded(
+                $gatewayExtensionKey
+            )
+        ) {
+            $gatewayFactoryObj =
+                \JambageCom\Transactor\Domain\GatewayFactory::getInstance();
+            $gatewayFactoryObj->registerGatewayExtension($gatewayExtensionKey);
+            $gatewayProxyObj =
+                $gatewayFactoryObj->getGatewayProxyObject(
+                    $paymentMethod
+                );
+        }
+
+        return $gatewayProxyObj;
+    }
+
+
+    /**
     * Returns an array of transaction records which match the given extension key
     * and optionally the given extension reference string and or booking status.
     * Use this function instead accessing the transaction records directly.
     *
-    * @param        string      $extensionKey: Extension key
+    * @param        string      $extensionKey: Extension key of extension 
+    *                           which calls the transactor library
     * @param        int         $gatewayid: (optional) Filter by gateway id
     * @param        string      $reference: (optional) Filter by reference
     * @param        string      $state: (optional) Filter by transaction state
@@ -191,7 +220,7 @@ class PaymentApi
         $where = '1=1';
         $where .=
             (
-                isset ($extensionKey) ?
+                !empty($extensionKey) ?
                     ' AND ext_key=' .
                     $GLOBALS['TYPO3_DB']->fullQuoteStr(
                         $extensionKey,
@@ -202,7 +231,7 @@ class PaymentApi
 
         $where .=
             (
-                isset ($gatewayid) ?
+                !empty($gatewayid) ?
                     ' AND gatewayid=' .
                     $GLOBALS['TYPO3_DB']->fullQuoteStr(
                         $gatewayid,
@@ -213,7 +242,7 @@ class PaymentApi
 
         $where .=
             (
-                isset ($reference) ?
+                !empty($reference) ?
                     ' AND reference=' .
                 $GLOBALS['TYPO3_DB']->fullQuoteStr(
                     $reference,
@@ -224,7 +253,7 @@ class PaymentApi
 
         $where .=
             (
-                isset ($state) ?
+                !empty($state) ?
                     ' AND state=' .
                 $GLOBALS['TYPO3_DB']->fullQuoteStr(
                     $state,

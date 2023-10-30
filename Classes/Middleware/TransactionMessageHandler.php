@@ -66,12 +66,20 @@ class TransactionMessageHandler implements MiddlewareInterface
         $response = GeneralUtility::makeInstance(Response::class);
 
         if (!isset($GLOBALS['TYPO3_CONF_VARS']['FE']['transactor_include'][$transactor])) {
-            return $response->withStatus(404, 'transactor has not been registered for ' . $transactor . '!');
+            return $response->withStatus(404, 'Transactor has not been registered for ' . $transactor . '!');
         }
+
         $configuration = $GLOBALS['TYPO3_CONF_VARS']['FE']['transactor_include'][$transactor];
 
         // Simple check to make sure that it is not an absolute file (to use the fallback)
-        if (strpos($configuration, '::') !== false || is_callable($configuration)) {        
+        // Check if the $configuration is a concatenated string of "className::actionMethod"
+        if (
+            is_string($configuration) &&
+            (
+                strpos($configuration, '::') !== false || 
+                is_callable($configuration)
+            )
+        ) {     
             if (
                 version_compare($version, '10.4.0', '>=')
             ) {
@@ -83,7 +91,8 @@ class TransactionMessageHandler implements MiddlewareInterface
                 $dispatcher = GeneralUtility::makeInstance(Dispatcher::class);
             }
             $request = $request->withAttribute('target', $configuration);
-            return $dispatcher->dispatch($request, $response) ?? new NullResponse();
+            $response = $dispatcher->dispatch($request) ?? new NullResponse();
+            return $response;
         }
         trigger_error(
             'transactor "' . $transactor . '" is registered with a script to the file "' . GeneralUtility::getFileAbsFileName($configuration) . '".'
