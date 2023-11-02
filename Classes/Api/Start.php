@@ -184,12 +184,6 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
         return $referenceUid;
     }
 
-    static public function test (
-    )
-    {
-        debug('', 'Start::test'); // keep this
-    }
-
     static public function checkLoaded (
         &$errorMessage,
         Localization $languageObj,
