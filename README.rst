@@ -7,7 +7,7 @@ connecting to various gateways.
 Installation Requirement
 ------------------------
 
-Older extension versions might need the old API which has been removed in version 0.11.0.
+Some extensions might need the old API which has however been removed in version 0.11.0.
 
 Since version 0.9.0 the transactor extension contains a middleware,
 which payment extensions can use for dealing with a gateway instant
