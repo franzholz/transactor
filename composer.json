@@ -24,9 +24,9 @@
     "GPL-2.0-or-later"
   ],
   "require": {
-    "php": "^7.4 || ^8.0",
-    "typo3/cms-core": "^10.4 || ^11.5 || ^12.4",
-    "jambagecom/div2007": "^1.14"
+    "php": "^8.0",
+    "typo3/cms-core": "^11.5 || ^12.4",
+    "jambagecom/div2007": "^1.17"
   },
   "suggest": {
     "friendsoftypo3/typo3db-legacy": "^1"
@@ -34,13 +34,7 @@
   "autoload": {
     "psr-4": {
       "JambageCom\\Transactor\\": "Classes"
-    },
-    "classmap": [
-      "interfaces",
-      "Classes",
-      "lib",
-      "model"
-    ]
+    }
   },
   "replace": {
     "typo3-ter/transactor": "self.version"
