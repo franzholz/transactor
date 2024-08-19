@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" version="1.2">
+  <file source-language="en" datatype="plaintext" original="EXT:transactor/Resources/Private/Language/locallang_marker.xlf" date="2018-05-09T17:24:37Z" product-name="transactor" target-language="da">
+    <header/>
+    <body>
+      <trans-unit id="message_redirect" resname="message_redirect" approved="yes">
+        <source>After completing the payment you need to return back to ###HOST### to complete the order.</source>
+        <target state="final">Når betalingen er gennemført, skal du returnere til ###HOST### for at fuldføre ordren.</target>
+      </trans-unit>
+      <trans-unit id="message_place_order" resname="message_place_order" approved="yes">
+        <source>buy now</source>
+        <target state="final">køb nu</target>
+      </trans-unit>
+      <trans-unit id="message_credit_card" resname="message_credit_card" approved="yes">
+        <source>Credit card</source>
+        <target state="final">Betalingskort</target>
+      </trans-unit>
+      <trans-unit id="message_card_number" resname="message_card_number" approved="yes">
+        <source>Card number</source>
+        <target state="final">Kortnummer</target>
+      </trans-unit>
+      <trans-unit id="message_card_holder" resname="message_card_holder" approved="yes">
+        <source>Card holder</source>
+        <target state="final">Kortindehaver</target>
+      </trans-unit>
+      <trans-unit id="message_valid_until" resname="message_valid_until" approved="yes">
+        <source>Valid until (MM/YYYY)</source>
+        <target state="final">Gyldig indtil (MM/ÅÅÅÅ)</target>
+      </trans-unit>
+      <trans-unit id="message_account_holder" resname="message_account_holder" approved="yes">
+        <source>Account holder</source>
+        <target state="final">Kontoindehaver</target>
+      </trans-unit>
+      <trans-unit id="message_account_number" resname="message_account_number" approved="yes">
+        <source>Account number</source>
+        <target state="final">Kontonummer</target>
+      </trans-unit>
+      <trans-unit id="message_bank_code" resname="message_bank_code" approved="yes">
+        <source>Bank code</source>
+        <target state="final">Bankkode</target>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>
