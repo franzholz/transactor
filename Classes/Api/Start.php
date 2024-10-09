@@ -317,12 +317,14 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
         ...$options
     )
     {
-        $variantFields = $options[0] ?: [];
+        $variantFields = $options[0] ?? [];
         if (!is_array($variantFields)) {
             throw new \RuntimeException('Error in transactor: Render method parameter option[0] "' .json_decode($variantFields) . '" must be an array.  "JambageCom\Transactor\Api\Start"', 1711197986
 );
         }
-        $extraData = $options[1] ?: '';
+        $extraData = $options[1] ?? '';
+
+
 
 // TODO:
 // siehe getTransactionDetails
@@ -1414,8 +1416,8 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
 
 
     static public function readActionParameters (
-        ContentObjectRenderer $cObj,
         &$errorMessage,
+        ContentObjectRenderer $cObj,
         array $confScript
     ) {
         $result = false;
@@ -1429,8 +1431,7 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
                 );
 
             if (
-                is_object($gatewayProxyObject) &&
-                method_exists($gatewayProxyObject, 'readActionParameters')
+                is_object($gatewayProxyObject)
             ) {
                 $result = $gatewayProxyObject->readActionParameters($cObj);
             }
@@ -1494,7 +1495,10 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
         $ok = static::checkLoaded($errorMessage, $languageObj, $gatewayExtKey);
         $result = false;
 
-        if ($ok) {
+        if (
+            !empty($confScript['login']) &&
+            $ok
+        ) {
             $gatewayProxyObject =
                 PaymentApi::getGatewayProxyObject(
                     $confScript

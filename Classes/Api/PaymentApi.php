@@ -429,8 +429,11 @@ class PaymentApi
 
     static public function getRequestId ($reference)
     {
-        $position = strpos($reference, '#');
-        $requestId = substr($reference, $position + 1);
+        $requestId = 0;
+        if (!empty($reference)) {
+            $position = strpos($reference, '#');
+            $requestId = substr($reference, $position + 1);
+        }
         return $requestId;
     }
 

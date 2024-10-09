@@ -206,7 +206,7 @@ class GatewayProxy implements \JambageCom\Transactor\Domain\GatewayInterface
         $this->getGatewayObj()->setConfig($config);
     }
 
-    public function getBasket () 
+    public function getBasket ()
     {
         $result = $this->getGatewayObj()->getBasket();
         return $result;
@@ -217,7 +217,7 @@ class GatewayProxy implements \JambageCom\Transactor\Domain\GatewayInterface
         $this->getGatewayObj()->setBasket($basket);
     }
 
-    public function getBasketSum () 
+    public function getBasketSum ()
     {
         $result = $this->getGatewayObj()->getBasketSum();
         return $result;
@@ -228,7 +228,7 @@ class GatewayProxy implements \JambageCom\Transactor\Domain\GatewayInterface
         $this->getGatewayObj()->setBasketSum($basketSum);
     }
 
-    public function getOrderUid () 
+    public function getOrderUid ()
     {
         return $this->getGatewayObj()->getOrderUid();
     }
@@ -238,7 +238,7 @@ class GatewayProxy implements \JambageCom\Transactor\Domain\GatewayInterface
         $this->getGatewayObj()->setOrderUid($orderUid);
     }
 
-    public function getOrderNumber () 
+    public function getOrderNumber ()
     {
         return $this->getGatewayObj()->getOrderNumber();
     }
@@ -775,7 +775,7 @@ class GatewayProxy implements \JambageCom\Transactor\Domain\GatewayInterface
     * @return	void
     * @access	public
     */
-    public function setFormActionURI ($formActionURI) 
+    public function setFormActionURI ($formActionURI)
     {
         $this->getGatewayObj()->setFormActionURI($formActionURI);
     }
@@ -799,7 +799,7 @@ class GatewayProxy implements \JambageCom\Transactor\Domain\GatewayInterface
     * @return	void
     * @access	public
     */
-    public function setCheckoutURI ($checkoutURI) 
+    public function setCheckoutURI ($checkoutURI)
     {
         $this->getGatewayObj()->setCheckoutURI($checkoutURI);
     }
@@ -823,7 +823,7 @@ class GatewayProxy implements \JambageCom\Transactor\Domain\GatewayInterface
     * @return	void
     * @access	public
     */
-    public function setCaptureURI ($captureURI) 
+    public function setCaptureURI ($captureURI)
     {
         $this->getGatewayObj()->setCaptureURI($captureURI);
     }
@@ -854,12 +854,16 @@ class GatewayProxy implements \JambageCom\Transactor\Domain\GatewayInterface
 
     /**
     * Returns the parameters which can lead into an action started by the calling application
-    * Such parameters are added by the gateway to the redirection link. 
+    * Such parameters are added by the gateway to the redirection link.
     *
     * @access	public
     */
     public function readActionParameters (ContentObjectRenderer $cObj) {
-        $result = $this->getGatewayObj()->readActionParameters($cObj);
+        $result = false;
+
+        if (method_exists($this->getGatewayObj(), 'readActionParameters')) {
+            $result = $this->getGatewayObj()->readActionParameters($cObj);
+        }
         return $result;
     }
 
