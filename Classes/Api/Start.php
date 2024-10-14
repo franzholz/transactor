@@ -324,8 +324,6 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
         }
         $extraData = $options[1] ?? '';
 
-
-
 // TODO:
 // siehe getTransactionDetails
 //     $returnUrl,
@@ -594,8 +592,8 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
                                 if (is_array($hiddenFieldsArray)) {
                                     foreach ($hiddenFieldsArray as $key => $value) {
                                         $hiddenFields .=
-                                            '<input type="hidden" name="' . htmlspecialchars($key) .
-                                            '" value="' . htmlspecialchars($value) . '"' . $xhtmlFix . '>' .
+                                            '<input type="hidden" name="' . htmlspecialchars((string) $key) .
+                                            '" value="' . htmlspecialchars((string) $value) . '"' . $xhtmlFix . '>' .
                                             chr(10);
                                     }
                                 }
@@ -606,7 +604,7 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
                                     $script = '<script ';
                                     $scriptLines = [];
                                     foreach ($scriptParametersArray as $key => $value) {
-                                        $scriptLines[] = htmlspecialchars($key) . '="' . htmlspecialchars($value) . '"';
+                                        $scriptLines[] = htmlspecialchars((string) $key) . '="' . htmlspecialchars($value) . '"';
                                     }
                                     $script .= implode(chr(10), $scriptLines) . '></script>';
                                 }
