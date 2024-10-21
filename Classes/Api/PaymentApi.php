@@ -59,10 +59,11 @@ class PaymentApi
         )->get($gatewayExtensionKey);
 
         if (
-            $key != '' &&
-            isset($transactorConf[$key])
+            $key != ''
         ) {
-            $result = $transactorConf[$key];
+            if (isset($transactorConf[$key])) {
+                $result = $transactorConf[$key];
+            }
         } else {
             $result = $transactorConf;
         }
@@ -534,7 +535,6 @@ class PaymentApi
     static public function convertToTransactorBasket (array $itemArray, array $variantFields)
     {
         $result = [];
-
         // loop over all items in the basket indexed by sorting text
         foreach ($itemArray as $sort => $actItemArray) {
             foreach ($actItemArray as $k1 => $actItem) {
