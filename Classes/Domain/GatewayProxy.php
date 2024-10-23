@@ -26,8 +26,8 @@ namespace JambageCom\Transactor\Domain;
 *  This copyright notice MUST APPEAR in all copies of the script!
 ***************************************************************/
 
-use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Core\Utility\ExtensionManagementUtility;
+use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Frontend\ContentObject\ContentObjectRenderer;
 
 use JambageCom\Transactor\Domain\Gateway;
@@ -61,11 +61,11 @@ class GatewayProxy implements \JambageCom\Transactor\Domain\GatewayInterface
     public function init ($extensionKey)
     {
         $this->gatewayClass = '';
-        $this->extensionManagerConf = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(
+        $this->extensionManagerConf = GeneralUtility::makeInstance(
             \TYPO3\CMS\Core\Configuration\ExtensionConfiguration::class
         )->get('transactor');
 
-        $newExtensionManagerConf = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(
+        $newExtensionManagerConf = GeneralUtility::makeInstance(
             \TYPO3\CMS\Core\Configuration\ExtensionConfiguration::class
         )->get($extensionKey);
 
