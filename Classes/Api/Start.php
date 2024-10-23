@@ -39,23 +39,23 @@ namespace JambageCom\Transactor\Api;
 */
 
 use TYPO3\CMS\Core\Service\MarkerBasedTemplateService;
-use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Core\Utility\ExtensionManagementUtility;
+use TYPO3\CMS\Core\Utility\GeneralUtility;
+use TYPO3\CMS\Core\Utility\VersionNumberUtility;
 use TYPO3\CMS\Frontend\ContentObject\ContentObjectRenderer;
 
 
 use JambageCom\Div2007\Utility\FrontendUtility;
 use JambageCom\Div2007\Utility\HtmlUtility;
 
+use JambageCom\Transactor\Api\Localization;
+use JambageCom\Transactor\Api\PaymentApi;
+
 use JambageCom\Transactor\Constants\Action;
 use JambageCom\Transactor\Constants\Feature;
 use JambageCom\Transactor\Constants\Field;
 use JambageCom\Transactor\Constants\GatewayMode;
 use JambageCom\Transactor\Constants\Message;
-
-
-use JambageCom\Transactor\Api\Localization;
-use JambageCom\Transactor\Api\PaymentApi;
 
 
 class Start implements \TYPO3\CMS\Core\SingletonInterface
@@ -91,10 +91,11 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
         $languageSubpath = '/Resources/Private/Language/';
         $languagePath = 'EXT:' . $extensionKey . $languageSubpath;
         $cObj = FrontendUtility::getContentObjectRenderer();
+        $version = VersionNumberUtility::getCurrentTypo3Version();
         $languageObj = GeneralUtility::makeInstance(Localization::class);
         $languageObj->init1(
             '',
-            $conf['_LOCAL_LANG.'],
+            $conf['_LOCAL_LANG.'] ?? '',
             $languageSubpath
         );
         $languageObj->loadLocalLang(
@@ -110,7 +111,10 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
         }
         $templateService = GeneralUtility::makeInstance(MarkerBasedTemplateService::class);
 
-        if (is_array($conf['marks.'])) {
+        if (
+            isset($conf['marks.']) &&
+            is_array($conf['marks.'])
+        ) {
                 // Substitute Marker Array from TypoScript Setup
             foreach ($conf['marks.'] as $key => $value) {
 
@@ -124,11 +128,18 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
 
         if(isset($langArray) && is_array($langArray)) {
             foreach ($langArray as $key => $value) {
-                if (is_array($value)) {
-                    $value = $value[0]['target'];
+                if (
+                    is_array($value) &&
+                    isset($value[0])
+                ) {
+                    if (!empty($value[0]['target'])) {
+                        $value = $value[0]['target'];
+                    } else {
+                        $value = $value[0]['source'];
+                    }
+                    $newMarkerArray['###' . strtoupper($key) . '###'] =
+                        $templateService->substituteMarkerArray($value, $markerArray);
                 }
-                $newMarkerArray['###' . strtoupper($key) . '###'] =
-                    $templateService->substituteMarkerArray($value, $markerArray);
             }
         } else {
             $langArray = [];
@@ -294,7 +305,7 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
         &$finalize,
         &$finalVerify,
         &$gatewayStatus,
-        &$markerArray,
+        array &$markerArray,
         &$templateFilename,
         &$localTemplateCode,
         &$errorMessage,
@@ -323,6 +334,7 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
 );
         }
         $extraData = $options[1] ?? '';
+        $markerArray['###HIDDENFIELDS###'] = $markerArray['###HIDDENFIELDS###'] ?? '';
 
 // TODO:
 // siehe getTransactionDetails
