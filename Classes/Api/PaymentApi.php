@@ -44,10 +44,12 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Frontend\Authentication\FrontendUserAuthentication;
 use TYPO3\CMS\Frontend\Controller\TypoScriptFrontendController;
 
+use JambageCom\Transactor\Constants\Field;
+
 
 class PaymentApi
 {
-    static public function getTransactorConf ($gatewayExtensionKey, $key = '') 
+    static public function getTransactorConf ($gatewayExtensionKey, $key = '')
     {
         $transactorConf = [];
         $result = '';
@@ -57,10 +59,11 @@ class PaymentApi
         )->get($gatewayExtensionKey);
 
         if (
-            $key != '' &&
-            isset($transactorConf[$key])
+            $key != ''
         ) {
-            $result = $transactorConf[$key];
+            if (isset($transactorConf[$key])) {
+                $result = $transactorConf[$key];
+            }
         } else {
             $result = $transactorConf;
         }
@@ -198,7 +201,7 @@ class PaymentApi
     * and optionally the given extension reference string and or booking status.
     * Use this function instead accessing the transaction records directly.
     *
-    * @param        string      $extensionKey: Extension key of extension 
+    * @param        string      $extensionKey: Extension key of extension
     *                           which calls the transactor library
     * @param        int         $gatewayid: (optional) Filter by gateway id
     * @param        string      $reference: (optional) Filter by reference
@@ -427,8 +430,11 @@ class PaymentApi
 
     static public function getRequestId ($reference)
     {
-        $position = strpos($reference, '#');
-        $requestId = substr($reference, $position + 1);
+        $requestId = 0;
+        if (!empty($reference)) {
+            $position = strpos($reference, '#');
+            $requestId = substr($reference, $position + 1);
+        }
         return $requestId;
     }
 
@@ -462,6 +468,104 @@ class PaymentApi
     static public function getStoredReferenceUid ()
     {
         return static::getStoredData('referenceUid');
+    }
+
+    static public function storeInit (
+        $action,
+        $paymentMethod,
+        $callingExtensionKey,
+        $templateFilename = '',
+        $orderUid = 0,
+        $orderNumber = '0',
+        $currency = 'EUR',
+        $conf = [],
+        $basket = [],
+        $extraData = []
+    )
+    {
+        $data = [
+            'action' => $action,
+            'paymentMethod' => $paymentMethod,
+            'callingExtensionKey' => $callingExtensionKey,
+            'templateFilename' => $templateFilename,
+            'orderUid' => $orderUid,
+            'orderNumber' => $orderNumber,
+            'currency' => $currency,
+            'conf' => $conf,
+            'basket' => $basket,
+            'extraData' => $extraData
+        ];
+
+        foreach ($data as $key => $value) {
+            static::storeData($key, $value);
+        }
+    }
+
+    static public function getStoredInit (
+        &$action,
+        &$paymentMethod,
+        &$callingExtensionKey,
+        &$templateFilename,
+        &$orderUid,
+        &$orderNumber,
+        &$currency,
+        &$conf,
+        &$basket,
+        &$extraData
+    ) {
+        $data = [
+            'action' => &$action,
+            'paymentMethod' => &$paymentMethod,
+            'callingExtensionKey' => &$callingExtensionKey,
+            'templateFilename' => &$templateFilename,
+            'orderUid' => &$orderUid,
+            'orderNumber' => &$orderNumber,
+            'currency' => &$currency,
+            'conf' => &$conf,
+            'basket' => &$basket,
+            'extraData' => &$extraData
+        ];
+
+
+        foreach ($data as $key => &$value) {
+            $value = static::getStoredData($key);
+        }
+    }
+
+    static public function convertToTransactorBasket (array $itemArray, array $variantFields)
+    {
+        $result = [];
+        // loop over all items in the basket indexed by sorting text
+        foreach ($itemArray as $sort => $actItemArray) {
+            foreach ($actItemArray as $k1 => $actItem) {
+                $row = $actItem['rec'];
+                if (!$row) {	// avoid bug with missing row
+                    continue;
+                }
+                $record = [];
+                $variants = [];
+                foreach ($variantFields as $field) {
+                    if (
+                        isset($row[$field]) &&
+                        $row[$field] != ''
+                    ) {
+                        $variants[] = $row[$field];
+                    }
+                }
+
+                $record = $row;
+                $record[Field::VARIANT] = implode(' ', $variants);
+                $record[Field::QUANTITY] = $actItem['count'];
+                $record[Field::PRICE_TAX] = $row['pricetax'];
+                $record[Field::PRICE_NOTAX] = $row['pricenotax'];
+
+                $record[Field::TAX_PERCENTAGE] = $row['taxperc'];
+                $record[Field::NAME] = $row['title'];
+                $result[] = $record;
+            }
+        }
+
+        return $result;
     }
 
     /**

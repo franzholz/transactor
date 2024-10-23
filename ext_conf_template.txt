@@ -1,5 +1,3 @@
-# cat=basic/enable; type=integer; label=Compatibility Mode: If set to 1, then the old API class.tx_transactor_api.php shall be used by extensions like tt_products. Set this to 0 to use the new API with the namespace class \JambageCom\Transactor\Api\Start .
-compatibility = 0
 
 # cat=basic/enable; type=integer; label=Maximum characters: Set the maximum number of characters which are used from the item fields in the cart.
 maximumCharacters = 64

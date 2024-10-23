@@ -39,22 +39,23 @@ namespace JambageCom\Transactor\Api;
 */
 
 use TYPO3\CMS\Core\Service\MarkerBasedTemplateService;
-use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Core\Utility\ExtensionManagementUtility;
+use TYPO3\CMS\Core\Utility\GeneralUtility;
+use TYPO3\CMS\Core\Utility\VersionNumberUtility;
 use TYPO3\CMS\Frontend\ContentObject\ContentObjectRenderer;
 
 
 use JambageCom\Div2007\Utility\FrontendUtility;
+use JambageCom\Div2007\Utility\HtmlUtility;
+
+use JambageCom\Transactor\Api\Localization;
+use JambageCom\Transactor\Api\PaymentApi;
 
 use JambageCom\Transactor\Constants\Action;
 use JambageCom\Transactor\Constants\Feature;
 use JambageCom\Transactor\Constants\Field;
 use JambageCom\Transactor\Constants\GatewayMode;
 use JambageCom\Transactor\Constants\Message;
-
-
-use JambageCom\Transactor\Api\Localization;
-use JambageCom\Transactor\Api\PaymentApi;
 
 
 class Start implements \TYPO3\CMS\Core\SingletonInterface
@@ -90,10 +91,11 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
         $languageSubpath = '/Resources/Private/Language/';
         $languagePath = 'EXT:' . $extensionKey . $languageSubpath;
         $cObj = FrontendUtility::getContentObjectRenderer();
+        $version = VersionNumberUtility::getCurrentTypo3Version();
         $languageObj = GeneralUtility::makeInstance(Localization::class);
         $languageObj->init1(
             '',
-            $conf['_LOCAL_LANG.'],
+            $conf['_LOCAL_LANG.'] ?? '',
             $languageSubpath
         );
         $languageObj->loadLocalLang(
@@ -109,7 +111,10 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
         }
         $templateService = GeneralUtility::makeInstance(MarkerBasedTemplateService::class);
 
-        if (is_array($conf['marks.'])) {
+        if (
+            isset($conf['marks.']) &&
+            is_array($conf['marks.'])
+        ) {
                 // Substitute Marker Array from TypoScript Setup
             foreach ($conf['marks.'] as $key => $value) {
 
@@ -123,11 +128,18 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
 
         if(isset($langArray) && is_array($langArray)) {
             foreach ($langArray as $key => $value) {
-                if (is_array($value)) {
-                    $value = $value[0]['target'];
+                if (
+                    is_array($value) &&
+                    isset($value[0])
+                ) {
+                    if (!empty($value[0]['target'])) {
+                        $value = $value[0]['target'];
+                    } else {
+                        $value = $value[0]['source'];
+                    }
+                    $newMarkerArray['###' . strtoupper($key) . '###'] =
+                        $templateService->substituteMarkerArray($value, $markerArray);
                 }
-                $newMarkerArray['###' . strtoupper($key) . '###'] =
-                    $templateService->substituteMarkerArray($value, $markerArray);
             }
         } else {
             $langArray = [];
@@ -184,6 +196,13 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
         return $referenceUid;
     }
 
+    // This method is implemented to test function calls.
+    static public function test (
+    )
+    {
+        debug('', 'Start::test'); // keep this
+    }
+
     static public function checkLoaded (
         &$errorMessage,
         Localization $languageObj,
@@ -218,10 +237,17 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
     /**
     * deprecated old API
     * use the render method instead
-    * 
+    *
     * Include handle extension library
     */
     static public function includeHandleLib (
+        &$finalize,
+        &$finalVerify,
+        &$gatewayStatus,
+        &$markerArray,
+        &$templateFilename,
+        &$localTemplateCode,
+        &$errorMessage,
         $handleLib,
         $confScript,
         $extensionKey,
@@ -238,12 +264,7 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
         $orderNumber, // text string of the order number
         $notificationEmail,
         $cardRow,
-        &$finalize,
-        &$finalVerify,
-        &$markerArray,
-        &$templateFilename,
-        &$localTemplateCode,
-        &$errorMessage
+        $variantFields
     )
     {
         $gatewayStatus = '';
@@ -275,16 +296,16 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
             $orderNumber,
             $notificationEmail,
             $cardRow,
-            ''
+            $variantFields
         );
         return $result;
     }
-    
+
     static public function render (
         &$finalize,
         &$finalVerify,
         &$gatewayStatus,
-        &$markerArray,
+        array &$markerArray,
         &$templateFilename,
         &$localTemplateCode,
         &$errorMessage,
@@ -304,9 +325,23 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
         $orderNumber, // text string of the order number
         $notificationEmail,
         $cardRow,
-        ...$options // TODO: not yet used
+        ...$options
     )
     {
+        $variantFields = $options[0] ?? [];
+        if (!is_array($variantFields)) {
+            throw new \RuntimeException('Error in transactor: Render method parameter option[0] "' .json_decode($variantFields) . '" must be an array.  "JambageCom\Transactor\Api\Start"', 1711197986
+);
+        }
+        $extraData = $options[1] ?? '';
+        $markerArray['###HIDDENFIELDS###'] = $markerArray['###HIDDENFIELDS###'] ?? '';
+
+// TODO:
+// siehe getTransactionDetails
+//     $returnUrl,
+//     $cancelUrl
+// aus $pidArray ermitteln
+
         $gatewayStatus = [];
         $languageObj = GeneralUtility::makeInstance(Localization::class);
         $cObj = FrontendUtility::getContentObjectRenderer();
@@ -316,7 +351,7 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
         $gatewayExtKey = '';
         $result = '';
         $emConf = '';
-        $xhtmlFix = \JambageCom\Div2007\Utility\HtmlUtility::generateXhtmlFix();
+        $xhtmlFix = HtmlUtility::generateXhtmlFix();
 
         if (
             !is_array($itemArray) ||
@@ -342,7 +377,24 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
                         $confScript
                     );
                 if (is_object($gatewayProxyObject)) {
+                    $paymentBasket =
+                        PaymentApi::convertToTransactorBasket(
+                            $itemArray,
+                            $variantFields
+                        );
+
                     $ok = $gatewayProxyObject->transactionInit(
+                        Action::AUTHORIZE_TRANSFER,
+                        $paymentMethod,
+                        $extensionKey,
+                        $confScript['templateFile'] ?? '',
+                        $orderUid,
+                        $orderNumber,
+                        $confScript['currency'] ? $confScript['currency'] : 'EUR',
+                        $confScript['conf.'] ?? []
+                    );
+
+                    PaymentApi::storeInit(
                         Action::AUTHORIZE_TRANSFER,
                         $paymentMethod,
                         $extensionKey,
@@ -368,7 +420,7 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
                     if (isset($confScript['em.'])) {
                         $emConf = array_replace_recursive($emConf, $confScript['em.']);
                     }
-        
+
                     if ($emConf) {
                         $gatewayConf = array_replace_recursive($gatewayConf, $emConf);
                         $gatewayProxyObject->setConf($gatewayConf);
@@ -551,9 +603,9 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
 
                                 if (is_array($hiddenFieldsArray)) {
                                     foreach ($hiddenFieldsArray as $key => $value) {
-                                        $hiddenFields .= 
-                                            '<input type="hidden" name="' . htmlspecialchars($key) .
-                                            '" value="' . htmlspecialchars($value) . '"' . $xhtmlFix . '>' .
+                                        $hiddenFields .=
+                                            '<input type="hidden" name="' . htmlspecialchars((string) $key) .
+                                            '" value="' . htmlspecialchars((string) $value) . '"' . $xhtmlFix . '>' .
                                             chr(10);
                                     }
                                 }
@@ -564,11 +616,11 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
                                     $script = '<script ';
                                     $scriptLines = [];
                                     foreach ($scriptParametersArray as $key => $value) {
-                                        $scriptLines[] = htmlspecialchars($key) . '="' . htmlspecialchars($value) . '"';
+                                        $scriptLines[] = htmlspecialchars((string) $key) . '="' . htmlspecialchars($value) . '"';
                                     }
                                     $script .= implode(chr(10), $scriptLines) . '></script>';
                                 }
-                                
+
                                 $formuri = $gatewayProxyObject->transactionFormGetActionURI();
                                 $gatewayProxyObject->setFormActionURI($formuri);
                                 $formParams = $gatewayProxyObject->transactionFormGetFormParms();
@@ -678,7 +730,7 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
                     $errorMessage .= '<br' . $xhtmlFix . '>' . $error;
                 }
             }
-        }                                    
+        }
 
         if ($finalize) {
             // add the markers for a processed transaction
@@ -690,7 +742,7 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
                     '_',
                     $key,
                     $parameter
-                ); 
+                );
             }
         }
 
@@ -994,7 +1046,7 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
                 );
             $transactionDetailsArray['transaction']['verifylink'] = $verifyLink;
         }
-        
+
         if (isset($confScript['conf.']) && is_array($confScript['conf.'])) {
             $transactionDetailsArray['options'] = $confScript['conf.'];
         }
@@ -1055,7 +1107,7 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
                         $goodsTotalDepositTax = $calculatedArray['deposittax']['goodstotal']['ALL'];
                         $goodsTotalDepositNoTax = $calculatedArray['depositnotax']['goodstotal']['ALL'];
                     }
-                    
+
                     if (
                         isset($calculatedArray['priceTax']['vouchertotal']) &&
                         isset($calculatedArray['priceTax']['vouchertotal']['ALL'])
@@ -1258,8 +1310,8 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
                     Field::HANDLING_TAX => $handling,
                     Field::TAX_PERCENTAGE => $tax,
                     Field::PRICE_ONLYTAX => (
-                            isset($actItem['priceTax']) && isset($actItem['totalNoTax']) ? 
-                            (static::fFloat($actItem['priceTax'] - $actItem['priceNoTax'])) : 
+                            isset($actItem['priceTax']) && isset($actItem['totalNoTax']) ?
+                            (static::fFloat($actItem['priceTax'] - $actItem['priceNoTax'])) :
                             0
                         ),
                     Field::PRICE_TOTAL_ONLYTAX => (
@@ -1374,8 +1426,8 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
 
 
     static public function readActionParameters (
-        ContentObjectRenderer $cObj,
         &$errorMessage,
+        ContentObjectRenderer $cObj,
         array $confScript
     ) {
         $result = false;
@@ -1389,15 +1441,14 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
                 );
 
             if (
-                is_object($gatewayProxyObject) &&
-                method_exists($gatewayProxyObject, 'readActionParameters')
+                is_object($gatewayProxyObject)
             ) {
                 $result = $gatewayProxyObject->readActionParameters($cObj);
             }
         }
         return $result;
     }
-    
+
     static public function addMainWindowJavascript (
         &$errorMessage,
         array $confScript
@@ -1433,7 +1484,7 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
             }
         }
     }
-    
+
     /**
     * Render data entry forms for the user billing and shipping address
     */
@@ -1444,7 +1495,7 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
         $extensionKey,
         array $basket,
         $orderUid,
-        $orderNumber, // text string of the order number       
+        $orderNumber, // text string of the order number
         $currency,
         array $extraData
     ) {
@@ -1454,7 +1505,10 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
         $ok = static::checkLoaded($errorMessage, $languageObj, $gatewayExtKey);
         $result = false;
 
-        if ($ok) {
+        if (
+            !empty($confScript['login']) &&
+            $ok
+        ) {
             $gatewayProxyObject =
                 PaymentApi::getGatewayProxyObject(
                     $confScript
@@ -1486,13 +1540,26 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
                         $orderUid,
                         $orderNumber,
                         $currency,
-                        $confScript['conf.'] ?? '',
+                        $confScript['conf.'] ?? null,
                         $basket,
                         $extraData
                     );
                 }
- 
+
                 if ($ok) {
+                    PaymentApi::storeInit(
+                        Action::AUTHORIZE_TRANSFER,
+                        $confScript['paymentMethod'],
+                        $extensionKey,
+                        $confScript['templateFile'] ?? '',
+                        $orderUid,
+                        $orderNumber,
+                        $currency,
+                        $confScript['conf.'] ?? null,
+                        $basket,
+                        $extraData
+                    );
+
                     if (class_exists($addressFeatureClass)) {
                         if (
                             method_exists($addressFeatureClass, 'init') &&

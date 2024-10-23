@@ -5,7 +5,6 @@ $extensionKey = 'transactor';
 $languageSubpath = '/Resources/Private/Language/';
 $languagePath = 'LLL:EXT:' . $extensionKey . $languageSubpath . 'locallang_db.xlf:';
 
-
 // ******************************************************************
 // transactions table
 // ******************************************************************
@@ -16,11 +15,9 @@ $result = [
         'crdate' => 'crdate',
         'default_sortby' => 'ORDER BY crdate',
         'dividers2tabs' => true,
+        'readOnly' => true,
         'iconfile' => 'EXT:' . $extensionKey . '/Resources/Public/Icons/Extension.gif',
         'searchFields' => 'uid,reference,orderuid,message,user',
-    ],
-    'interface' => [
-        'showRecordFieldList' => 'uid,reference,gatewayid,orderuid,currency,amount,state,state_time,message,ext_key,paymethod_key,paymethod_method,config,config_ext,user'
     ],
     'columns' => [
         'uid' => [
@@ -179,6 +176,5 @@ $result = [
         '1' => ['showitem' => '']
     ]
 ];
-
 
 return $result;

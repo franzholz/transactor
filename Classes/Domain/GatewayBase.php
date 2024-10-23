@@ -111,9 +111,11 @@ abstract class GatewayBase implements GatewayInterface, \TYPO3\CMS\Core\Singleto
             );
 
         $this->setConf($conf);
-        $this->setCookieArray(
-            ['fe_typo_user' => $_COOKIE['fe_typo_user']]
-        );
+        if (isset($_COOKIE['fe_typo_user'])) {
+            $this->setCookieArray(
+                ['fe_typo_user' => $_COOKIE['fe_typo_user']]
+            );
+        }
     }
 
     public function getTablename ()
@@ -190,7 +192,7 @@ abstract class GatewayBase implements GatewayInterface, \TYPO3\CMS\Core\Singleto
         $this->basket = $basket;
     }
 
-    public function getBasket () 
+    public function getBasket ()
     {
         return $this->basket;
     }
@@ -200,9 +202,9 @@ abstract class GatewayBase implements GatewayInterface, \TYPO3\CMS\Core\Singleto
         $this->extraData[$key] = $value;
     }
 
-    public function getExtraData ($key) 
+    public function getExtraData ($key)
     {
-        return $this->extraData[$key];
+        return $this->extraData[$key] ?? null;
     }
 
     public function setBasketSum ($basketSum)
@@ -210,7 +212,7 @@ abstract class GatewayBase implements GatewayInterface, \TYPO3\CMS\Core\Singleto
         $this->basketSum = doubleval($basketSum);
     }
 
-    public function getBasketSum () 
+    public function getBasketSum ()
     {
         return $this->basketSum;
     }
@@ -220,7 +222,7 @@ abstract class GatewayBase implements GatewayInterface, \TYPO3\CMS\Core\Singleto
         $this->orderUid = $orderUid;
     }
 
-    public function getOrderUid () 
+    public function getOrderUid ()
     {
         return $this->orderUid;
     }
@@ -230,7 +232,7 @@ abstract class GatewayBase implements GatewayInterface, \TYPO3\CMS\Core\Singleto
         $this->orderNumber = $orderNumber;
     }
 
-    public function getOrderNumber () 
+    public function getOrderNumber ()
     {
         return $this->orderNumber;
     }
@@ -249,7 +251,7 @@ abstract class GatewayBase implements GatewayInterface, \TYPO3\CMS\Core\Singleto
      * 3 letter currency code as defined by ISO 4217.
      *
      * @param string $currency
-     * 
+     *
      * @return void
      */
     public function setCurrency ($currency)
@@ -390,7 +392,7 @@ abstract class GatewayBase implements GatewayInterface, \TYPO3\CMS\Core\Singleto
             $orderNumber
         ) {
             $this->setOrderUid($orderUid);
-            $this->setOrderNumber($orderNumber);            
+            $this->setOrderNumber($orderNumber);
         }
 
         $paymentMethodsArray = $this->getAvailablePaymentMethods();
@@ -481,7 +483,7 @@ abstract class GatewayBase implements GatewayInterface, \TYPO3\CMS\Core\Singleto
                 }
             }
             $xmlOptions =
-                '<?xml version=”1.0” encoding=”utf-8” standalone=”yes” ?>' . LF . 
+                '<?xml version=”1.0” encoding=”utf-8” standalone=”yes” ?>' . LF .
                 GeneralUtility::array2xml(
                     $this->getConfig()
                 );
@@ -490,7 +492,7 @@ abstract class GatewayBase implements GatewayInterface, \TYPO3\CMS\Core\Singleto
             '<?xml version=”1.0” encoding=”utf-8” standalone=”yes” ?>' . LF .
             GeneralUtility::array2xml(
                 $this->getConf()
-            );        
+            );
 
         // Store order id in database
         $dataArray = [
@@ -1074,7 +1076,7 @@ abstract class GatewayBase implements GatewayInterface, \TYPO3\CMS\Core\Singleto
     * @return	void
     * @access	public
     */
-    public function setCheckoutURI ($checkoutURI) 
+    public function setCheckoutURI ($checkoutURI)
     {
         $this->checkoutURI = $checkoutURI;
     }
@@ -1097,7 +1099,7 @@ abstract class GatewayBase implements GatewayInterface, \TYPO3\CMS\Core\Singleto
     * @return	void
     * @access	public
     */
-    public function setCaptureURI ($captureURI) 
+    public function setCaptureURI ($captureURI)
     {
         $this->captureURI = $captureURI;
     }
