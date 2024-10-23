@@ -54,7 +54,7 @@ class PaymentApi
         $transactorConf = [];
         $result = '';
 
-        $transactorConf = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(
+        $transactorConf = GeneralUtility::makeInstance(
             \TYPO3\CMS\Core\Configuration\ExtensionConfiguration::class
         )->get($gatewayExtensionKey);
 
@@ -84,7 +84,7 @@ class PaymentApi
     )
     {
         $result = [];
-        $result = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(
+        $result = GeneralUtility::makeInstance(
             \TYPO3\CMS\Core\Configuration\ExtensionConfiguration::class
         )->get('transactor');
 
@@ -92,7 +92,7 @@ class PaymentApi
             $extensionKey != '' &&
             isset($GLOBALS['TYPO3_CONF_VARS']['EXT']['extConf'][$extensionKey])
         ) {
-            $extManagerConf = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(
+            $extManagerConf = GeneralUtility::makeInstance(
                 \TYPO3\CMS\Core\Configuration\ExtensionConfiguration::class
             )->get($extensionKey);
         }
