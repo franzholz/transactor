@@ -35,6 +35,7 @@
 *
 */
 
+use TYPO3\CMS\Core\Utility\ArrayUtility;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 
@@ -90,10 +91,13 @@ class Parameters implements \TYPO3\CMS\Core\SingletonInterface
             self::$prefixId &&
             !isset(self::$piVars[self::$prefixId])
         ) {
-            self::$piVars = GeneralUtility::_GPmerged(self::$prefixId);
+            self::$piVars = $GLOBALS['TYPO3_REQUEST']->getQueryParams()[self::$prefixId];
+            ArrayUtility::mergeRecursiveWithOverrule(
+                self::$piVars,
+                $GLOBALS['TYPO3_REQUEST']->getParsedBody()[self::$prefixId]
+            );
         }
         $result = self::$piVars;
         return $result;
     }
 }
-
