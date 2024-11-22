@@ -366,7 +366,7 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
 
         if ($paramsValid) {
             $lConf = $confScript;
-            $gatewayExtKey = $confScript['extName'];
+            $gatewayExtKey = $confScript['extName'] ?? '';
             $ok = static::checkLoaded($errorMessage, $languageObj, $gatewayExtKey);
             $paymentMethod = $confScript['paymentMethod'];
 
@@ -1438,7 +1438,7 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
     ) {
         $result = false;
         $languageObj = GeneralUtility::makeInstance(Localization::class);
-        $gatewayExtKey = $confScript['extName'];
+        $gatewayExtKey = $confScript['extName'] ?? '';
         $ok = static::checkLoaded($errorMessage, $languageObj, $gatewayExtKey);
         if ($ok) {
             $gatewayProxyObject =
@@ -1465,7 +1465,7 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
     {
         $languageObj = GeneralUtility::makeInstance(Localization::class);
         $accountFeatureClass = false;
-        $gatewayExtKey = $confScript['extName'];
+        $gatewayExtKey = $confScript['extName'] ?? '';
         $ok = static::checkLoaded($errorMessage, $languageObj, $gatewayExtKey);
         $result = false;
 
@@ -1502,7 +1502,7 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
     {
         $accountFeatureClass = false;
         $languageObj = GeneralUtility::makeInstance(Localization::class);
-        $gatewayExtKey = $confScript['extName'];
+        $gatewayExtKey = $confScript['extName'] ?? '';
         $ok = static::checkLoaded($errorMessage, $languageObj, $gatewayExtKey);
         $result = false;
 
@@ -1584,7 +1584,7 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
     ) {
         $languageObj = GeneralUtility::makeInstance(Localization::class);
         $accountFeatureClass = false;
-        $gatewayExtKey = $confScript['extName'];
+        $gatewayExtKey = $confScript['extName'] ?? '';
         $ok = static::checkLoaded($errorMessage, $languageObj, $gatewayExtKey);
         $result = false;
 
@@ -1691,7 +1691,6 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
                 }
             }
         }
-
         return $result;
     }
 }
