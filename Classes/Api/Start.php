@@ -368,11 +368,12 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
             $lConf = $confScript;
             $gatewayExtKey = $confScript['extName'] ?? '';
             $ok = static::checkLoaded($errorMessage, $languageObj, $gatewayExtKey);
-            $paymentMethod = $confScript['paymentMethod'];
+            $paymentMethod = $confScript['paymentMethod'] ?? '';
 
             if (
                 $ok &&
-                $errorMessage == ''
+                $errorMessage == '' &&
+                $paymentMethod != ''
             ) {
                 $gatewayProxyObject =
                     PaymentApi::getGatewayProxyObject(
