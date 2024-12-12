@@ -38,15 +38,15 @@ namespace JambageCom\Transactor\Api;
 
 
 class Address implements \TYPO3\CMS\Core\SingletonInterface {
-    protected $name;
-    protected $user_id;
-    protected $email;
-    protected $email_verified;
-    protected $street;
-    protected $zip;
-    protected $city;
-    protected $state;
-    protected $country;
+    protected $name = null;
+    protected $user_id = null;
+    protected $email = null;
+    protected $email_verified = null;
+    protected $street = null;
+    protected $zip = null;
+    protected $city = null;
+    protected $state = null;
+    protected $country = null;
 
 
 
@@ -141,5 +141,3 @@ class Address implements \TYPO3\CMS\Core\SingletonInterface {
     }
 
 }
-
-

@@ -20,7 +20,7 @@ namespace JambageCom\Transactor\Constants;
  */
 class Feature
 {
-    const ADDRESS = 1;       // address from external login
+    const ACCOUNT = 1;       // account from external login
 }
 
 

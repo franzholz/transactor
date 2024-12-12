@@ -60,6 +60,8 @@ use JambageCom\Transactor\Constants\Message;
 
 class Start implements \TYPO3\CMS\Core\SingletonInterface
 {
+    private static $hasActionParameters = false;
+
     static public function init (
         $pLangObj,
         $cObj, // DEPRECATED
@@ -364,13 +366,14 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
 
         if ($paramsValid) {
             $lConf = $confScript;
-            $gatewayExtKey = $confScript['extName'];
+            $gatewayExtKey = $confScript['extName'] ?? '';
             $ok = static::checkLoaded($errorMessage, $languageObj, $gatewayExtKey);
-            $paymentMethod = $confScript['paymentMethod'];
+            $paymentMethod = $confScript['paymentMethod'] ?? '';
 
             if (
                 $ok &&
-                $errorMessage == ''
+                $errorMessage == '' &&
+                $paymentMethod != ''
             ) {
                 $gatewayProxyObject =
                     PaymentApi::getGatewayProxyObject(
@@ -1424,6 +1427,10 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
         return round($float, $level);
     }
 
+    static public function hasActionParameters(
+    ) {
+        return static::$hasActionParameters;
+    }
 
     static public function readActionParameters (
         &$errorMessage,
@@ -1432,7 +1439,7 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
     ) {
         $result = false;
         $languageObj = GeneralUtility::makeInstance(Localization::class);
-        $gatewayExtKey = $confScript['extName'];
+        $gatewayExtKey = $confScript['extName'] ?? '';
         $ok = static::checkLoaded($errorMessage, $languageObj, $gatewayExtKey);
         if ($ok) {
             $gatewayProxyObject =
@@ -1445,6 +1452,9 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
             ) {
                 $result = $gatewayProxyObject->readActionParameters($cObj);
             }
+            if ($result) {
+                static::$hasActionParameters = true;
+            }
         }
         return $result;
     }
@@ -1455,8 +1465,8 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
     )
     {
         $languageObj = GeneralUtility::makeInstance(Localization::class);
-        $addressFeatureClass = false;
-        $gatewayExtKey = $confScript['extName'];
+        $accountFeatureClass = false;
+        $gatewayExtKey = $confScript['extName'] ?? '';
         $ok = static::checkLoaded($errorMessage, $languageObj, $gatewayExtKey);
         $result = false;
 
@@ -1467,9 +1477,9 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
                 );
 
             if (is_object($gatewayProxyObject)) {
-                $addressFeatureClass = $gatewayProxyObject->getFeatureClass(Feature::ADDRESS);
+                $accountFeatureClass = $gatewayProxyObject->getFeatureClass(Feature::ACCOUNT);
                 if (
-                    $addressFeatureClass != '' &&
+                    $accountFeatureClass != '' &&
                     $errorMessage == ''
                 ) {
                     $parameters = [
@@ -1477,7 +1487,7 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
                         $confScript,
                     ];
                     call_user_func_array(
-                        $addressFeatureClass . '::addMainWindowJavascript',
+                        $accountFeatureClass . '::addMainWindowJavascript',
                         $parameters
                     );
                 }
@@ -1485,23 +1495,15 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
         }
     }
 
-    /**
-    * Render data entry forms for the user billing and shipping address
-    */
-    static public function renderDataEntry (
+    static public function readAccountData (
         &$errorMessage,
         &$addressModel,
         array $confScript,
-        $extensionKey,
-        array $basket,
-        $orderUid,
-        $orderNumber, // text string of the order number
-        $currency,
-        array $extraData
-    ) {
+    )
+    {
+        $accountFeatureClass = false;
         $languageObj = GeneralUtility::makeInstance(Localization::class);
-        $addressFeatureClass = false;
-        $gatewayExtKey = $confScript['extName'];
+        $gatewayExtKey = $confScript['extName'] ?? '';
         $ok = static::checkLoaded($errorMessage, $languageObj, $gatewayExtKey);
         $result = false;
 
@@ -1515,7 +1517,7 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
                 );
 
             if (is_object($gatewayProxyObject)) {
-                $addressFeatureClass = $gatewayProxyObject->getFeatureClass(Feature::ADDRESS);
+                $accountFeatureClass = $gatewayProxyObject->getFeatureClass(Feature::ACCOUNT);
             } else {
                 $paymentMethod = $confScript['paymentMethod'];
                 $message =
@@ -1527,7 +1529,89 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
             }
 
             if (
-                $addressFeatureClass != ''
+                $accountFeatureClass != ''
+            ) {
+                if (
+                    $errorMessage == ''
+                ) {
+
+                }
+
+                if (class_exists($accountFeatureClass)) {
+                    if (
+                        method_exists($accountFeatureClass, 'init') &&
+                        method_exists($accountFeatureClass, 'fetch')
+                    ) {
+                        $account =
+                            GeneralUtility::makeInstance(
+                                $accountFeatureClass
+                            );
+                        $account->init(
+                            $gatewayProxyObject->getGatewayObj(),
+                            $confScript
+                        );
+
+                        // read the login box from the Payment Gateway
+                        $result = $account->fetch($errorMessage, $addressModel);
+                    } else {
+                        $errorMessage =
+                            sprintf(
+                                $languageObj->getLabel(
+                                    'error_feature_class_interface'
+                                ),
+                                $accountFeatureClass,
+                                $labelAdress
+                            );
+                    }
+                }
+            }
+        }
+        return $result;
+    }
+
+    /**
+    * Render data entry forms for the user billing and shipping address
+    */
+    static public function renderLoginBox (
+        &$errorMessage,
+        &$accountModel,
+        array $confScript,
+        $extensionKey,
+        array $basket,
+        $orderUid,
+        $orderNumber, // text string of the order number
+        $currency,
+        array $extraData
+    ) {
+        $languageObj = GeneralUtility::makeInstance(Localization::class);
+        $accountFeatureClass = false;
+        $gatewayExtKey = $confScript['extName'] ?? '';
+        $ok = static::checkLoaded($errorMessage, $languageObj, $gatewayExtKey);
+        $result = false;
+
+        if (
+            !empty($confScript['login']) &&
+            $ok
+        ) {
+            $gatewayProxyObject =
+                PaymentApi::getGatewayProxyObject(
+                    $confScript
+                );
+
+            if (is_object($gatewayProxyObject)) {
+                $accountFeatureClass = $gatewayProxyObject->getFeatureClass(Feature::ACCOUNT);
+            } else {
+                $paymentMethod = $confScript['paymentMethod'];
+                $message =
+                    $languageObj->getLabel(
+                        'error_gateway_missing'
+                    );
+                $messageArray =  explode('|', $message);
+                $errorMessage = $messageArray[0] . $paymentMethod . $messageArray[1];
+            }
+
+            if (
+                $accountFeatureClass != ''
             ) {
                 if (
                     $errorMessage == ''
@@ -1560,28 +1644,29 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
                         $extraData
                     );
 
-                    if (class_exists($addressFeatureClass)) {
+                    if (class_exists($accountFeatureClass)) {
                         if (
-                            method_exists($addressFeatureClass, 'init') &&
-                            method_exists($addressFeatureClass, 'fetch')
+                            method_exists($accountFeatureClass, 'init') &&
+                            method_exists($accountFeatureClass, 'render')
                         ) {
-                            $address =
+                            $account =
                                 GeneralUtility::makeInstance(
-                                    $addressFeatureClass
+                                    $accountFeatureClass
                                 );
-                            $address->init(
+                            $account->init(
                                 $gatewayProxyObject->getGatewayObj(),
                                 $confScript
                             );
 
-                            $result = $address->fetch($errorMessage, $addressModel);
+                            // read the login box from the Payment Gateway
+                            $result = $account->render($errorMessage, $accountModel);
                         } else {
                             $errorMessage =
                                 sprintf(
                                     $languageObj->getLabel(
                                         'error_feature_class_interface'
                                     ),
-                                    $addressFeatureClass,
+                                    $accountFeatureClass,
                                     $labelAdress
                                 );
                         }
@@ -1595,7 +1680,7 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
                                 $languageObj->getLabel(
                                     'error_feature_class'
                                 ),
-                                $addressFeatureClass,
+                                $accountFeatureClass,
                                 $labelAdress
                             );
                     }
@@ -1607,7 +1692,6 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
                 }
             }
         }
-
         return $result;
     }
 }

@@ -45,14 +45,14 @@ class PaymentPreviousApi {
     */
     static public function getGatewayProxyObject (
         $confScript
-    ) 
+    )
     {
         $result = false;
 
         if (
             is_array($confScript) &&
-            $confScript['extName'] != '' &&
-            $confScript['paymentMethod'] != ''
+            isset($confScript['extName']) &&
+            isset($confScript['paymentMethod'])
         ) {
             $gatewayExtKey = $confScript['extName'];
 
