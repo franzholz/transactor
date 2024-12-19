@@ -1,5 +1,7 @@
 <?php
+
 declare(strict_types = 1);
+
 namespace JambageCom\Transactor\Middleware;
 
 /*
@@ -76,10 +78,10 @@ class TransactionMessageHandler implements MiddlewareInterface
         if (
             is_string($configuration) &&
             (
-                strpos($configuration, '::') !== false || 
+                strpos($configuration, '::') !== false ||
                 is_callable($configuration)
             )
-        ) {     
+        ) {
             if (
                 version_compare($version, '10.4.0', '>=')
             ) {

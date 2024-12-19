@@ -1,7 +1,8 @@
 <?php
 
-namespace JambageCom\Transactor\Domain;
+declare(strict_types=1);
 
+namespace JambageCom\Transactor\Domain;
 
 /***************************************************************
 *

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace JambageCom\Transactor\Api;
 
 /***************************************************************
@@ -67,7 +69,7 @@ abstract class Listener {
     {
         if (is_array ($GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['transactor']['listener'])) {
             foreach ($GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['transactor']['listener'] as $classRef) {
-                $hookObj = 
+                $hookObj =
                     GeneralUtility::makeInstance($classRef);
 
                 if (
