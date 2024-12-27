@@ -88,18 +88,20 @@ class GatewayProxy implements \JambageCom\Transactor\Domain\GatewayInterface
         ) {
             $this->gatewayClass = $this->extensionManagerConf['gatewayClass'];
         } else {
-            $composerFile = \TYPO3\CMS\Core\Utility\PathUtility::stripPathSitePrefix(ExtensionManagementUtility::extPath($extensionKey)) . 'composer.json';
+            $composerFile =  GeneralUtility::getFileAbsFileName(ExtensionManagementUtility::extPath($extensionKey)) . 'composer.json';
+
             if (file_exists($composerFile)) {
                 $content = file_get_contents($composerFile);
                 $content = json_decode($content, true);
+
                 if (
                     isset($content['autoload']) &&
                     isset($content['autoload']['psr-4'])
                 ) {
                     $keys = array_keys($content['autoload']['psr-4']);
 
-                    if (isset($keys['0'])) {
-                        $this->gatewayClass = $keys['0'] . 'Domain\\Gateway';
+                    if (isset($keys[0])) {
+                        $this->gatewayClass = $keys[0] . 'Domain\\Gateway';
                     }
                 }
             }
@@ -121,8 +123,9 @@ class GatewayProxy implements \JambageCom\Transactor\Domain\GatewayInterface
     public function getGatewayObj ()
     {
         $result = false;
+
         if (
-            $this->getGatewayClass() != ''/* &&
+            $this->getGatewayClass() != '' /* &&
             class_exists($this->getGatewayClass())*/
         ) {
             $result = GeneralUtility::makeInstance($this->getGatewayClass());
@@ -860,7 +863,7 @@ class GatewayProxy implements \JambageCom\Transactor\Domain\GatewayInterface
     *
     * @access	public
     */
-    public function readActionParameters (ContentObjectRenderer $cObj) {
+    public function readActionParameters (ContentObjectRenderer $cObj): bool {
         $result = false;
 
         if (method_exists($this->getGatewayObj(), 'readActionParameters')) {
