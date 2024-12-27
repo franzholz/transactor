@@ -532,13 +532,13 @@ abstract class GatewayBase implements GatewayInterface, \TYPO3\CMS\Core\Singleto
                 (
                     abs(
                         round(
-                            $row['amount'], 2
+                            floatval($row['amount']), 2
                         ) -
                         round(
-                            $dataArray['amount'],
+                            floatval($dataArray['amount']),
                             2
-                        ) > 0.1
-                    ) ||
+                        )
+                    ) > 0.1 ||
                     $row['paymethod_key'] != $dataArray['paymethod_key'] ||
                     $row['paymethod_method'] != $dataArray['paymethod_method'] ||
                     $row['orderuid'] != $dataArray['orderuid']

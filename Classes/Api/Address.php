@@ -141,5 +141,4 @@ class Address implements \TYPO3\CMS\Core\SingletonInterface {
     {
         return $this->country;
     }
-
 }
