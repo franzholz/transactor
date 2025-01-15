@@ -8,7 +8,7 @@ $EM_CONF[$_EXTKEY] = [
     'title' => 'Payment Transactor API',
     'description' => 'This is a basic API to develop extensions which connect to different payment transaction gateways.',
     'category' => 'misc',
-    'version' => '0.13.0',
+    'version' => '0.14.0',
     'state' => 'stable',
     'clearcacheonload' => 0,
     'author' => 'Franz Holzinger',
@@ -17,8 +17,8 @@ $EM_CONF[$_EXTKEY] = [
     'constraints' => [
         'depends' => [
             'php' => '8.0.0-8.4.99',
-            'typo3' => '11.5.0-13.4.99',
-            'div2007' => '2.0.5-2.2.99',
+            'typo3' => '12.4.0-13.4.99',
+            'div2007' => '2.2.0-2.2.99',
         ],
         'conflicts' => [
         ],

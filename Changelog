@@ -1,3 +1,6 @@
+2025-01-15 Franz Holzinger <franz@ttproducts.de>
+    * support for TYPO3 12 and 13 only
+
 2024-12-19 Franz Holzinger <franz@ttproducts.de>
     * remove unused class Request/Parameters
     * add class SessionHandler/SessionHandler to store session data.
