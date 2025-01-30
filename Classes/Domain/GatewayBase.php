@@ -8,7 +8,7 @@ namespace JambageCom\Transactor\Domain;
 *
 *  Copyright notice
 *
-*  (c) 2023 Franz Holzinger (franz@ttproducts.de)
+*  (c) 2024 Franz Holzinger (franz@ttproducts.de)
 *  All rights reserved
 *
 *  This script is part of the TYPO3 project. The TYPO3 project is
@@ -28,6 +28,8 @@ namespace JambageCom\Transactor\Domain;
 *  This copyright notice MUST APPEAR in all copies of the script!
 ***************************************************************/
 
+
+use Psr\Http\Message\ServerRequestInterface;
 
 use JambageCom\Transactor\Constants\Action;
 use JambageCom\Transactor\Constants\Field;
@@ -59,6 +61,7 @@ abstract class GatewayBase implements GatewayInterface, \TYPO3\CMS\Core\Singleto
     protected $gatewayKey = 'gatewayname';	   // must be overridden
     protected $extensionKey = 'transactor';    // must be overridden
     protected $taxIncluded = true;
+    protected $request = null;
     protected $conf = [];
     protected $config = [];
     protected $mergeConf = true;
@@ -118,6 +121,16 @@ abstract class GatewayBase implements GatewayInterface, \TYPO3\CMS\Core\Singleto
                 ['fe_typo_user' => $_COOKIE['fe_typo_user']]
             );
         }
+    }
+
+    public function setRequest(ServerRequestInterface $request)
+    {
+        $this->request = $request;
+    }
+
+    public function getRequest()
+    {
+        return $this->request;
     }
 
     public function getTablename ()
@@ -439,19 +452,6 @@ abstract class GatewayBase implements GatewayInterface, \TYPO3\CMS\Core\Singleto
             }
             $result = implode('; ', $tmpArray);
         }
-        return $result;
-    }
-
-    public function getLanguage ()
-    {
-        $result = (
-            isset($GLOBALS['TSFE']->config['config']) &&
-            is_array($GLOBALS['TSFE']->config['config']) &&
-            $GLOBALS['TSFE']->config['config']['language'] ?
-                $GLOBALS['TSFE']->config['config']['language'] :
-                'en'
-        );
-
         return $result;
     }
 

@@ -1,5 +1,7 @@
-2025-01-15 Franz Holzinger <franz@ttproducts.de>
+2025-01-30 Franz Holzinger <franz@ttproducts.de>
     * support for TYPO3 12 and 13 only
+    * Remove getLanguage methods. Use getLanguage from div2007 TranslationBase instead of it.
+    * add parameter ServerRequestInterface $request
 
 2024-12-19 Franz Holzinger <franz@ttproducts.de>
     * remove unused class Request/Parameters

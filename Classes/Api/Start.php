@@ -7,7 +7,7 @@ namespace JambageCom\Transactor\Api;
 /***************************************************************
 *  Copyright notice
 *
-*  (c) 2023 Franz Holzinger <franz@ttproducts.de>
+*  (c) 2025 Franz Holzinger <franz@ttproducts.de>
 *  All rights reserved
 *
 *  This script is part of the TYPO3 project. The TYPO3 project is
@@ -40,12 +40,13 @@ namespace JambageCom\Transactor\Api;
 *
 */
 
+use Psr\Http\Message\ServerRequestInterface;
+
 use TYPO3\CMS\Core\Service\MarkerBasedTemplateService;
 use TYPO3\CMS\Core\Utility\ExtensionManagementUtility;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Core\Utility\VersionNumberUtility;
 use TYPO3\CMS\Frontend\ContentObject\ContentObjectRenderer;
-
 
 use JambageCom\Div2007\Utility\FrontendUtility;
 use JambageCom\Div2007\Utility\HtmlUtility;
@@ -64,10 +65,12 @@ use JambageCom\Transactor\Constants\Message;
 class Start implements \TYPO3\CMS\Core\SingletonInterface
 {
     private static $hasActionParameters = false;
+    private static $request = null;
+    private static int $id;
 
     static public function init (
         $pLangObj,
-        $cObj, // DEPRECATED
+        ServerRequestInterface $request,
         array $conf,
         $keepLanguageSettings = true
     )
@@ -79,12 +82,22 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
         $languageObj->init1(
             $pLangObj,
             $conf['_LOCAL_LANG.'] ?? '',
-            $languageSubpath,
+            $request,
             $keepLanguageSettings
         );
         $languageObj->loadLocalLang(
             $languagePath . 'locallang.xlf'
         );
+        static::$request = $request;
+        $typo3VersionArray = VersionNumberUtility::convertVersionStringToArray(VersionNumberUtility::getCurrentTypo3Version());
+        $typo3VersionMain = $typo3VersionArray['version_main'];
+
+        if ($typo3VersionMain >= 13) {
+            static::$id = $request->getAttribute('frontend.page.information')->getId();
+        } else {
+            static::$id = $GLOBALS['TSFE']->id;
+        }
+
     }
 
     static public function getMarkers (
@@ -96,12 +109,11 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
         $languageSubpath = '/Resources/Private/Language/';
         $languagePath = 'EXT:' . $extensionKey . $languageSubpath;
         $cObj = FrontendUtility::getContentObjectRenderer();
-        $version = VersionNumberUtility::getCurrentTypo3Version();
         $languageObj = GeneralUtility::makeInstance(Localization::class);
         $languageObj->init1(
             '',
             $conf['_LOCAL_LANG.'] ?? '',
-            $languageSubpath
+            static::$request
         );
         $languageObj->loadLocalLang(
             $languagePath . 'locallang_marker.xlf'
@@ -401,6 +413,7 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
                     );
 
                     PaymentApi::storeInit(
+                        static::$request->getAttribute('frontend.user'),
                         Action::AUTHORIZE_TRANSFER,
                         $paymentMethod,
                         $extensionKey,
@@ -459,7 +472,10 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
                             );
                         return '';
                     }
-                    PaymentApi::storeReferenceUid($referenceId);
+                    PaymentApi::storeReferenceUid(
+                        static::$request->getAttribute('frontend.user'),
+                        $referenceId
+                    );
                     $transactionDetailsArray = static::getTransactionDetails(
                         $referenceId,
                         $handleLib,
@@ -884,18 +900,6 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
         return $url;
     }
 
-    static public function getLanguage ()
-    {
-        if (
-            isset($GLOBALS['TSFE']->config['config']['language'])
-        ) {
-            $result = strtolower($GLOBALS['TSFE']->config['config']['language']);
-        } else {
-            $result = 'default';
-        }
-        return $result;
-    }
-
     /**
     * Gets all the data needed for the transaction or the verification check
     */
@@ -919,6 +923,7 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
         array $paymentBasketArray
     )
     {
+        $languageObj = GeneralUtility::makeInstance(Localization::class);
         $paramNameActivity = $extensionKey . '[activity][' . $paymentActivity . ']';
         $failLinkParams = [$paramNameActivity => '0'];
 
@@ -978,7 +983,7 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
         } else {
             $successPid = ($pidArray['PIDthanks'] ? $pidArray['PIDthanks'] : $pidArray['PIDfinalize']);
             if (!$successPid) {
-                $successPid = $GLOBALS['TSFE']->id;
+                $successPid = static::$id;
             }
         }
 
@@ -994,17 +999,17 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
             $failPid = ($pidArray['PIDpayment'] ? $pidArray['PIDpayment'] : $pidArray['PIDbasket']);
 
             if (!$failPid) {
-                $failPid = $GLOBALS['TSFE']->id;
+                $failPid = static::$id;
             }
         }
 
         $conf = ['returnLast' => 'url'];
         $urlDir = GeneralUtility::getIndpEnv('TYPO3_REQUEST_DIR');
-        $retlink = $urlDir . static::getUrl($conf, $GLOBALS['TSFE']->id, $linkParams);
+        $retlink = $urlDir . static::getUrl($conf, static::$id, $linkParams);
         $returi = $retlink . $paramReturi;
         $faillink = $urlDir . static::getUrl($conf, $failPid, $failLinkParams);
         $successlink = $urlDir . static::getUrl($conf, $successPid, $successLinkParams);
-        $notifyurl = $urlDir . static::getUrl($conf, $GLOBALS['TSFE']->id, $notifyUrlParams);
+        $notifyurl = $urlDir . static::getUrl($conf, static::$id, $notifyUrlParams);
 
         $extensions = [
             'calling' => $extensionKey,
@@ -1037,7 +1042,7 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
             'address' => $addressArray,
             'basket' => $paymentBasketArray,
             'cc' => $cardRow,
-            'language' => static::getLanguage(),
+            'language' => $languageObj->getLanguage(),
             'extension' => $extensionInfo,
             'confScript' => $confScript
         ];
@@ -1047,7 +1052,7 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
                 $urlDir .
                 static::getUrl(
                     $conf,
-                    $GLOBALS['TSFE']->id,
+                    static::$id,
                     $successLinkParams
                 );
             $transactionDetailsArray['transaction']['verifylink'] = $verifyLink;
@@ -1525,6 +1530,7 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
                             $accountFeatureClass
                         );
                     $account->init(
+                        static::$request,
                         $gatewayProxyObject->getGatewayObj(),
                         $confScript
                     );
@@ -1534,7 +1540,7 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
                 } else {
                     $labelAdress =
                         $languageObj->getLabel(
-                            'feature_address_gatewayaccout'
+                            'feature_address_gatewayaccount'
                         );
                     $errorMessage =
                         sprintf(
@@ -1547,7 +1553,6 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
                 }
             }
         }
-
         return $result;
     }
 
@@ -1585,7 +1590,7 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
                 } else {
                     $labelAdress =
                         $languageObj->getLabel(
-                            'feature_address_gatewayaccout'
+                            'feature_address_gatewayaccount'
                         );
                     $errorMessage =
                         sprintf(
@@ -1654,6 +1659,7 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
                                 $accountFeatureClass
                             );
                         $account->init(
+                            static::$request,
                             $gatewayProxyObject->getGatewayObj(),
                             $confScript
                         );
@@ -1663,7 +1669,7 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
                     } else {
                         $labelAdress =
                             $languageObj->getLabel(
-                                'feature_address_gatewayaccout'
+                                'feature_address_gatewayaccount'
                             );
                         $errorMessage =
                             sprintf(
@@ -1677,7 +1683,6 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
                 }
             }
         }
-
         return $result;
     }
 
@@ -1694,7 +1699,7 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
         $orderNumber, // text string of the order number
         $currency,
         array $extraData
-    ) {
+    ): string {
         $languageObj = GeneralUtility::makeInstance(Localization::class);
         $accountFeatureClass = false;
         $gatewayExtKey = $confScript['extName'] ?? '';
@@ -1702,7 +1707,7 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
         $result = false;
         $labelAdress =
             $languageObj->getLabel(
-                'feature_address_gatewayaccout'
+                'feature_address_gatewayaccount'
             );
 
         if (
@@ -1748,6 +1753,7 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
 
                 if ($ok) {
                     PaymentApi::storeInit(
+                        static::$request->getAttribute('frontend.user'),
                         Action::AUTHORIZE_TRANSFER,
                         $confScript['paymentMethod'],
                         $extensionKey,
@@ -1770,6 +1776,7 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
                                     $accountFeatureClass
                                 );
                             $account->init(
+                                static::$request,
                                 $gatewayProxyObject->getGatewayObj(),
                                 $confScript
                             );
@@ -1804,7 +1811,6 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
                 }
             }
         }
-
         return $result;
     }
 }

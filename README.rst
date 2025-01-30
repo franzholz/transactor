@@ -7,6 +7,8 @@ connecting to various gateways.
 Installation Requirement
 ------------------------
 
+Version 0.14.0 has a request parameter for the Api::Start class which is supported by tt_products 2.16.2+ and 3.5.2 and later.
+
 Some extensions might need the old API which has however been removed in version 0.11.0.
 
 Since version 0.9.0 the transactor extension contains a middleware,

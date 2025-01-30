@@ -35,7 +35,7 @@
 			</trans-unit>
 			<trans-unit id="error_api_parameters" resname="error_api_parameters">
 				<source>ERROR: Wrong parameter in the call of the Transactor API.</source>
-			</trans-unit>    
+			</trans-unit>
 			<trans-unit id="error_invalid_data" resname="error_invalid_data">
 				<source>ERROR: invalid data.</source>
 			</trans-unit>
@@ -45,7 +45,7 @@
 			<trans-unit id="extension_missing" resname="extension_missing">
 				<source>ERROR: The extension '|' has not been installed.</source>
 			</trans-unit>
-			<trans-unit id="feature_address_gatewayaccout" resname="feature_address_gatewayaccout">
+			<trans-unit id="feature_address_gatewayaccount" resname="feature_address_gatewayaccount">
 				<source>fetch address from gateway account</source>
 			</trans-unit>
 		</body>

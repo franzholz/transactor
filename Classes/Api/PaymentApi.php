@@ -446,33 +446,50 @@ class PaymentApi
         return $result;
     }
 
-    static public function storeData ($type, $data)
+    static public function storeData (
+        FrontendUserAuthentication $frontendUserAuthentification,
+        $type,
+        $data
+    )
     {
         $key = 'transactor';
-        $sessionData = static::getFrontendUser()->getKey('ses', $key);
+        $sessionData = $frontendUserAuthentification->getKey('ses', $key);
         $sessionData[$type] = $data;
-        static::getFrontendUser()->setKey('ses', $key, $sessionData);
-        static::getFrontendUser()->storeSessionData();
+        $frontendUserAuthentification->setKey('ses', $key, $sessionData);
+        $frontendUserAuthentification->storeSessionData();
     }
 
-    static public function getStoredData ($type)
+    static public function getStoredData (
+        FrontendUserAuthentication $frontendUserAuthentification,
+        $type
+    )
     {
         $key = 'transactor';
-        $sessionData = static::getFrontendUser()->getKey('ses', $key);
+        $sessionData = $frontendUserAuthentification->getKey('ses', $key);
         return $sessionData[$type] ?? null;
     }
 
-    static public function storeReferenceUid ($referenceUid)
+    static public function storeReferenceUid (
+        FrontendUserAuthentication $frontendUserAuthentification,
+        string $referenceUid
+    )
     {
-        static::storeData('referenceUid', $referenceUid);
+        static::storeData(
+            $frontendUserAuthentification,
+            'referenceUid',
+            $referenceUid
+        );
     }
 
-    static public function getStoredReferenceUid ()
+    static public function getStoredReferenceUid (
+        FrontendUserAuthentication $frontendUserAuthentification
+    )
     {
-        return static::getStoredData('referenceUid');
+        return static::getStoredData($frontendUserAuthentification, 'referenceUid');
     }
 
     static public function storeInit (
+        FrontendUserAuthentication $frontendUserAuthentification,
         $action,
         $paymentMethod,
         $callingExtensionKey,
@@ -499,7 +516,7 @@ class PaymentApi
         ];
 
         foreach ($data as $key => $value) {
-            static::storeData($key, $value);
+            static::storeData($frontendUserAuthentification, $key, $value);
         }
     }
 
@@ -513,7 +530,8 @@ class PaymentApi
         &$currency,
         &$conf,
         &$basket,
-        &$extraData
+        &$extraData,
+        FrontendUserAuthentication $frontendUserAuthentification
     ) {
         $data = [
             'action' => &$action,
@@ -530,7 +548,7 @@ class PaymentApi
 
 
         foreach ($data as $key => &$value) {
-            $value = static::getStoredData($key);
+            $value = static::getStoredData($frontendUserAuthentification, $key);
         }
     }
 
@@ -570,20 +588,5 @@ class PaymentApi
         return $result;
     }
 
-    /**
-     * @return FrontendUserAuthentication
-     */
-    static protected function getFrontendUser(): FrontendUserAuthentication
-    {
-        return static::getTypoScriptFrontendController()->fe_user;
-    }
-
-    /**
-     * @return TypoScriptFrontendController|null
-     */
-    static protected function getTypoScriptFrontendController(): ?TypoScriptFrontendController
-    {
-        return $GLOBALS['TSFE'] ?? null;
-    }
 }
 

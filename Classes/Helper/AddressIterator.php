@@ -26,7 +26,6 @@ class AddressIterator extends \FilterIterator {
     public function accept(): bool
     {
         $key = trim(parent::key());
-
         $function = 'set' . ucwords($key, '_');
         $function = str_replace('_', '', $function);
         $result = method_exists(Address::class, $function);
