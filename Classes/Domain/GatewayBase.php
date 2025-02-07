@@ -128,7 +128,7 @@ abstract class GatewayBase implements GatewayInterface, \TYPO3\CMS\Core\Singleto
         $this->request = $request;
     }
 
-    public function getRequest()
+    public function getRequest(): ?ServerRequestInterface
     {
         return $this->request;
     }

@@ -168,7 +168,7 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
         $confScript,
         array &$subpartArray,
         array &$wrappedSubpartArray
-    )
+    ): bool
     {
         $bUseTransactor = false;
         if (
@@ -189,6 +189,8 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
             $wrappedSubpartArray['###MESSAGE_PAYMENT_TRANSACTOR_NO###'] = '';
             $subpartArray['###MESSAGE_PAYMENT_TRANSACTOR_YES###'] = '';
         }
+
+        return $bUseTransactor;
     }
 
     static public function getReferenceUid (
@@ -199,7 +201,12 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
     )
     {
         $referenceUid = false;
-        $gatewayProxyObject = PaymentApi::getGatewayProxyObject($confScript);
+        $gatewayProxyObject =
+            PaymentApi::getGatewayProxyObject(
+                static::$request,
+                $confScript
+            );
+
         if (
             $orderUid &&
             method_exists($gatewayProxyObject, 'generateReferenceUid')
@@ -392,6 +399,7 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
             ) {
                 $gatewayProxyObject =
                     PaymentApi::getGatewayProxyObject(
+                        static::$request,
                         $confScript
                     );
                 if (is_object($gatewayProxyObject)) {
@@ -804,6 +812,7 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
         if (strpos($handleLib, 'transactor') !== false) {
             $gatewayProxyObject =
                 PaymentApi::getGatewayProxyObject(
+                    static::$request,
                     $confScript
                 );
 
@@ -1442,7 +1451,6 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
 
     static public function readActionParameters (
         &$errorMessage,
-        ContentObjectRenderer $cObj,
         array $confScript
     ): bool {
         $result = false;
@@ -1452,13 +1460,14 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
         if ($ok) {
             $gatewayProxyObject =
                 PaymentApi::getGatewayProxyObject(
+                    static::$request,
                     $confScript
                 );
 
             if (
                 is_object($gatewayProxyObject)
             ) {
-                $result = $gatewayProxyObject->readActionParameters($cObj);
+                $result = $gatewayProxyObject->readActionParameters();
             }
             if ($result) {
                 static::$hasActionParameters = true;
@@ -1481,6 +1490,7 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
         if ($ok) {
             $gatewayProxyObject =
                 PaymentApi::getGatewayProxyObject(
+                    static::$request,
                     $confScript
                 );
 
@@ -1493,6 +1503,7 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
                     $parameters = [
                         &$errorMessage,
                         $confScript,
+                        static::$request,
                     ];
                     $result = call_user_func_array(
                         $accountFeatureClass . '::addMainWindowJavascript',
@@ -1513,6 +1524,7 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
         ) {
             $gatewayProxyObject =
                 PaymentApi::getGatewayProxyObject(
+                    static::$request,
                     $confScript
                 );
 
@@ -1530,7 +1542,6 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
                             $accountFeatureClass
                         );
                     $account->init(
-                        static::$request,
                         $gatewayProxyObject->getGatewayObj(),
                         $confScript
                     );
@@ -1569,6 +1580,7 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
         ) {
             $gatewayProxyObject =
                 PaymentApi::getGatewayProxyObject(
+                    static::$request,
                     $confScript
                 );
 
@@ -1625,6 +1637,7 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
         ) {
             $gatewayProxyObject =
                 PaymentApi::getGatewayProxyObject(
+                    static::$request,
                     $confScript
                 );
 
@@ -1659,7 +1672,6 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
                                 $accountFeatureClass
                             );
                         $account->init(
-                            static::$request,
                             $gatewayProxyObject->getGatewayObj(),
                             $confScript
                         );
@@ -1716,6 +1728,7 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
         ) {
             $gatewayProxyObject =
                 PaymentApi::getGatewayProxyObject(
+                    static::$request,
                     $confScript
                 );
 
@@ -1776,13 +1789,17 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
                                     $accountFeatureClass
                                 );
                             $account->init(
-                                static::$request,
                                 $gatewayProxyObject->getGatewayObj(),
                                 $confScript
                             );
 
                             // read the login box from the Payment Gateway
-                            $result = $account->render($errorMessage, $accountModel);
+                            $result =
+                                $account->render(
+                                    $errorMessage,
+                                    $accountModel,
+                                    static::$request,
+                                );
                         } else {
                             $errorMessage =
                                 sprintf(

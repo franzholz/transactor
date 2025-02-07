@@ -28,6 +28,8 @@ use TYPO3\CMS\Core\Http\Response;
 use TYPO3\CMS\Core\Information\Typo3Version;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
+use JambageCom\Transactor\SessionHandler\SessionHandler;
+
 
 /**
  *
@@ -51,8 +53,13 @@ class TransactionMessageHandler implements MiddlewareInterface
         $postParams = $request->getParsedBody();
         $eID = $request->getParsedBody()['eID'] ?? $request->getQueryParams()['eID'] ?? null;
         $transactor = $request->getParsedBody()['transactor'] ?? $queryParams['transactor'] ?? null;
+
+        $frontendUser = $request->getAttribute('frontend.user');
+        // Keep this line: Initialization for the session handler!
+        $sessionHandler = GeneralUtility::makeInstance(SessionHandler::class, $frontendUser);
+
         // Do not use any more eID for Transactor!
-        if ($eID != null || $transactor === null) {
+        if ($transactor === null || $eID != null) {
             return $handler->handle($request);
         }
 
@@ -82,16 +89,9 @@ class TransactionMessageHandler implements MiddlewareInterface
                 is_callable($configuration)
             )
         ) {
-            if (
-                version_compare($version, '10.4.0', '>=')
-            ) {
-                $container = GeneralUtility::getContainer();
-                /** @var Dispatcher $dispatcher */
-                $dispatcher = GeneralUtility::makeInstance(Dispatcher::class, $container);
-            } else {
-                /** @var Dispatcher $dispatcher */
-                $dispatcher = GeneralUtility::makeInstance(Dispatcher::class);
-            }
+            $container = GeneralUtility::getContainer();
+            /** @var Dispatcher $dispatcher */
+            $dispatcher = GeneralUtility::makeInstance(Dispatcher::class, $container);
             $request = $request->withAttribute('target', $configuration);
             $response = $dispatcher->dispatch($request) ?? new NullResponse();
             return $response;

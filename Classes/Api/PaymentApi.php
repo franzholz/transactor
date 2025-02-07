@@ -40,11 +40,16 @@ namespace JambageCom\Transactor\Api;
  *
  */
 
+use Psr\Http\Message\ServerRequestInterface;
+
+use TYPO3\CMS\Core\Configuration\ExtensionConfiguration;
 use TYPO3\CMS\Core\Session\UserSessionManager;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 use TYPO3\CMS\Frontend\Authentication\FrontendUserAuthentication;
 use TYPO3\CMS\Frontend\Controller\TypoScriptFrontendController;
+
+use JambageCom\Div2007\Utility\MailUtility;
 
 use JambageCom\Transactor\Constants\Field;
 
@@ -57,7 +62,7 @@ class PaymentApi
         $result = '';
 
         $transactorConf = GeneralUtility::makeInstance(
-            \TYPO3\CMS\Core\Configuration\ExtensionConfiguration::class
+            ExtensionConfiguration::class
         )->get($gatewayExtensionKey);
 
         if (
@@ -87,7 +92,7 @@ class PaymentApi
     {
         $result = [];
         $result = GeneralUtility::makeInstance(
-            \TYPO3\CMS\Core\Configuration\ExtensionConfiguration::class
+            ExtensionConfiguration::class
         )->get('transactor');
 
         if (
@@ -95,7 +100,7 @@ class PaymentApi
             isset($GLOBALS['TYPO3_CONF_VARS']['EXT']['extConf'][$extensionKey])
         ) {
             $extManagerConf = GeneralUtility::makeInstance(
-                \TYPO3\CMS\Core\Configuration\ExtensionConfiguration::class
+                ExtensionConfiguration::class
             )->get($extensionKey);
         }
 
@@ -123,6 +128,7 @@ class PaymentApi
     * returns the gateway proxy object
     */
     static public function getGatewayProxyObject (
+        ServerRequestInterface $request,
         $confScript
     )
     {
@@ -142,7 +148,7 @@ class PaymentApi
             ) {
                 $gatewayFactoryObj =
                     \JambageCom\Transactor\Domain\GatewayFactory::getInstance();
-                $gatewayFactoryObj->registerGatewayExtension($gatewayExtensionKey);
+                $gatewayFactoryObj->registerGatewayExtension($request, $gatewayExtensionKey);
                 $paymentMethod = $confScript['paymentMethod'];
                 $gatewayProxyObj =
                     $gatewayFactoryObj->getGatewayProxyObject(
@@ -153,7 +159,7 @@ class PaymentApi
                     if (
                         $gatewayProxyObj instanceof \JambageCom\Transactor\Domain\GatewayProxy
                     ) {
-                        $gatewayProxyObj->init($gatewayExtensionKey);
+                        $gatewayProxyObj->init($request, $gatewayExtensionKey);
                         if (!empty($confScript['checkoutUrl'])) {
                             $gatewayProxyObj->setCheckoutURI($confScript['checkoutUrl']);
                         }
@@ -174,6 +180,7 @@ class PaymentApi
     * returns the gateway proxy object
     */
     static public function getGatewayProxyObjectForExtension (
+        ServerRequestInterface $request,
         $gatewayExtensionKey,
         $paymentMethod
     )
@@ -187,7 +194,7 @@ class PaymentApi
         ) {
             $gatewayFactoryObj =
                 \JambageCom\Transactor\Domain\GatewayFactory::getInstance();
-            $gatewayFactoryObj->registerGatewayExtension($gatewayExtensionKey);
+            $gatewayFactoryObj->registerGatewayExtension($request, $gatewayExtensionKey);
             $gatewayProxyObj =
                 $gatewayFactoryObj->getGatewayProxyObject(
                     $paymentMethod
@@ -420,7 +427,7 @@ class PaymentApi
         $PLAINContent .= chr(13) . implode('|', $fields);
         $HTMLContent = '';
 
-        \JambageCom\Div2007\Utility\MailUtility::send(
+        MailUtility::send(
             $toEMail,
             $subject,
             $PLAINContent,

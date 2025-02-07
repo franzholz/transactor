@@ -28,6 +28,8 @@ namespace JambageCom\Transactor\Domain;
 *  This copyright notice MUST APPEAR in all copies of the script!
 ***************************************************************/
 
+use Psr\Http\Message\ServerRequestInterface;
+
 use TYPO3\CMS\Core\Utility\ExtensionManagementUtility;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Frontend\ContentObject\ContentObjectRenderer;
@@ -51,6 +53,8 @@ class GatewayProxy implements \JambageCom\Transactor\Domain\GatewayInterface
     private $gatewayExtension = '';
     private $gatewayClass = '';
     protected $extensionManagerConf = [];
+    private ?ServerRequestInterface $request = null;
+
 
 
     /**
@@ -60,8 +64,12 @@ class GatewayProxy implements \JambageCom\Transactor\Domain\GatewayInterface
     * @return	void
     * @access	public
     */
-    public function init ($extensionKey)
+    public function init (
+        ServerRequestInterface $request,
+        string $extensionKey
+    )
     {
+        $this->request = $request;
         $this->gatewayClass = '';
         $this->extensionManagerConf = GeneralUtility::makeInstance(
             \TYPO3\CMS\Core\Configuration\ExtensionConfiguration::class
@@ -88,7 +96,9 @@ class GatewayProxy implements \JambageCom\Transactor\Domain\GatewayInterface
         ) {
             $this->gatewayClass = $this->extensionManagerConf['gatewayClass'];
         } else {
-            $composerFile =  GeneralUtility::getFileAbsFileName(ExtensionManagementUtility::extPath($extensionKey)) . 'composer.json';
+            $composerFile =
+                GeneralUtility::getFileAbsFileName(
+                    ExtensionManagementUtility::extPath($extensionKey)) . 'composer.json';
 
             if (file_exists($composerFile)) {
                 $content = file_get_contents($composerFile);
@@ -131,7 +141,9 @@ class GatewayProxy implements \JambageCom\Transactor\Domain\GatewayInterface
             $result = GeneralUtility::makeInstance($this->getGatewayClass());
         }
 
-        if (!is_object($result)) {
+        if (is_object($result)) {
+            $result->setRequest($this->request);
+        } else {
             throw new \RuntimeException('ERROR in the Payment Transactor API (transactor) used by the extension "' . $this->getGatewayExtension() . '": no object can be created for the class "' . $this->getGatewayClass() . '"', 2020290000);
         }
         return $result;
@@ -863,11 +875,11 @@ class GatewayProxy implements \JambageCom\Transactor\Domain\GatewayInterface
     *
     * @access	public
     */
-    public function readActionParameters (ContentObjectRenderer $cObj): bool {
+    public function readActionParameters (): bool {
         $result = false;
 
         if (method_exists($this->getGatewayObj(), 'readActionParameters')) {
-            $result = $this->getGatewayObj()->readActionParameters($cObj);
+            $result = $this->getGatewayObj()->readActionParameters();
         }
         return $result;
     }
@@ -918,6 +930,16 @@ class GatewayProxy implements \JambageCom\Transactor\Domain\GatewayInterface
                 );
         }
         return $result;
+    }
+
+    public function setRequest(ServerRequestInterface $request)
+    {
+        $this->request = $request;
+    }
+
+    public function getRequest()
+    {
+        return $this->request;
     }
 }
 
