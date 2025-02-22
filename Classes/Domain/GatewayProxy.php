@@ -245,22 +245,22 @@ class GatewayProxy implements \JambageCom\Transactor\Domain\GatewayInterface
         $this->getGatewayObj()->setBasketSum($basketSum);
     }
 
-    public function getOrderUid ()
+    public function getOrderUid (): int
     {
         return $this->getGatewayObj()->getOrderUid();
     }
 
-    public function setOrderUid ($orderUid)
+    public function setOrderUid (int $orderUid)
     {
         $this->getGatewayObj()->setOrderUid($orderUid);
     }
 
-    public function getOrderNumber ()
+    public function getOrderNumber (): string
     {
         return $this->getGatewayObj()->getOrderNumber();
     }
 
-    public function setOrderNumber ($orderNumber)
+    public function setOrderNumber (string $orderNumber)
     {
         $this->getGatewayObj()->setOrderNumber($orderNumber);
     }
@@ -279,40 +279,42 @@ class GatewayProxy implements \JambageCom\Transactor\Domain\GatewayInterface
     /**
     * Initializes a transaction.
     *
-    * @param	integer		$action: Type of the transaction, one of the constants TX_TRANSACTOR_TRANSACTION_ACTION_*
+    * @param	integer		$action: Type of the transaction, one of the constants GatewayMode::*
     * @param	string		$paymentMethod: Payment method, one of the values of getSupportedMethods()
-    * @param	string		$extensionKey: Extension key of the calling script.
+    * @param	string		$callingExtensionKey: Extension key of the calling script.
+    * @param	string		$templateFilename: Template filename
     * @param	integer		$orderUid: order unique id
     * @param	string		$orderNumber: order identifier name which also contains the number
-    * @param	array		$config: configuration for the extension
+    * @param	string		$currency: 3 letter currency code as defined by ISO 4217.
+    * @param	array		$conf: configuration. This will override former configuration from the exension manager.
     * @param	array		$basket: items in the basket
     * @param	array		$extraData: 'return_url', 'cancel_url'
-    * @return	void
+    * @return	boolean     true if the initialization went fine
     * @access	public
     */
     public function transactionInit (
-        $action,
-        $method,
-        $callingExtensionKey,
-        $templateFilename = '',
-        $orderUid = 0,
-        $orderNumber = '0',
-        $currency = 'EUR',
-        $config = [],
-        $basket = [],
-        $extraData = []
-    )
+        int    $action,
+        string $paymentMethod,
+        string $callingExtensionKey,
+        string $templateFilename = '',
+        int    $orderUid = 0,
+        string $orderNumber = '0',
+        string $currency = 'EUR',
+        array  $conf = [],
+        array  $basket = [],
+        array  $extraData = []
+    ): bool
     {
         $this->getGatewayObj()->setTransactionUid(0);
         $result = $this->getGatewayObj()->transactionInit(
             $action,
-            $method,
+            $paymentMethod,
             $callingExtensionKey,
             $templateFilename,
             $orderUid,
             $orderNumber,
             $currency,
-            $config,
+            $conf,
             $basket,
             $extraData
         );
@@ -359,9 +361,9 @@ class GatewayProxy implements \JambageCom\Transactor\Domain\GatewayInterface
     * @return	boolean		true if the transaction went fine
     * @access	public
     */
-    public function transactionSucceeded ($resultsArr)
+    public function transactionSucceeded (array $transactionResults): bool
     {
-        $result = $this->getGatewayObj()->transactionSucceeded($resultsArr);
+        $result = $this->getGatewayObj()->transactionSucceeded($transactionResults);
         return $result;
     }
 
@@ -372,9 +374,9 @@ class GatewayProxy implements \JambageCom\Transactor\Domain\GatewayInterface
     * @return	boolean		true if the transaction went wrong
     * @access	public
     */
-    public function transactionFailed ($resultsArr)
+    public function transactionFailed ($transactionResults): bool
     {
-        $result = $this->getGatewayObj()->transactionFailed($resultsArr);
+        $result = $this->getGatewayObj()->transactionFailed($transactionResults);
         return $result;
     }
 
@@ -382,12 +384,12 @@ class GatewayProxy implements \JambageCom\Transactor\Domain\GatewayInterface
     * Returns if the message of the transaction
     *
     * @param	array		results from transaction_getResults
-    * @return	boolean		true if the transaction went wrong
+    * @return	string		error message if the transaction went wrong
     * @access	public
     */
-    public function transactionMessage ($resultsArr)
+    public function transactionMessage (array $transactionResults): string
     {
-        $result = $this->getGatewayObj()->transactionMessage($resultsArr);
+        $result = $this->getGatewayObj()->transactionMessage($transactionResults);
         return $result;
     }
 

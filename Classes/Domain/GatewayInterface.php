@@ -55,13 +55,13 @@ interface GatewayInterface
 
     public function getBasketSum ();
 
-    public function setOrderUid ($orderUid);
+    public function setOrderUid (int $orderUid);
 
-    public function getOrderUid ();
+    public function getOrderUid (): int;
 
-    public function setOrderNumber ($orderNumber);
+    public function setOrderNumber (string $orderNumber);
 
-    public function getOrderNumber ();
+    public function getOrderNumber (): string;
 
     /**
     * Returns an array of keys of the supported payment methods
@@ -77,6 +77,7 @@ interface GatewayInterface
     * @param	integer		$action: Type of the transaction, one of the constants TX_TRANSACTOR_TRANSACTION_ACTION_*
     * @param	string		$paymentMethod: Payment method, one of the values of getSupportedMethods()
     * @param	string		$callingExtensionKey: Extension key of the calling script.
+    * @param	string		$templateFilename: Template filename
     * @param	integer		$orderUid: order unique id
     * @param	string		$orderNumber: order identifier name which also contains the number
     * @param	array		$conf: configuration. This will override former configuration from the exension manager.
@@ -85,7 +86,18 @@ interface GatewayInterface
     * @return	void
     * @access	public
     */
-    public function transactionInit ($action, $paymentMethod, $callingExtensionKey, $templateFilename = '', $orderUid = 0, $orderNumber = '0', $conf = [], $basket = [], $extraData = []);
+    public function transactionInit (
+        int    $action,
+        string $paymentMethod,
+        string $callingExtensionKey,
+        string $templateFilename = '',
+        int    $orderUid = 0,
+        string $orderNumber = '0',
+        string $currency = 'EUR',
+        array  $conf = [],
+        array  $basket = [],
+        array  $extraData = []
+    );
 
     /**
     * Sets the payment details. Which fields can be set usually depends on the
@@ -110,7 +122,7 @@ interface GatewayInterface
     * @return	boolean		Returns true if validation was successful, false if not
     * @access	public
     */
-    public function transactionValidate ($level = 1);
+    public function transactionValidate (int $level = 1);
 
     /**
     * Submits the prepared transaction to the payment gateway
@@ -250,7 +262,7 @@ interface GatewayInterface
     * @return	boolean		true if the transaction went fine
     * @access	public
     */
-    public function transactionSucceeded ($resultsArr);
+    public function transactionSucceeded (array $transactionResults): bool;
 
     /**
     * Returns if the transaction has been unsuccessfull
@@ -259,16 +271,16 @@ interface GatewayInterface
     * @return	boolean		true if the transaction went wrong
     * @access	public
     */
-    public function transactionFailed ($resultsArr);
+    public function transactionFailed (array $transactionResults): bool;
 
     /**
     * Returns if the message of the transaction
     *
     * @param	array		results from transaction_getResults
-    * @return	boolean		true if the transaction went wrong
+    * @return	string		error message if the transaction went wrong
     * @access	public
     */
-    public function transactionMessage ($resultsArr);
+    public function transactionMessage (array $transactionResults): string;
 
     public function clearErrors ();
 

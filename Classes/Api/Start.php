@@ -283,9 +283,9 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
         array $infoArray,
         $pidArray,
         $linkParams,
-        $trackingCode,
-        $orderUid,
-        $orderNumber, // text string of the order number
+        string $trackingCode,
+        int $orderUid,
+        string $orderNumber, // text string of the order number
         $notificationEmail,
         $cardRow,
         $variantFields
@@ -344,9 +344,9 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
         array $infoArray,
         $pidArray,
         $linkParams,
-        $trackingCode,
-        $orderUid,
-        $orderNumber, // text string of the order number
+        string $trackingCode,
+        int $orderUid,
+        string $orderNumber, // text string of the order number
         $notificationEmail,
         $cardRow,
         ...$options
@@ -409,6 +409,7 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
                             $variantFields
                         );
 
+
                     $ok = $gatewayProxyObject->transactionInit(
                         Action::AUTHORIZE_TRANSFER,
                         $paymentMethod,
@@ -419,6 +420,7 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
                         $confScript['currency'] ? $confScript['currency'] : 'EUR',
                         $confScript['conf.'] ?? []
                     );
+
 
                     PaymentApi::storeInit(
                         static::$request->getAttribute('frontend.user'),
@@ -484,25 +486,28 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
                         static::$request->getAttribute('frontend.user'),
                         $referenceId
                     );
-                    $transactionDetailsArray = static::getTransactionDetails(
-                        $referenceId,
-                        $handleLib,
-                        $confScript,
-                        $extensionKey,
-                        $gatewayExtKey,
-                        $calculatedArray,
-                        $paymentActivity,
-                        $pidArray,
-                        $linkParams,
-                        $trackingCode,
-                        $orderUid,
-                        $orderNumber,
-                        $notificationEmail,
-                        $cardRow,
-                        $totalArray,
-                        $addressArray,
-                        $paymentBasketArray
-                    );
+                    $gatewayKey = $gatewayProxyObject->getGatewayKey();
+                    $transactionDetailsArray =
+                        static::getTransactionDetails(
+                            $referenceId,
+                            $handleLib,
+                            $confScript,
+                            $extensionKey,
+                            $gatewayExtKey,
+                            $gatewayKey,
+                            $calculatedArray,
+                            $paymentActivity,
+                            $pidArray,
+                            $linkParams,
+                            $trackingCode,
+                            $orderUid,
+                            $orderNumber,
+                            $notificationEmail,
+                            $cardRow,
+                            $totalArray,
+                            $addressArray,
+                            $paymentBasketArray
+                        );
 
                         // Set payment details:
                     $ok =
@@ -518,29 +523,8 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
                         return '';
                     }
 
-                        // Get results of a possible earlier submit and display messages:
-                    $transactionResults =
-                        $gatewayProxyObject->transactionGetResults(
-                            $referenceId
-                        );
-
-                    if (!is_array($transactionResults)) {
-                        $row =
-                            $gatewayProxyObject->getTransaction(
-                                $referenceId
-                            );
-
-                        if (is_array($row)) {
-                            if ($gatewayProxyObject->transactionIsInitState($row)) {
-                                $transactionResults = $row;
-                            }
-                        } else if (!is_array($row)) {
-                            $transactionResults =
-                                $gatewayProxyObject->transactionGetResultsSuccess(
-                                    'first trial'
-                                );
-                        }
-                    }
+                    // neu FHO
+                    $transactionResults = static::fetchTransactionResults($gatewayProxyObject, $referenceId);
 
                     if (is_array($transactionResults)) {
                         if (
@@ -671,13 +655,16 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
                                 }
 
                                 if (
-                                    stripos($formuri, 'ERROR') !== false ||
-                                    !$formuri
+                                    !$formuri ||
+                                    stripos($formuri, 'ERROR') !== false
                                 ) {
                                     $isError = true;
                                 }
 
-                                if ($formuri && !$isError) {
+                                if (
+                                    $formuri != '' &&
+                                    !$isError
+                                ) {
                                     $markerArray['###HIDDENFIELDS###'] .= $hiddenFields;
                                     $markerArray['###SCRIPT###'] = $script;
                                     $markerArray['###REDIRECT_URL###'] = htmlspecialchars($formuri);
@@ -704,7 +691,10 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
                                     );
                                 } else {
                                     if ($isError) {
-                                        if (stripos($formuri, 'ERROR') !== false) {
+                                        if (
+                                            $formuri != '' &&
+                                            stripos($formuri, 'ERROR'
+                                        ) !== false) {
                                             $errorMessage = $formuri;
                                         } else {
                                             $errorDetails = $gatewayProxyObject->transactionGetErrorDetails();
@@ -788,26 +778,56 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
         return $result;
     } // render
 
+
+    static protected function fetchTransactionResults($gatewayProxyObject, $referenceId)
+    {
+            // Get results of a possible earlier submit and display messages:
+        $transactionResults =
+            $gatewayProxyObject->transactionGetResults(
+                $referenceId
+            );
+
+        if (!is_array($transactionResults)) {
+            $row =
+                $gatewayProxyObject->getTransaction(
+                    $referenceId
+                );
+
+            if (is_array($row)) {
+                if ($gatewayProxyObject->transactionIsInitState($row)) {
+                    $transactionResults = $row;
+                }
+            } else if (!is_array($row)) {
+                $transactionResults =
+                    $gatewayProxyObject->transactionGetResultsSuccess(
+                        'first trial'
+                    );
+            }
+        }
+
+        return $transactionResults;
+    }
+
     /**
     * Checks if required fields for credit cards and bank accounts are filled in correctly
     */
     static public function checkRequired (
-        $referenceId,
-        $handleLib,
+        string $referenceId,
+        string $handleLib,
         array $confScript,
-        $extensionKey,
-        $calculatedArray,
-        $paymentActivity,
-        $pidArray,
+        string $extensionKey,
+        array $calculatedArray,
+        string $paymentActivity,
+        array $pidArray,
         $linkParams,
-        $trackingCode,
-        $orderUid,
-        $orderNumber,
-        $notificationEmail,
-        $cardRow
+        string $trackingCode,
+        int $orderUid,
+        string $orderNumber,
+        string $notificationEmail,
+        array $cardRow
     )
     {
-        $result = '';
+        $gatewayExtKey = $confScript['extName'] ?? '';
 
         if (strpos($handleLib, 'transactor') !== false) {
             $gatewayProxyObject =
@@ -820,12 +840,38 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
                 $paymentBasketArray = [];
                 $addressArray = [];
                 $totalArray = [];
+                $paymentMethod = $confScript['paymentMethod'];
+
+                $ok = $gatewayProxyObject->transactionInit(
+                    Action::INIT,
+                    $paymentMethod,
+                    $extensionKey,
+                    $confScript['templateFile'] ?? '',
+                    $orderUid,
+                    $orderNumber,
+                    $confScript['currency'] ? $confScript['currency'] : 'EUR',
+                    $confScript['conf.'] ?? []
+                );
+
+                if (!$ok) {
+                    $languageObj = GeneralUtility::makeInstance(Localization::class);
+
+                    $errorMessage =
+                        $languageObj->getLabel(
+                            'error_transaction_init'
+                        );
+
+                    return $errorMessage;
+                }
+                $gatewayKey = $gatewayProxyObject->getGatewayKey();
                 $transactionDetailsArray =
                     static::getTransactionDetails(
                         $referenceId,
                         $handleLib,
                         $confScript,
                         $extensionKey,
+                        $gatewayExtKey,
+                        $gatewayKey,
                         $calculatedArray,
                         $paymentActivity,
                         $pidArray,
@@ -839,6 +885,7 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
                         $addressArray,
                         $paymentBasketArray
                     );
+
                 $set =
                     $gatewayProxyObject->transactionSetDetails(
                         $transactionDetailsArray
@@ -856,12 +903,17 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
 
                     return $errorMessage;
                 }
+                $transactionResults =
+                    static::fetchTransactionResults(
+                        $gatewayProxyObject,
+                        $referenceId
+                    );
 
-                if ($gatewayProxyObject->transactionSucceeded() == false) {
+                if ($gatewayProxyObject->transactionSucceeded($transactionResults) == false) {
                     $result =
                         htmlspecialchars(
                             $gatewayProxyObject->transactionMessage(
-                                []
+                                $transactionResults
                             )
                         );
                 }
@@ -918,6 +970,7 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
         array $confScript,
         $extensionKey,
         $gatewayExtKey,
+        $gatewayKey,
         array $calculatedArray,
         $paymentActivity,
         array $pidArray,
@@ -945,9 +998,9 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
         if (isset($linkParams) && is_array($linkParams)) {
             $successLinkParams = array_merge($successLinkParams, $linkParams);
         }
-
         $notifyUrlParams = [];
-        $notifyUrlParams['transactor'] = PaymentApi::getRequestId($referenceId);
+        $notifyUrlParams['transactor'] = $gatewayKey;
+        $notifyUrlParams['ref'] = PaymentApi::getRequestId($referenceId);
 
         if (isset($linkParams) && is_array($linkParams)) {
             $notifyUrlParams = array_merge($notifyUrlParams, $linkParams);
@@ -1044,7 +1097,7 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
                 'returi' => $returi,
                 'faillink' => $faillink,
                 'successlink' => $successlink,
-                'notifyurl' => $notifyurl
+                'notifyurl' => $notifyurl,
             ],
             'total' => $totalArray,
             'tracking' => $trackingCode,

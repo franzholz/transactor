@@ -98,7 +98,7 @@ class TransactionMessageHandler implements MiddlewareInterface
         }
         trigger_error(
             'transactor "' . $transactor . '" is registered with a script to the file "' . GeneralUtility::getFileAbsFileName($configuration) . '".'
-            . ' Register transactor with a class::method syntax like "\MyVendor\MyExtension\Controller\MyTransactorController::myMethod" instead!',
+            . ' Register your extension for transactor with a class::method syntax like "\MyVendor\MyExtension\Controller\MyTransactorController::myMethod" instead!',
             E_USER_ERROR
         );
 

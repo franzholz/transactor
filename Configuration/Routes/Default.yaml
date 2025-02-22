@@ -1,0 +1,11 @@
+routeEnhancers:
+  Transactor:
+    type: Simple
+    routePath: '/transactor/{gateway_key}/ref/{reference_id}'
+    requirements:
+      gateway_key: '[a-z]{3,32}'
+      reference_id: '[a-f0-9]{32}'
+    _arguments:
+      gateway_key: 'transactor'
+      reference_id: 'ref'
+

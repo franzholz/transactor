@@ -44,6 +44,7 @@ use Psr\Http\Message\ServerRequestInterface;
 
 use TYPO3\CMS\Core\Configuration\ExtensionConfiguration;
 use TYPO3\CMS\Core\Session\UserSessionManager;
+use TYPO3\CMS\Core\Utility\ExtensionManagementUtility;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 use TYPO3\CMS\Frontend\Authentication\FrontendUserAuthentication;
@@ -51,8 +52,10 @@ use TYPO3\CMS\Frontend\Controller\TypoScriptFrontendController;
 
 use JambageCom\Div2007\Utility\MailUtility;
 
+use JambageCom\Transactor\Constants\Action;
 use JambageCom\Transactor\Constants\Field;
-
+use JambageCom\Transactor\Domain\GatewayFactory;
+use JambageCom\Transactor\Domain\GatewayProxy;
 
 class PaymentApi
 {
@@ -142,12 +145,12 @@ class PaymentApi
             $gatewayExtensionKey = $confScript['extName'];
 
             if (
-                \TYPO3\CMS\Core\Utility\ExtensionManagementUtility::isLoaded(
+                ExtensionManagementUtility::isLoaded(
                     $gatewayExtensionKey
                 )
             ) {
                 $gatewayFactoryObj =
-                    \JambageCom\Transactor\Domain\GatewayFactory::getInstance();
+                    GatewayFactory::getInstance();
                 $gatewayFactoryObj->registerGatewayExtension($request, $gatewayExtensionKey);
                 $paymentMethod = $confScript['paymentMethod'];
                 $gatewayProxyObj =
@@ -157,7 +160,7 @@ class PaymentApi
 
                 if (is_object($gatewayProxyObj)) {
                     if (
-                        $gatewayProxyObj instanceof \JambageCom\Transactor\Domain\GatewayProxy
+                        $gatewayProxyObj instanceof GatewayProxy
                     ) {
                         $gatewayProxyObj->init($request, $gatewayExtensionKey);
                         if (!empty($confScript['checkoutUrl'])) {
@@ -168,7 +171,12 @@ class PaymentApi
                         }
                         $result = $gatewayProxyObj;
                     } else {
-                        throw new \RuntimeException('Error in transactor: Gateway object class "' . get_class($gatewayProxyObj) . '" must be an instance of  "JambageCom\Transactor\Domain\GatewayProxy"', 50200);
+                        throw new \RuntimeException(
+                            'Error in transactor: Gateway object class "' .
+                            get_class($gatewayProxyObj) .
+                            '" must be an instance of  "JambageCom\Transactor\Domain\GatewayProxy"',
+                            50200
+                        );
                     }
                 }
             }
@@ -188,13 +196,17 @@ class PaymentApi
         $gatewayProxyObj = null;
 
         if (
-            \TYPO3\CMS\Core\Utility\ExtensionManagementUtility::isLoaded(
+            ExtensionManagementUtility::isLoaded(
                 $gatewayExtensionKey
             )
         ) {
             $gatewayFactoryObj =
-                \JambageCom\Transactor\Domain\GatewayFactory::getInstance();
-            $gatewayFactoryObj->registerGatewayExtension($request, $gatewayExtensionKey);
+                GatewayFactory::getInstance();
+            $gatewayFactoryObj->
+                registerGatewayExtension(
+                    $request,
+                    $gatewayExtensionKey
+                );
             $gatewayProxyObj =
                 $gatewayFactoryObj->getGatewayProxyObject(
                     $paymentMethod
@@ -497,16 +509,16 @@ class PaymentApi
 
     static public function storeInit (
         FrontendUserAuthentication $frontendUserAuthentification,
-        $action,
-        $paymentMethod,
-        $callingExtensionKey,
-        $templateFilename = '',
-        $orderUid = 0,
-        $orderNumber = '0',
-        $currency = 'EUR',
-        $conf = [],
-        $basket = [],
-        $extraData = []
+        int $action, // Action constant
+        string $paymentMethod,
+        string $callingExtensionKey,
+        string $templateFilename = '',
+        int $orderUid = 0,
+        string $orderNumber = '0',
+        string $currency = 'EUR',
+        array $conf = [],
+        array $basket = [],
+        array $extraData = []
     )
     {
         $data = [
@@ -528,7 +540,7 @@ class PaymentApi
     }
 
     static public function getStoredInit (
-        &$action,
+        &$action, // Action constant
         &$paymentMethod,
         &$callingExtensionKey,
         &$templateFilename,
