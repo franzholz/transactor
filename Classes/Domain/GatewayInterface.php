@@ -327,40 +327,6 @@ interface GatewayInterface
     public function setFormActionURI ($formActionURI);
 
     /**
-    * Sets the checkout Ajax URI
-    *
-    * @param	string		checkout URI
-    * @return	void
-    * @access	public
-    */
-    public function setCheckoutURI ($checkoutURI);
-
-    /**
-    * Fetches the checkout Ajax URI
-    *
-    * @return	string		checkout URI
-    * @access	public
-    */
-    public function getCheckoutURI ();
-
-    /**
-    * Sets the capture Transactor URI
-    *
-    * @param	string		capture URI
-    * @return	void
-    * @access	public
-    */
-    public function setCaptureURI ($captureURI);
-
-    /**
-    * Fetches the capture Transactor URI
-    *
-    * @return	string		capture URI
-    * @access	public
-    */
-    public function getCaptureURI ();
-
-    /**
     * Fetches the form action URI
     *
     * @return	string		form action URI

@@ -501,6 +501,7 @@ abstract class GatewayBase implements GatewayInterface, \TYPO3\CMS\Core\Singleto
 
         // Store order id in database
         $dataArray = [
+            'pid' => $GLOBLAS['TSFE']->id,
             'crdate' => time(),
             'ext_key' => $this->getCallingExtension(),
             'reference' => $reference,
@@ -1080,52 +1081,6 @@ abstract class GatewayBase implements GatewayInterface, \TYPO3\CMS\Core\Singleto
     public function getFormActionURI ()
     {
         return $this->formActionURI;
-    }
-
-    /**
-    * Sets the checkout Transactor URI
-    *
-    * @param	string		checkout URI
-    * @return	void
-    * @access	public
-    */
-    public function setCheckoutURI ($checkoutURI)
-    {
-        $this->checkoutURI = $checkoutURI;
-    }
-
-    /**
-    * Fetches the checkout Transactor URI
-    *
-    * @return	string		checkout URI
-    * @access	public
-    */
-    public function getCheckoutURI ()
-    {
-        return $this->checkoutURI;
-    }
-
-    /**
-    * Sets the capture Transactor URI
-    *
-    * @param	string		capture URI
-    * @return	void
-    * @access	public
-    */
-    public function setCaptureURI ($captureURI)
-    {
-        $this->captureURI = $captureURI;
-    }
-
-    /**
-    * Fetches the capture Transactor URI
-    *
-    * @return	string		capture URI
-    * @access	public
-    */
-    public function getCaptureURI ()
-    {
-        return $this->captureURI;
     }
 
     /**
