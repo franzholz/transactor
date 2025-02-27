@@ -75,8 +75,6 @@ abstract class GatewayBase implements GatewayInterface, \TYPO3\CMS\Core\Singleto
     protected $optionsArray;
     protected $resultsArray = [];
     protected $formActionURI = '';	// The action uri for the submit form
-    protected $checkoutURI = ''; // relative URI to the checkout action listener of the payment extension
-    protected $captureURI = ''; // relative URI to the capture action listener of the payment extension
 
     protected $gatewayModeArray =
         [
