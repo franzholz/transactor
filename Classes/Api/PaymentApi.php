@@ -163,12 +163,6 @@ class PaymentApi
                         $gatewayProxyObj instanceof GatewayProxy
                     ) {
                         $gatewayProxyObj->init($request, $gatewayExtensionKey);
-                        if (!empty($confScript['checkoutUrl'])) {
-                            $gatewayProxyObj->setCheckoutURI($confScript['checkoutUrl']);
-                        }
-                        if (!empty($confScript['captureUrl'])) {
-                            $gatewayProxyObj->setCaptureURI($confScript['captureUrl']);
-                        }
                         $result = $gatewayProxyObj;
                     } else {
                         throw new \RuntimeException(
