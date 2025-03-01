@@ -37,12 +37,11 @@ use JambageCom\Transactor\Constants\GatewayMode;
 use JambageCom\Transactor\Constants\Message;
 use JambageCom\Transactor\Constants\State;
 
+use JambageCom\Transactor\Api\Address;
 use JambageCom\Transactor\Api\PaymentApi;
 
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Core\Utility\ExtensionManagementUtility;
-
-
 
 
 /**
@@ -66,11 +65,19 @@ abstract class GatewayBase implements GatewayInterface, \TYPO3\CMS\Core\Singleto
     protected $config = [];
     protected $mergeConf = true;
     protected $basket = [];
+    protected $totals = [];
+    protected $addresses =
+        [
+            Address::PAYER => [],
+            Address::SHIPPING => [],
+        ];
+    protected $shippingTitle;
     protected $extraData = [];
     protected $basketSum = 0;
     protected $currency = 'EUR';
     protected int $orderUid = 0;
     protected string $orderNumber = '0';
+    protected string $description = '';
     protected $sendBasket = false;	// Submit detailed basket informations like single products
     protected $optionsArray;
     protected $resultsArray = [];
@@ -210,16 +217,6 @@ abstract class GatewayBase implements GatewayInterface, \TYPO3\CMS\Core\Singleto
         return $this->basket;
     }
 
-    public function setExtraData ($key, $value)
-    {
-        $this->extraData[$key] = $value;
-    }
-
-    public function getExtraData ($key)
-    {
-        return $this->extraData[$key] ?? null;
-    }
-
     public function setBasketSum ($basketSum)
     {
         $this->basketSum = doubleval($basketSum);
@@ -228,6 +225,46 @@ abstract class GatewayBase implements GatewayInterface, \TYPO3\CMS\Core\Singleto
     public function getBasketSum ()
     {
         return $this->basketSum;
+    }
+
+    public function setTotals ($totals)
+    {
+        $this->totals = $totals;
+    }
+
+    public function getTotals ()
+    {
+        return $this->totals;
+    }
+
+    public function setAddresses ($addresses)
+    {
+        $this->addresses = $addresses;
+    }
+
+    public function getAddresses ()
+    {
+        return $this->addresses;
+    }
+
+    public function setShippingTitle ($shippingTitle)
+    {
+        $this->shippingTitle = $shippingTitle;
+    }
+
+    public function getShippingTitle ()
+    {
+        return $this->shippingTitle;
+    }
+
+    public function setExtraData ($key, $value)
+    {
+        $this->extraData[$key] = $value;
+    }
+
+    public function getExtraData ($key)
+    {
+        return $this->extraData[$key] ?? null;
     }
 
     public function setOrderUid (int $orderUid)
@@ -248,6 +285,16 @@ abstract class GatewayBase implements GatewayInterface, \TYPO3\CMS\Core\Singleto
     public function getOrderNumber (): string
     {
         return $this->orderNumber;
+    }
+
+    public function setDescription (string $description)
+    {
+        return $this->description;
+    }
+
+    public function getDescription (): string
+    {
+        return $this->description;
     }
 
     public function getSendBasket ()
@@ -497,9 +544,10 @@ abstract class GatewayBase implements GatewayInterface, \TYPO3\CMS\Core\Singleto
                 $this->getConf()
             );
 
+
         // Store order id in database
         $dataArray = [
-            'pid' => $GLOBLAS['TSFE']->id,
+            'pid' => $GLOBALS['TSFE']->id,
             'crdate' => time(),
             'ext_key' => $this->getCallingExtension(),
             'reference' => $reference,
@@ -664,7 +712,7 @@ abstract class GatewayBase implements GatewayInterface, \TYPO3\CMS\Core\Singleto
     * @access   public
     */  public function transactionGetErrorDetails ()
     {
-        $result = '(' . $this->getExtensionKey() . ') No details function transactionGetErrorDetails has been written.';
+        $result = '(' . $this->getExtensionKey() . ') The details function transactionGetErrorDetails has not been overwritten.';
         return $result;
     }
 

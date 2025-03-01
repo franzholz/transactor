@@ -335,6 +335,7 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
         &$errorMessage,
         $handleLib,
         array $confScript,
+        $shippingTitle,
         $extensionKey,
         array $itemArray,
         array $calculatedArray,
@@ -409,7 +410,6 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
                             $variantFields
                         );
 
-
                     $ok = $gatewayProxyObject->transactionInit(
                         Action::AUTHORIZE_TRANSFER,
                         $paymentMethod,
@@ -420,7 +420,6 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
                         $confScript['currency'] ? $confScript['currency'] : 'EUR',
                         $confScript['conf.'] ?? []
                     );
-
 
                     PaymentApi::storeInit(
                         static::$request->getAttribute('frontend.user'),
@@ -466,6 +465,10 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
                         $gatewayConf
                     );
                     $gatewayProxyObject->setBasket($paymentBasketArray);
+                    $gatewayProxyObject->setTotals($totalArray);
+                    $gatewayProxyObject->setAddresses($addressArray);
+                    $gatewayProxyObject->setShippingTitle($shippingTitle);
+
 
                     $referenceId =
                         static::getReferenceUid(
@@ -1279,8 +1282,8 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
             'country' => 'country'
         ];
         $tmpAddrArray = [
-            'person' => $infoArray['billing'],
-            'delivery' => $infoArray['delivery']
+            Address::PAYER => $infoArray['billing'],
+            Address::SHIPPING => $infoArray['delivery']
         ];
         $addressArray = [];
 
@@ -1326,7 +1329,7 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
                 }
             }
         }
-        $addressArray['delivery']['note'] = $deliveryNote;
+        $addressArray[Address::SHIPPING]['note'] = $deliveryNote;
 
         $totalCount = 0;
         foreach ($itemArray as $sort => $actItemArray) {
@@ -1427,13 +1430,6 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
                 $lastKey = $key;
             }
         }
-
-        // fix rounding errors
-//         foreach ($newTotalArray as $newType => $newAmount) {
-//             if ($newTotalArray[$newType] != $totalArray[$newType]) {
-//                 $basketArray[$lastSort][$lastKey][$newType] += $totalArray[$newType] - $newTotalArray[$newType];
-//             }
-//         }
 
         $value1 = 0;
         $value2 = 0;

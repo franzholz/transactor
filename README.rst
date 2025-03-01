@@ -11,7 +11,7 @@ Version 0.14.0 has a request parameter for the Api::Start class which is support
 
 Some extensions might need the old API which has however been removed in version 0.11.0.
 
-Since version 0.9.0 the transactor extension contains a middleware,
+The transactor extension contains a middleware,
 which payment extensions can use for dealing with a gateway instant
 message after the payment.
 

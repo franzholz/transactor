@@ -8,7 +8,7 @@ namespace JambageCom\Transactor\Domain;
 *
 *  Copyright notice
 *
-*  (c) 2017 Franz Holzinger (franz@ttproducts.de)
+*  (c) 2025 Franz Holzinger (franz@ttproducts.de)
 *  All rights reserved
 *
 *  This script is part of the Typo3 project. The Typo3 project is
@@ -32,7 +32,6 @@ use Psr\Http\Message\ServerRequestInterface;
 
 use TYPO3\CMS\Core\Utility\ExtensionManagementUtility;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
-use TYPO3\CMS\Frontend\ContentObject\ContentObjectRenderer;
 
 use JambageCom\Transactor\Domain\Gateway;
 use JambageCom\Transactor\Constants\GatewayMode;
@@ -243,6 +242,40 @@ class GatewayProxy implements \JambageCom\Transactor\Domain\GatewayInterface
     public function setBasketSum ($basketSum)
     {
         $this->getGatewayObj()->setBasketSum($basketSum);
+    }
+
+    public function setTotals ($totals)
+    {
+        $this->getGatewayObj()->setTotals($totals);
+    }
+
+    public function getTotals ()
+    {
+        $result = $this->getGatewayObj()->getTotals();
+        return $result;
+    }
+
+    public function setAddresses ($addresses)
+    {
+        $this->getGatewayObj()->setAddresses($addresses);
+    }
+
+    public function getAddresses ()
+    {
+        $result = $this->getGatewayObj()->getAddresses();
+        return $result;
+    }
+
+
+    public function setShippingTitle ($shippingTitle)
+    {
+        $this->getGatewayObj()->setShippingTitle($shippingTitle);
+    }
+
+    public function getShippingTitle ()
+    {
+        $result = $this->getGatewayObj()->getShippingTitle();
+        return $result;
     }
 
     public function getOrderUid (): int

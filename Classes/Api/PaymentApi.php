@@ -99,12 +99,9 @@ class PaymentApi
         )->get('transactor');
 
         if (
-            $extensionKey != '' &&
-            isset($GLOBALS['TYPO3_CONF_VARS']['EXT']['extConf'][$extensionKey])
+            $extensionKey != ''
         ) {
-            $extManagerConf = GeneralUtility::makeInstance(
-                ExtensionConfiguration::class
-            )->get($extensionKey);
+            $extManagerConf = static::getTransactorConf($extensionKey);
         }
 
         if ($mergeConf && is_array($conf)) {
@@ -600,6 +597,5 @@ class PaymentApi
 
         return $result;
     }
-
 }
 

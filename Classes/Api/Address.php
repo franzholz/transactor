@@ -40,6 +40,9 @@ namespace JambageCom\Transactor\Api;
 
 
 class Address implements \TYPO3\CMS\Core\SingletonInterface {
+    const PAYER = 0;            // billing
+    const SHIPPING = 1;         // initialization phase
+
     protected $name = null;
     protected $user_id = null;
     protected $email = null;

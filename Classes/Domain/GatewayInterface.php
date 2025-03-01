@@ -55,6 +55,18 @@ interface GatewayInterface
 
     public function getBasketSum ();
 
+    public function setTotals ($totals);
+
+    public function getTotals ();
+
+    public function setAddresses ($addresses);
+
+    public function getAddresses ();
+
+    public function setShippingTitle ($shippingTitle);
+
+    public function getShippingTitle ();
+
     public function setOrderUid (int $orderUid);
 
     public function getOrderUid (): int;

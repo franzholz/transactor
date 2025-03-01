@@ -63,7 +63,6 @@ abstract class Listener {
     * Main function which processes the tasks connected to the listener.
     * E.g an order in the shop is finalized.
     *
-    * @return	void
     */
     public function execute ($params)
     {
