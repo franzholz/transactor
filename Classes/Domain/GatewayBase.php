@@ -31,6 +31,9 @@ namespace JambageCom\Transactor\Domain;
 
 use Psr\Http\Message\ServerRequestInterface;
 
+use TYPO3\CMS\Core\Utility\GeneralUtility;
+use TYPO3\CMS\Core\Utility\ExtensionManagementUtility;
+
 use JambageCom\Transactor\Constants\Action;
 use JambageCom\Transactor\Constants\Field;
 use JambageCom\Transactor\Constants\GatewayMode;
@@ -40,8 +43,6 @@ use JambageCom\Transactor\Constants\State;
 use JambageCom\Transactor\Api\Address;
 use JambageCom\Transactor\Api\PaymentApi;
 
-use TYPO3\CMS\Core\Utility\GeneralUtility;
-use TYPO3\CMS\Core\Utility\ExtensionManagementUtility;
 
 
 /**

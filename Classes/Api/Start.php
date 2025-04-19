@@ -469,7 +469,6 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
                     $gatewayProxyObject->setAddresses($addressArray);
                     $gatewayProxyObject->setShippingTitle($shippingTitle);
 
-
                     $referenceId =
                         static::getReferenceUid(
                             $handleLib,
@@ -511,7 +510,6 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
                             $addressArray,
                             $paymentBasketArray
                         );
-
                         // Set payment details:
                     $ok =
                         $gatewayProxyObject->transactionSetDetails(
@@ -598,7 +596,6 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
                                         $templateFilename = $gatewayProxyObject->getTemplateFilename();
                                     }
                                 }
-
                                 $localTemplateCode = FrontendUtility::fileResource($templateFilename);
 
                                 if (
@@ -1375,7 +1372,6 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
                 $handling = static::fFloat($actItem['handling'] ?? 0, 2);
                 $newTotalArray[Field::HANDLING_TAX] += $handling;
 
-
                 $basketRow = [
                     Field::NAME        => $row['title'],
                     Field::QUANTITY    => $count,
@@ -1395,7 +1391,11 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
                         0
                     ),
                     Field::ITEMNUMBER => $row['itemnumber'] ?? '',
-                    Field::DESCRIPTION => $row['note'] ?? ''
+                    Field::DESCRIPTION => (
+                        isset($row['note']) ?
+                        substr(strip_tags(preg_replace('/(\s|&nbsp;)+/', ' ', $row['note'])), 0, 1024) :
+                        ''
+                    ),
                 ];
 
                 for ($i = 0; $i <= 7; ++$i) {
@@ -1586,6 +1586,8 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
                     method_exists($accountFeatureClass, 'init') &&
                     method_exists($accountFeatureClass, 'read')
                 ) {
+                    $conf = $gatewayProxyObject->getConf();
+                    $geoapifyKey = $conf['geoapifyKey'] ?? '';
                     $account =
                         GeneralUtility::makeInstance(
                             $accountFeatureClass
@@ -1596,7 +1598,7 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
                     );
 
                     // read the login box from the Payment Gateway
-                    $result = $account->read();
+                    $result = $account->read($geoapifyKey);
                 } else {
                     $labelAdress =
                         $languageObj->getLabel(
