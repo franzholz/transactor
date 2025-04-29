@@ -287,7 +287,9 @@ class PaymentApi
         if ($res && $GLOBALS['TYPO3_DB']->sql_num_rows($res)) {
             $transactionsArray = [];
             while ($row = $GLOBALS['TYPO3_DB']->sql_fetch_assoc($res)) {
-                $row['user'] = json_decode($row['user']);
+                if (!empty($row['user'])) {
+                    $row['user'] = json_decode($row['user']);
+                }
                 $transactionsArray[$row['uid']] = $row;
             }
             $GLOBALS['TYPO3_DB']->sql_free_result($res);
@@ -322,7 +324,9 @@ class PaymentApi
         $fields['message'] = $message;
         $fields['state'] = $state;
         $fields['state_time'] = $time;
-        $fields['user'] = $GLOBALS['TYPO3_DB']->fullQuoteStr(json_encode($user), $tablename);
+        if (!empty($user)) {
+            $fields['user'] = $GLOBALS['TYPO3_DB']->fullQuoteStr(json_encode($user), $tablename);
+        }
 
         $dbResult =
             $GLOBALS['TYPO3_DB']->exec_UPDATEquery(
