@@ -1393,7 +1393,7 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
                     Field::ITEMNUMBER => $row['itemnumber'] ?? '',
                     Field::DESCRIPTION => (
                         isset($row['note']) ?
-                        substr(strip_tags(preg_replace('/(\s|&nbsp;)+/', ' ', $row['note'])), 0, 1024) :
+                        substr(strip_tags(preg_replace('/(\s|&nbsp;)+/', ' ', $row['note'])), 0, 2) /* Test. ändern auf 1024! +++ */ :
                         ''
                     ),
                 ];
@@ -1430,7 +1430,6 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
                 $lastKey = $key;
             }
         }
-
         $value1 = 0;
         $value2 = 0;
 

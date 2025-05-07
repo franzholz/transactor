@@ -50,6 +50,7 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Frontend\Authentication\FrontendUserAuthentication;
 use TYPO3\CMS\Frontend\Controller\TypoScriptFrontendController;
 
+use JambageCom\Div2007\Api\PhpHelper;
 use JambageCom\Div2007\Utility\MailUtility;
 
 use JambageCom\Transactor\Constants\Action;
@@ -286,14 +287,23 @@ class PaymentApi
 
         if ($res && $GLOBALS['TYPO3_DB']->sql_num_rows($res)) {
             $transactionsArray = [];
+            $phpHelper = GeneralUtility::makeInstance(PhpHelper::class);
             while ($row = $GLOBALS['TYPO3_DB']->sql_fetch_assoc($res)) {
                 if (!empty($row['user'])) {
-                    $row['user'] = json_decode($row['user']);
+                    $userObj =
+                        $phpHelper->json_decode_special(
+                            stripslashes($row['user']),
+                            null,
+                            12,
+                            JSON_INVALID_UTF8_SUBSTITUTE | JSON_THROW_ON_ERROR
+                        );
+                    $row['user'] = (array) $userObj;
                 }
                 $transactionsArray[$row['uid']] = $row;
             }
             $GLOBALS['TYPO3_DB']->sql_free_result($res);
         }
+
         return $transactionsArray;
     }
 
@@ -325,7 +335,16 @@ class PaymentApi
         $fields['state'] = $state;
         $fields['state_time'] = $time;
         if (!empty($user)) {
-            $fields['user'] = $GLOBALS['TYPO3_DB']->fullQuoteStr(json_encode($user), $tablename);
+            $fields['user'] =
+                trim(
+                    $GLOBALS['TYPO3_DB']->fullQuoteStr(
+                        json_encode($user),
+                        $tablename
+                    ),
+                    "\n\r\'"
+                );
+
+                // $fields['user'] = json_encode($user);
         }
 
         $dbResult =
@@ -360,7 +379,17 @@ class PaymentApi
         }
 
         $row = $GLOBALS['TYPO3_DB']->sql_fetch_assoc($res);
-        $row['user'] = json_decode($row['user']);
+        // $row['user'] = json_decode($row['user']);
+        if (!empty($row['user'])) {
+            $phpHelper = GeneralUtility::makeInstance(PhpHelper::class);
+            $row['user'] =
+                $phpHelper->json_decode_special(
+                    stripslashes($row['user']),
+                    null,
+                    12,
+                    JSON_INVALID_UTF8_SUBSTITUTE | JSON_THROW_ON_ERROR
+                );
+        }
 
         return $row;
     }
@@ -385,9 +414,16 @@ class PaymentApi
 
         if (
             is_array($row) &&
-            isset($row['user'])
+            !empty($row['user'])
         ) {
-            $row['user'] = json_decode($row['user']);
+            $phpHelper = GeneralUtility::makeInstance(PhpHelper::class);
+            $row['user'] =
+                $phpHelper->json_decode_special(
+                    stripslashes($row['user']),
+                    null,
+                    12,
+                    JSON_INVALID_UTF8_SUBSTITUTE | JSON_THROW_ON_ERROR
+                );
         }
 
         return $row;
