@@ -59,7 +59,7 @@
         <source>ERROR: The extension '|' has not been installed.</source>
         <target state="translated">FEHLER: Die Extension '|' wurde nicht installiert.</target>
       </trans-unit>
-      <trans-unit id="feature_address_gatewayaccout" resname="feature_address_gatewayaccout">
+      <trans-unit id="feature_address_gatewayaccount" resname="feature_address_gatewayaccount">
         <source>fetch address from gateway account</source>
         <target state="needs-translation">fetch address from gateway account</target>
       </trans-unit>
