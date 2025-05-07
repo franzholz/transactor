@@ -1,11 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 namespace JambageCom\Transactor\Api;
 
 /***************************************************************
 *  Copyright notice
 *
-*  (c) 2023 Franz Holzinger <franz@ttproducts.de>
+*  (c) 2025 Franz Holzinger <franz@ttproducts.de>
 *  All rights reserved
 *
 *  This script is part of the TYPO3 project. The TYPO3 project is
@@ -38,16 +40,18 @@ namespace JambageCom\Transactor\Api;
 *
 */
 
+use Psr\Http\Message\ServerRequestInterface;
+
 use TYPO3\CMS\Core\Service\MarkerBasedTemplateService;
 use TYPO3\CMS\Core\Utility\ExtensionManagementUtility;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Core\Utility\VersionNumberUtility;
 use TYPO3\CMS\Frontend\ContentObject\ContentObjectRenderer;
 
-
 use JambageCom\Div2007\Utility\FrontendUtility;
 use JambageCom\Div2007\Utility\HtmlUtility;
 
+use JambageCom\Transactor\Api\Address;
 use JambageCom\Transactor\Api\Localization;
 use JambageCom\Transactor\Api\PaymentApi;
 
@@ -61,10 +65,12 @@ use JambageCom\Transactor\Constants\Message;
 class Start implements \TYPO3\CMS\Core\SingletonInterface
 {
     private static $hasActionParameters = false;
+    private static $request = null;
+    private static int $id;
 
     static public function init (
         $pLangObj,
-        $cObj, // DEPRECATED
+        ServerRequestInterface $request,
         array $conf,
         $keepLanguageSettings = true
     )
@@ -76,12 +82,22 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
         $languageObj->init1(
             $pLangObj,
             $conf['_LOCAL_LANG.'] ?? '',
-            $languageSubpath,
+            $request,
             $keepLanguageSettings
         );
         $languageObj->loadLocalLang(
             $languagePath . 'locallang.xlf'
         );
+        static::$request = $request;
+        $typo3VersionArray = VersionNumberUtility::convertVersionStringToArray(VersionNumberUtility::getCurrentTypo3Version());
+        $typo3VersionMain = $typo3VersionArray['version_main'];
+
+        if ($typo3VersionMain >= 13) {
+            static::$id = $request->getAttribute('frontend.page.information')->getId();
+        } else {
+            static::$id = $GLOBALS['TSFE']->id;
+        }
+
     }
 
     static public function getMarkers (
@@ -93,12 +109,11 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
         $languageSubpath = '/Resources/Private/Language/';
         $languagePath = 'EXT:' . $extensionKey . $languageSubpath;
         $cObj = FrontendUtility::getContentObjectRenderer();
-        $version = VersionNumberUtility::getCurrentTypo3Version();
         $languageObj = GeneralUtility::makeInstance(Localization::class);
         $languageObj->init1(
             '',
             $conf['_LOCAL_LANG.'] ?? '',
-            $languageSubpath
+            static::$request
         );
         $languageObj->loadLocalLang(
             $languagePath . 'locallang_marker.xlf'
@@ -153,7 +168,7 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
         $confScript,
         array &$subpartArray,
         array &$wrappedSubpartArray
-    )
+    ): bool
     {
         $bUseTransactor = false;
         if (
@@ -174,6 +189,8 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
             $wrappedSubpartArray['###MESSAGE_PAYMENT_TRANSACTOR_NO###'] = '';
             $subpartArray['###MESSAGE_PAYMENT_TRANSACTOR_YES###'] = '';
         }
+
+        return $bUseTransactor;
     }
 
     static public function getReferenceUid (
@@ -184,7 +201,12 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
     )
     {
         $referenceUid = false;
-        $gatewayProxyObject = PaymentApi::getGatewayProxyObject($confScript);
+        $gatewayProxyObject =
+            PaymentApi::getGatewayProxyObject(
+                static::$request,
+                $confScript
+            );
+
         if (
             $orderUid &&
             method_exists($gatewayProxyObject, 'generateReferenceUid')
@@ -261,9 +283,9 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
         array $infoArray,
         $pidArray,
         $linkParams,
-        $trackingCode,
-        $orderUid,
-        $orderNumber, // text string of the order number
+        string $trackingCode,
+        int $orderUid,
+        string $orderNumber, // text string of the order number
         $notificationEmail,
         $cardRow,
         $variantFields
@@ -313,6 +335,7 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
         &$errorMessage,
         $handleLib,
         array $confScript,
+        $shippingTitle,
         $extensionKey,
         array $itemArray,
         array $calculatedArray,
@@ -322,9 +345,9 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
         array $infoArray,
         $pidArray,
         $linkParams,
-        $trackingCode,
-        $orderUid,
-        $orderNumber, // text string of the order number
+        string $trackingCode,
+        int $orderUid,
+        string $orderNumber, // text string of the order number
         $notificationEmail,
         $cardRow,
         ...$options
@@ -377,6 +400,7 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
             ) {
                 $gatewayProxyObject =
                     PaymentApi::getGatewayProxyObject(
+                        static::$request,
                         $confScript
                     );
                 if (is_object($gatewayProxyObject)) {
@@ -398,6 +422,7 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
                     );
 
                     PaymentApi::storeInit(
+                        static::$request->getAttribute('frontend.user'),
                         Action::AUTHORIZE_TRANSFER,
                         $paymentMethod,
                         $extensionKey,
@@ -440,6 +465,9 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
                         $gatewayConf
                     );
                     $gatewayProxyObject->setBasket($paymentBasketArray);
+                    $gatewayProxyObject->setTotals($totalArray);
+                    $gatewayProxyObject->setAddresses($addressArray);
+                    $gatewayProxyObject->setShippingTitle($shippingTitle);
 
                     $referenceId =
                         static::getReferenceUid(
@@ -456,27 +484,32 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
                             );
                         return '';
                     }
-                    PaymentApi::storeReferenceUid($referenceId);
-                    $transactionDetailsArray = static::getTransactionDetails(
-                        $referenceId,
-                        $handleLib,
-                        $confScript,
-                        $extensionKey,
-                        $gatewayExtKey,
-                        $calculatedArray,
-                        $paymentActivity,
-                        $pidArray,
-                        $linkParams,
-                        $trackingCode,
-                        $orderUid,
-                        $orderNumber,
-                        $notificationEmail,
-                        $cardRow,
-                        $totalArray,
-                        $addressArray,
-                        $paymentBasketArray
+                    PaymentApi::storeReferenceUid(
+                        static::$request->getAttribute('frontend.user'),
+                        $referenceId
                     );
-
+                    $gatewayKey = $gatewayProxyObject->getGatewayKey();
+                    $transactionDetailsArray =
+                        static::getTransactionDetails(
+                            $referenceId,
+                            $handleLib,
+                            $confScript,
+                            $extensionKey,
+                            $gatewayExtKey,
+                            $gatewayKey,
+                            $calculatedArray,
+                            $paymentActivity,
+                            $pidArray,
+                            $linkParams,
+                            $trackingCode,
+                            $orderUid,
+                            $orderNumber,
+                            $notificationEmail,
+                            $cardRow,
+                            $totalArray,
+                            $addressArray,
+                            $paymentBasketArray
+                        );
                         // Set payment details:
                     $ok =
                         $gatewayProxyObject->transactionSetDetails(
@@ -491,29 +524,8 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
                         return '';
                     }
 
-                        // Get results of a possible earlier submit and display messages:
-                    $transactionResults =
-                        $gatewayProxyObject->transactionGetResults(
-                            $referenceId
-                        );
-
-                    if (!is_array($transactionResults)) {
-                        $row =
-                            $gatewayProxyObject->getTransaction(
-                                $referenceId
-                            );
-
-                        if (is_array($row)) {
-                            if ($gatewayProxyObject->transactionIsInitState($row)) {
-                                $transactionResults = $row;
-                            }
-                        } else if (!is_array($row)) {
-                            $transactionResults =
-                                $gatewayProxyObject->transactionGetResultsSuccess(
-                                    'first trial'
-                                );
-                        }
-                    }
+                    // neu FHO
+                    $transactionResults = static::fetchTransactionResults($gatewayProxyObject, $referenceId);
 
                     if (is_array($transactionResults)) {
                         if (
@@ -584,7 +596,6 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
                                         $templateFilename = $gatewayProxyObject->getTemplateFilename();
                                     }
                                 }
-
                                 $localTemplateCode = FrontendUtility::fileResource($templateFilename);
 
                                 if (
@@ -644,13 +655,16 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
                                 }
 
                                 if (
-                                    stripos($formuri, 'ERROR') !== false ||
-                                    !$formuri
+                                    !$formuri ||
+                                    stripos($formuri, 'ERROR') !== false
                                 ) {
                                     $isError = true;
                                 }
 
-                                if ($formuri && !$isError) {
+                                if (
+                                    $formuri != '' &&
+                                    !$isError
+                                ) {
                                     $markerArray['###HIDDENFIELDS###'] .= $hiddenFields;
                                     $markerArray['###SCRIPT###'] = $script;
                                     $markerArray['###REDIRECT_URL###'] = htmlspecialchars($formuri);
@@ -677,7 +691,10 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
                                     );
                                 } else {
                                     if ($isError) {
-                                        if (stripos($formuri, 'ERROR') !== false) {
+                                        if (
+                                            $formuri != '' &&
+                                            stripos($formuri, 'ERROR'
+                                        ) !== false) {
                                             $errorMessage = $formuri;
                                         } else {
                                             $errorDetails = $gatewayProxyObject->transactionGetErrorDetails();
@@ -761,30 +778,61 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
         return $result;
     } // render
 
+
+    static protected function fetchTransactionResults($gatewayProxyObject, $referenceId)
+    {
+            // Get results of a possible earlier submit and display messages:
+        $transactionResults =
+            $gatewayProxyObject->transactionGetResults(
+                $referenceId
+            );
+
+        if (!is_array($transactionResults)) {
+            $row =
+                $gatewayProxyObject->getTransaction(
+                    $referenceId
+                );
+
+            if (is_array($row)) {
+                if ($gatewayProxyObject->transactionIsInitState($row)) {
+                    $transactionResults = $row;
+                }
+            } else if (!is_array($row)) {
+                $transactionResults =
+                    $gatewayProxyObject->transactionGetResultsSuccess(
+                        'first trial'
+                    );
+            }
+        }
+
+        return $transactionResults;
+    }
+
     /**
     * Checks if required fields for credit cards and bank accounts are filled in correctly
     */
     static public function checkRequired (
-        $referenceId,
-        $handleLib,
+        string $referenceId,
+        string $handleLib,
         array $confScript,
-        $extensionKey,
-        $calculatedArray,
-        $paymentActivity,
-        $pidArray,
+        string $extensionKey,
+        array $calculatedArray,
+        string $paymentActivity,
+        array $pidArray,
         $linkParams,
-        $trackingCode,
-        $orderUid,
-        $orderNumber,
-        $notificationEmail,
-        $cardRow
+        string $trackingCode,
+        int $orderUid,
+        string $orderNumber,
+        string $notificationEmail,
+        array $cardRow
     )
     {
-        $result = '';
+        $gatewayExtKey = $confScript['extName'] ?? '';
 
         if (strpos($handleLib, 'transactor') !== false) {
             $gatewayProxyObject =
                 PaymentApi::getGatewayProxyObject(
+                    static::$request,
                     $confScript
                 );
 
@@ -792,12 +840,38 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
                 $paymentBasketArray = [];
                 $addressArray = [];
                 $totalArray = [];
+                $paymentMethod = $confScript['paymentMethod'];
+
+                $ok = $gatewayProxyObject->transactionInit(
+                    Action::INIT,
+                    $paymentMethod,
+                    $extensionKey,
+                    $confScript['templateFile'] ?? '',
+                    $orderUid,
+                    $orderNumber,
+                    $confScript['currency'] ? $confScript['currency'] : 'EUR',
+                    $confScript['conf.'] ?? []
+                );
+
+                if (!$ok) {
+                    $languageObj = GeneralUtility::makeInstance(Localization::class);
+
+                    $errorMessage =
+                        $languageObj->getLabel(
+                            'error_transaction_init'
+                        );
+
+                    return $errorMessage;
+                }
+                $gatewayKey = $gatewayProxyObject->getGatewayKey();
                 $transactionDetailsArray =
                     static::getTransactionDetails(
                         $referenceId,
                         $handleLib,
                         $confScript,
                         $extensionKey,
+                        $gatewayExtKey,
+                        $gatewayKey,
                         $calculatedArray,
                         $paymentActivity,
                         $pidArray,
@@ -811,6 +885,7 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
                         $addressArray,
                         $paymentBasketArray
                     );
+
                 $set =
                     $gatewayProxyObject->transactionSetDetails(
                         $transactionDetailsArray
@@ -828,12 +903,17 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
 
                     return $errorMessage;
                 }
+                $transactionResults =
+                    static::fetchTransactionResults(
+                        $gatewayProxyObject,
+                        $referenceId
+                    );
 
-                if ($gatewayProxyObject->transactionSucceeded() == false) {
+                if ($gatewayProxyObject->transactionSucceeded($transactionResults) == false) {
                     $result =
                         htmlspecialchars(
                             $gatewayProxyObject->transactionMessage(
-                                []
+                                $transactionResults
                             )
                         );
                 }
@@ -881,18 +961,6 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
         return $url;
     }
 
-    static public function getLanguage ()
-    {
-        if (
-            isset($GLOBALS['TSFE']->config['config']['language'])
-        ) {
-            $result = strtolower($GLOBALS['TSFE']->config['config']['language']);
-        } else {
-            $result = 'default';
-        }
-        return $result;
-    }
-
     /**
     * Gets all the data needed for the transaction or the verification check
     */
@@ -902,6 +970,7 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
         array $confScript,
         $extensionKey,
         $gatewayExtKey,
+        $gatewayKey,
         array $calculatedArray,
         $paymentActivity,
         array $pidArray,
@@ -916,6 +985,7 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
         array $paymentBasketArray
     )
     {
+        $languageObj = GeneralUtility::makeInstance(Localization::class);
         $paramNameActivity = $extensionKey . '[activity][' . $paymentActivity . ']';
         $failLinkParams = [$paramNameActivity => '0'];
 
@@ -928,9 +998,9 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
         if (isset($linkParams) && is_array($linkParams)) {
             $successLinkParams = array_merge($successLinkParams, $linkParams);
         }
-
         $notifyUrlParams = [];
-        $notifyUrlParams['transactor'] = PaymentApi::getRequestId($referenceId);
+        $notifyUrlParams['transactor'] = $gatewayKey;
+        $notifyUrlParams['ref'] = PaymentApi::getRequestId($referenceId);
 
         if (isset($linkParams) && is_array($linkParams)) {
             $notifyUrlParams = array_merge($notifyUrlParams, $linkParams);
@@ -975,7 +1045,7 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
         } else {
             $successPid = ($pidArray['PIDthanks'] ? $pidArray['PIDthanks'] : $pidArray['PIDfinalize']);
             if (!$successPid) {
-                $successPid = $GLOBALS['TSFE']->id;
+                $successPid = static::$id;
             }
         }
 
@@ -991,17 +1061,17 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
             $failPid = ($pidArray['PIDpayment'] ? $pidArray['PIDpayment'] : $pidArray['PIDbasket']);
 
             if (!$failPid) {
-                $failPid = $GLOBALS['TSFE']->id;
+                $failPid = static::$id;
             }
         }
 
         $conf = ['returnLast' => 'url'];
         $urlDir = GeneralUtility::getIndpEnv('TYPO3_REQUEST_DIR');
-        $retlink = $urlDir . static::getUrl($conf, $GLOBALS['TSFE']->id, $linkParams);
+        $retlink = $urlDir . static::getUrl($conf, static::$id, $linkParams);
         $returi = $retlink . $paramReturi;
         $faillink = $urlDir . static::getUrl($conf, $failPid, $failLinkParams);
         $successlink = $urlDir . static::getUrl($conf, $successPid, $successLinkParams);
-        $notifyurl = $urlDir . static::getUrl($conf, $GLOBALS['TSFE']->id, $notifyUrlParams);
+        $notifyurl = $urlDir . static::getUrl($conf, static::$id, $notifyUrlParams);
 
         $extensions = [
             'calling' => $extensionKey,
@@ -1027,14 +1097,14 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
                 'returi' => $returi,
                 'faillink' => $faillink,
                 'successlink' => $successlink,
-                'notifyurl' => $notifyurl
+                'notifyurl' => $notifyurl,
             ],
             'total' => $totalArray,
             'tracking' => $trackingCode,
             'address' => $addressArray,
             'basket' => $paymentBasketArray,
             'cc' => $cardRow,
-            'language' => static::getLanguage(),
+            'language' => $languageObj->getLanguage(),
             'extension' => $extensionInfo,
             'confScript' => $confScript
         ];
@@ -1044,7 +1114,7 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
                 $urlDir .
                 static::getUrl(
                     $conf,
-                    $GLOBALS['TSFE']->id,
+                    static::$id,
                     $successLinkParams
                 );
             $transactionDetailsArray['transaction']['verifylink'] = $verifyLink;
@@ -1209,8 +1279,8 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
             'country' => 'country'
         ];
         $tmpAddrArray = [
-            'person' => $infoArray['billing'],
-            'delivery' => $infoArray['delivery']
+            Address::PAYER => $infoArray['billing'],
+            Address::SHIPPING => $infoArray['delivery']
         ];
         $addressArray = [];
 
@@ -1256,7 +1326,7 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
                 }
             }
         }
-        $addressArray['delivery']['note'] = $deliveryNote;
+        $addressArray[Address::SHIPPING]['note'] = $deliveryNote;
 
         $totalCount = 0;
         foreach ($itemArray as $sort => $actItemArray) {
@@ -1302,7 +1372,6 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
                 $handling = static::fFloat($actItem['handling'] ?? 0, 2);
                 $newTotalArray[Field::HANDLING_TAX] += $handling;
 
-
                 $basketRow = [
                     Field::NAME        => $row['title'],
                     Field::QUANTITY    => $count,
@@ -1322,7 +1391,11 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
                         0
                     ),
                     Field::ITEMNUMBER => $row['itemnumber'] ?? '',
-                    Field::DESCRIPTION => $row['note'] ?? ''
+                    Field::DESCRIPTION => (
+                        isset($row['note']) ?
+                        substr(strip_tags(preg_replace('/(\s|&nbsp;)+/', ' ', $row['note'])), 0, 2) /* Test. ändern auf 1024! +++ */ :
+                        ''
+                    ),
                 ];
 
                 for ($i = 0; $i <= 7; ++$i) {
@@ -1344,7 +1417,7 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
 
                         if ($value != '') {
                             if (strlen($value) > $gatewayConf['maximumCharacters']) {
-                                $value = substr($value, 0, $gatewayConf['maximumCharacters']);
+                                $value = substr($value, 0, intval($gatewayConf['maximumCharacters']));
                                 $value .= '...';
                             }
                             $basketRow['on' . $i] = $gatewayConf['on' . $i . 'l'];
@@ -1357,14 +1430,6 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
                 $lastKey = $key;
             }
         }
-
-        // fix rounding errors
-//         foreach ($newTotalArray as $newType => $newAmount) {
-//             if ($newTotalArray[$newType] != $totalArray[$newType]) {
-//                 $basketArray[$lastSort][$lastKey][$newType] += $totalArray[$newType] - $newTotalArray[$newType];
-//             }
-//         }
-
         $value1 = 0;
         $value2 = 0;
 
@@ -1424,7 +1489,7 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
     {
         $float = floatval($value);
 
-        return round($float, $level);
+        return round($float, intval($level));
     }
 
     static public function hasActionParameters(
@@ -1434,9 +1499,8 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
 
     static public function readActionParameters (
         &$errorMessage,
-        ContentObjectRenderer $cObj,
         array $confScript
-    ) {
+    ): bool {
         $result = false;
         $languageObj = GeneralUtility::makeInstance(Localization::class);
         $gatewayExtKey = $confScript['extName'] ?? '';
@@ -1444,13 +1508,14 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
         if ($ok) {
             $gatewayProxyObject =
                 PaymentApi::getGatewayProxyObject(
+                    static::$request,
                     $confScript
                 );
 
             if (
                 is_object($gatewayProxyObject)
             ) {
-                $result = $gatewayProxyObject->readActionParameters($cObj);
+                $result = $gatewayProxyObject->readActionParameters();
             }
             if ($result) {
                 static::$hasActionParameters = true;
@@ -1462,7 +1527,7 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
     static public function addMainWindowJavascript (
         &$errorMessage,
         array $confScript
-    )
+    ): bool
     {
         $languageObj = GeneralUtility::makeInstance(Localization::class);
         $accountFeatureClass = false;
@@ -1473,6 +1538,7 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
         if ($ok) {
             $gatewayProxyObject =
                 PaymentApi::getGatewayProxyObject(
+                    static::$request,
                     $confScript
                 );
 
@@ -1485,19 +1551,127 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
                     $parameters = [
                         &$errorMessage,
                         $confScript,
+                        static::$request,
                     ];
-                    call_user_func_array(
+                    $result = call_user_func_array(
                         $accountFeatureClass . '::addMainWindowJavascript',
                         $parameters
                     );
                 }
             }
         }
+        return $result;
     }
+
+    static public function readStoredAccountData (
+        &$errorMessage,
+        array $confScript,
+    ): mixed {
+        if (
+            !empty($confScript['login'])
+        ) {
+            $gatewayProxyObject =
+                PaymentApi::getGatewayProxyObject(
+                    static::$request,
+                    $confScript
+                );
+
+            if (is_object($gatewayProxyObject)) {
+                $accountFeatureClass = $gatewayProxyObject->getFeatureClass(Feature::ACCOUNT);
+            }
+
+            if (class_exists($accountFeatureClass)) {
+                if (
+                    method_exists($accountFeatureClass, 'init') &&
+                    method_exists($accountFeatureClass, 'read')
+                ) {
+                    $conf = $gatewayProxyObject->getConf();
+                    $geoapifyKey = $conf['geoapifyKey'] ?? '';
+                    $account =
+                        GeneralUtility::makeInstance(
+                            $accountFeatureClass
+                        );
+                    $account->init(
+                        $gatewayProxyObject->getGatewayObj(),
+                        $confScript
+                    );
+
+                    // read the login box from the Payment Gateway
+                    $result = $account->read($geoapifyKey);
+                } else {
+                    $labelAdress =
+                        $languageObj->getLabel(
+                            'feature_address_gatewayaccount'
+                        );
+                    $errorMessage =
+                        sprintf(
+                            $languageObj->getLabel(
+                                'error_feature_class_interface'
+                            ),
+                            $accountFeatureClass,
+                            $labelAdress
+                        );
+                }
+            }
+        }
+        return $result;
+    }
+
+
+    static public function storeAccountData (
+        &$errorMessage,
+        Address $addressModel,
+        array $confScript,
+    ): bool {
+        $result = false;
+
+        if (
+            !empty($confScript['login'])
+        ) {
+            $gatewayProxyObject =
+                PaymentApi::getGatewayProxyObject(
+                    static::$request,
+                    $confScript
+                );
+
+            if (is_object($gatewayProxyObject)) {
+                $accountFeatureClass = $gatewayProxyObject->getFeatureClass(Feature::ACCOUNT);
+            }
+
+            if (class_exists($accountFeatureClass)) {
+                if (
+                    method_exists($accountFeatureClass, 'store')
+                ) {
+                    $account =
+                        GeneralUtility::makeInstance(
+                            $accountFeatureClass
+                        );
+                    // read the login box from the Payment Gateway
+                    $account->store($addressModel);
+                    $result = true;
+                } else {
+                    $labelAdress =
+                        $languageObj->getLabel(
+                            'feature_address_gatewayaccount'
+                        );
+                    $errorMessage =
+                        sprintf(
+                            $languageObj->getLabel(
+                                'error_feature_class_interface'
+                            ),
+                            $accountFeatureClass,
+                            $labelAdress
+                        );
+                }
+            }
+        }
+        return $result;
+    }
+
 
     static public function readAccountData (
         &$errorMessage,
-        &$addressModel,
+        Address &$addressModel,
         array $confScript,
     )
     {
@@ -1513,6 +1687,7 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
         ) {
             $gatewayProxyObject =
                 PaymentApi::getGatewayProxyObject(
+                    static::$request,
                     $confScript
                 );
 
@@ -1554,6 +1729,10 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
                         // read the login box from the Payment Gateway
                         $result = $account->fetch($errorMessage, $addressModel);
                     } else {
+                        $labelAdress =
+                            $languageObj->getLabel(
+                                'feature_address_gatewayaccount'
+                            );
                         $errorMessage =
                             sprintf(
                                 $languageObj->getLabel(
@@ -1582,12 +1761,16 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
         $orderNumber, // text string of the order number
         $currency,
         array $extraData
-    ) {
+    ): string {
         $languageObj = GeneralUtility::makeInstance(Localization::class);
         $accountFeatureClass = false;
         $gatewayExtKey = $confScript['extName'] ?? '';
         $ok = static::checkLoaded($errorMessage, $languageObj, $gatewayExtKey);
         $result = false;
+        $labelAdress =
+            $languageObj->getLabel(
+                'feature_address_gatewayaccount'
+            );
 
         if (
             !empty($confScript['login']) &&
@@ -1595,6 +1778,7 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
         ) {
             $gatewayProxyObject =
                 PaymentApi::getGatewayProxyObject(
+                    static::$request,
                     $confScript
                 );
 
@@ -1632,6 +1816,7 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
 
                 if ($ok) {
                     PaymentApi::storeInit(
+                        static::$request->getAttribute('frontend.user'),
                         Action::AUTHORIZE_TRANSFER,
                         $confScript['paymentMethod'],
                         $extensionKey,
@@ -1659,7 +1844,12 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
                             );
 
                             // read the login box from the Payment Gateway
-                            $result = $account->render($errorMessage, $accountModel);
+                            $result =
+                                $account->render(
+                                    $errorMessage,
+                                    $accountModel,
+                                    static::$request,
+                                );
                         } else {
                             $errorMessage =
                                 sprintf(
@@ -1671,10 +1861,6 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
                                 );
                         }
                     } else {
-                        $labelAdress =
-                            $languageObj->getLabel(
-                                'feature_address_gatewayaccout'
-                            );
                         $errorMessage =
                             sprintf(
                                 $languageObj->getLabel(

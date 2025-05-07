@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace JambageCom\Transactor\Api;
 
 /***************************************************************
@@ -38,14 +40,23 @@ namespace JambageCom\Transactor\Api;
  *
  */
 
+use Psr\Http\Message\ServerRequestInterface;
+
+use TYPO3\CMS\Core\Configuration\ExtensionConfiguration;
 use TYPO3\CMS\Core\Session\UserSessionManager;
+use TYPO3\CMS\Core\Utility\ExtensionManagementUtility;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 use TYPO3\CMS\Frontend\Authentication\FrontendUserAuthentication;
 use TYPO3\CMS\Frontend\Controller\TypoScriptFrontendController;
 
-use JambageCom\Transactor\Constants\Field;
+use JambageCom\Div2007\Api\PhpHelper;
+use JambageCom\Div2007\Utility\MailUtility;
 
+use JambageCom\Transactor\Constants\Action;
+use JambageCom\Transactor\Constants\Field;
+use JambageCom\Transactor\Domain\GatewayFactory;
+use JambageCom\Transactor\Domain\GatewayProxy;
 
 class PaymentApi
 {
@@ -55,7 +66,7 @@ class PaymentApi
         $result = '';
 
         $transactorConf = GeneralUtility::makeInstance(
-            \TYPO3\CMS\Core\Configuration\ExtensionConfiguration::class
+            ExtensionConfiguration::class
         )->get($gatewayExtensionKey);
 
         if (
@@ -85,16 +96,13 @@ class PaymentApi
     {
         $result = [];
         $result = GeneralUtility::makeInstance(
-            \TYPO3\CMS\Core\Configuration\ExtensionConfiguration::class
+            ExtensionConfiguration::class
         )->get('transactor');
 
         if (
-            $extensionKey != '' &&
-            isset($GLOBALS['TYPO3_CONF_VARS']['EXT']['extConf'][$extensionKey])
+            $extensionKey != ''
         ) {
-            $extManagerConf = GeneralUtility::makeInstance(
-                \TYPO3\CMS\Core\Configuration\ExtensionConfiguration::class
-            )->get($extensionKey);
+            $extManagerConf = static::getTransactorConf($extensionKey);
         }
 
         if ($mergeConf && is_array($conf)) {
@@ -121,6 +129,7 @@ class PaymentApi
     * returns the gateway proxy object
     */
     static public function getGatewayProxyObject (
+        ServerRequestInterface $request,
         $confScript
     )
     {
@@ -134,13 +143,13 @@ class PaymentApi
             $gatewayExtensionKey = $confScript['extName'];
 
             if (
-                \TYPO3\CMS\Core\Utility\ExtensionManagementUtility::isLoaded(
+                ExtensionManagementUtility::isLoaded(
                     $gatewayExtensionKey
                 )
             ) {
                 $gatewayFactoryObj =
-                    \JambageCom\Transactor\Domain\GatewayFactory::getInstance();
-                $gatewayFactoryObj->registerGatewayExtension($gatewayExtensionKey);
+                    GatewayFactory::getInstance();
+                $gatewayFactoryObj->registerGatewayExtension($request, $gatewayExtensionKey);
                 $paymentMethod = $confScript['paymentMethod'];
                 $gatewayProxyObj =
                     $gatewayFactoryObj->getGatewayProxyObject(
@@ -149,18 +158,17 @@ class PaymentApi
 
                 if (is_object($gatewayProxyObj)) {
                     if (
-                        $gatewayProxyObj instanceof \JambageCom\Transactor\Domain\GatewayProxy
+                        $gatewayProxyObj instanceof GatewayProxy
                     ) {
-                        $gatewayProxyObj->init($gatewayExtensionKey);
-                        if (!empty($confScript['checkoutUrl'])) {
-                            $gatewayProxyObj->setCheckoutURI($confScript['checkoutUrl']);
-                        }
-                        if (!empty($confScript['captureUrl'])) {
-                            $gatewayProxyObj->setCaptureURI($confScript['captureUrl']);
-                        }
+                        $gatewayProxyObj->init($request, $gatewayExtensionKey);
                         $result = $gatewayProxyObj;
                     } else {
-                        throw new \RuntimeException('Error in transactor: Gateway object class "' . get_class($gatewayProxyObj) . '" must be an instance of  "JambageCom\Transactor\Domain\GatewayProxy"', 50200);
+                        throw new \RuntimeException(
+                            'Error in transactor: Gateway object class "' .
+                            get_class($gatewayProxyObj) .
+                            '" must be an instance of  "JambageCom\Transactor\Domain\GatewayProxy"',
+                            50200
+                        );
                     }
                 }
             }
@@ -172,6 +180,7 @@ class PaymentApi
     * returns the gateway proxy object
     */
     static public function getGatewayProxyObjectForExtension (
+        ServerRequestInterface $request,
         $gatewayExtensionKey,
         $paymentMethod
     )
@@ -179,13 +188,17 @@ class PaymentApi
         $gatewayProxyObj = null;
 
         if (
-            \TYPO3\CMS\Core\Utility\ExtensionManagementUtility::isLoaded(
+            ExtensionManagementUtility::isLoaded(
                 $gatewayExtensionKey
             )
         ) {
             $gatewayFactoryObj =
-                \JambageCom\Transactor\Domain\GatewayFactory::getInstance();
-            $gatewayFactoryObj->registerGatewayExtension($gatewayExtensionKey);
+                GatewayFactory::getInstance();
+            $gatewayFactoryObj->
+                registerGatewayExtension(
+                    $request,
+                    $gatewayExtensionKey
+                );
             $gatewayProxyObj =
                 $gatewayFactoryObj->getGatewayProxyObject(
                     $paymentMethod
@@ -274,12 +287,23 @@ class PaymentApi
 
         if ($res && $GLOBALS['TYPO3_DB']->sql_num_rows($res)) {
             $transactionsArray = [];
+            $phpHelper = GeneralUtility::makeInstance(PhpHelper::class);
             while ($row = $GLOBALS['TYPO3_DB']->sql_fetch_assoc($res)) {
-                $row['user'] = json_decode($row['user']);
+                if (!empty($row['user'])) {
+                    $userObj =
+                        $phpHelper->json_decode_special(
+                            stripslashes($row['user']),
+                            null,
+                            12,
+                            JSON_INVALID_UTF8_SUBSTITUTE | JSON_THROW_ON_ERROR
+                        );
+                    $row['user'] = (array) $userObj;
+                }
                 $transactionsArray[$row['uid']] = $row;
             }
             $GLOBALS['TYPO3_DB']->sql_free_result($res);
         }
+
         return $transactionsArray;
     }
 
@@ -310,7 +334,18 @@ class PaymentApi
         $fields['message'] = $message;
         $fields['state'] = $state;
         $fields['state_time'] = $time;
-        $fields['user'] = $GLOBALS['TYPO3_DB']->fullQuoteStr(json_encode($user), $tablename);
+        if (!empty($user)) {
+            $fields['user'] =
+                trim(
+                    $GLOBALS['TYPO3_DB']->fullQuoteStr(
+                        json_encode($user),
+                        $tablename
+                    ),
+                    "\n\r\'"
+                );
+
+                // $fields['user'] = json_encode($user);
+        }
 
         $dbResult =
             $GLOBALS['TYPO3_DB']->exec_UPDATEquery(
@@ -344,7 +379,17 @@ class PaymentApi
         }
 
         $row = $GLOBALS['TYPO3_DB']->sql_fetch_assoc($res);
-        $row['user'] = json_decode($row['user']);
+        // $row['user'] = json_decode($row['user']);
+        if (!empty($row['user'])) {
+            $phpHelper = GeneralUtility::makeInstance(PhpHelper::class);
+            $row['user'] =
+                $phpHelper->json_decode_special(
+                    stripslashes($row['user']),
+                    null,
+                    12,
+                    JSON_INVALID_UTF8_SUBSTITUTE | JSON_THROW_ON_ERROR
+                );
+        }
 
         return $row;
     }
@@ -369,9 +414,16 @@ class PaymentApi
 
         if (
             is_array($row) &&
-            isset($row['user'])
+            !empty($row['user'])
         ) {
-            $row['user'] = json_decode($row['user']);
+            $phpHelper = GeneralUtility::makeInstance(PhpHelper::class);
+            $row['user'] =
+                $phpHelper->json_decode_special(
+                    stripslashes($row['user']),
+                    null,
+                    12,
+                    JSON_INVALID_UTF8_SUBSTITUTE | JSON_THROW_ON_ERROR
+                );
         }
 
         return $row;
@@ -418,7 +470,7 @@ class PaymentApi
         $PLAINContent .= chr(13) . implode('|', $fields);
         $HTMLContent = '';
 
-        \JambageCom\Div2007\Utility\MailUtility::send(
+        MailUtility::send(
             $toEMail,
             $subject,
             $PLAINContent,
@@ -444,43 +496,60 @@ class PaymentApi
         return $result;
     }
 
-    static public function storeData ($type, $data)
+    static public function storeData (
+        FrontendUserAuthentication $frontendUserAuthentification,
+        $type,
+        $data
+    )
     {
         $key = 'transactor';
-        $sessionData = static::getFrontendUser()->getKey('ses', $key);
+        $sessionData = $frontendUserAuthentification->getKey('ses', $key);
         $sessionData[$type] = $data;
-        static::getFrontendUser()->setKey('ses', $key, $sessionData);
-        static::getFrontendUser()->storeSessionData();
+        $frontendUserAuthentification->setKey('ses', $key, $sessionData);
+        $frontendUserAuthentification->storeSessionData();
     }
 
-    static public function getStoredData ($type)
+    static public function getStoredData (
+        FrontendUserAuthentication $frontendUserAuthentification,
+        $type
+    )
     {
         $key = 'transactor';
-        $sessionData = static::getFrontendUser()->getKey('ses', $key);
+        $sessionData = $frontendUserAuthentification->getKey('ses', $key);
         return $sessionData[$type] ?? null;
     }
 
-    static public function storeReferenceUid ($referenceUid)
+    static public function storeReferenceUid (
+        FrontendUserAuthentication $frontendUserAuthentification,
+        string $referenceUid
+    )
     {
-        static::storeData('referenceUid', $referenceUid);
+        static::storeData(
+            $frontendUserAuthentification,
+            'referenceUid',
+            $referenceUid
+        );
     }
 
-    static public function getStoredReferenceUid ()
+    static public function getStoredReferenceUid (
+        FrontendUserAuthentication $frontendUserAuthentification
+    )
     {
-        return static::getStoredData('referenceUid');
+        return static::getStoredData($frontendUserAuthentification, 'referenceUid');
     }
 
     static public function storeInit (
-        $action,
-        $paymentMethod,
-        $callingExtensionKey,
-        $templateFilename = '',
-        $orderUid = 0,
-        $orderNumber = '0',
-        $currency = 'EUR',
-        $conf = [],
-        $basket = [],
-        $extraData = []
+        FrontendUserAuthentication $frontendUserAuthentification,
+        int $action, // Action constant
+        string $paymentMethod,
+        string $callingExtensionKey,
+        string $templateFilename = '',
+        int $orderUid = 0,
+        string $orderNumber = '0',
+        string $currency = 'EUR',
+        array $conf = [],
+        array $basket = [],
+        array $extraData = []
     )
     {
         $data = [
@@ -497,12 +566,12 @@ class PaymentApi
         ];
 
         foreach ($data as $key => $value) {
-            static::storeData($key, $value);
+            static::storeData($frontendUserAuthentification, $key, $value);
         }
     }
 
     static public function getStoredInit (
-        &$action,
+        &$action, // Action constant
         &$paymentMethod,
         &$callingExtensionKey,
         &$templateFilename,
@@ -511,7 +580,8 @@ class PaymentApi
         &$currency,
         &$conf,
         &$basket,
-        &$extraData
+        &$extraData,
+        FrontendUserAuthentication $frontendUserAuthentification
     ) {
         $data = [
             'action' => &$action,
@@ -528,7 +598,7 @@ class PaymentApi
 
 
         foreach ($data as $key => &$value) {
-            $value = static::getStoredData($key);
+            $value = static::getStoredData($frontendUserAuthentification, $key);
         }
     }
 
@@ -566,22 +636,6 @@ class PaymentApi
         }
 
         return $result;
-    }
-
-    /**
-     * @return FrontendUserAuthentication
-     */
-    static protected function getFrontendUser(): FrontendUserAuthentication
-    {
-        return static::getTypoScriptFrontendController()->fe_user;
-    }
-
-    /**
-     * @return TypoScriptFrontendController|null
-     */
-    static protected function getTypoScriptFrontendController(): ?TypoScriptFrontendController
-    {
-        return $GLOBALS['TSFE'] ?? null;
     }
 }
 

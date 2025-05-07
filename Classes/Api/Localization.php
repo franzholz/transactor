@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace JambageCom\Transactor\Api;
 
 /***************************************************************
@@ -39,20 +41,21 @@ namespace JambageCom\Transactor\Api;
  *
  */
 
+use Psr\Http\Message\ServerRequestInterface;
 
 class Localization extends \JambageCom\Div2007\Base\TranslationBase implements \TYPO3\CMS\Core\SingletonInterface
 {
     public function init1 (
         $pObj,
         $confLocalLang = [],
-        $scriptRelPath = '',
+        ?ServerRequestInterface $request = null,
         $keepLanguageSettings = true
     )
     {
         $this->init(
             'transactor',
             $confLocalLang,
-            $scriptRelPath
+            $request,
         );
 
         if ($keepLanguageSettings) {

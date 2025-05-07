@@ -1,12 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace JambageCom\Transactor\Domain;
 
 /***************************************************************
 *
 *  Copyright notice
 *
-*  (c) 2017 Franz Holzinger (franz@ttproducts.de)
+*  (c) 2025 Franz Holzinger (franz@ttproducts.de)
 *  All rights reserved
 *
 *  This script is part of the Typo3 project. The Typo3 project is
@@ -26,9 +28,10 @@ namespace JambageCom\Transactor\Domain;
 *  This copyright notice MUST APPEAR in all copies of the script!
 ***************************************************************/
 
+use Psr\Http\Message\ServerRequestInterface;
+
 use TYPO3\CMS\Core\Utility\ExtensionManagementUtility;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
-use TYPO3\CMS\Frontend\ContentObject\ContentObjectRenderer;
 
 use JambageCom\Transactor\Domain\Gateway;
 use JambageCom\Transactor\Constants\GatewayMode;
@@ -49,6 +52,8 @@ class GatewayProxy implements \JambageCom\Transactor\Domain\GatewayInterface
     private $gatewayExtension = '';
     private $gatewayClass = '';
     protected $extensionManagerConf = [];
+    private ?ServerRequestInterface $request = null;
+
 
 
     /**
@@ -58,8 +63,12 @@ class GatewayProxy implements \JambageCom\Transactor\Domain\GatewayInterface
     * @return	void
     * @access	public
     */
-    public function init ($extensionKey)
+    public function init (
+        ServerRequestInterface $request,
+        string $extensionKey
+    )
     {
+        $this->request = $request;
         $this->gatewayClass = '';
         $this->extensionManagerConf = GeneralUtility::makeInstance(
             \TYPO3\CMS\Core\Configuration\ExtensionConfiguration::class
@@ -86,18 +95,22 @@ class GatewayProxy implements \JambageCom\Transactor\Domain\GatewayInterface
         ) {
             $this->gatewayClass = $this->extensionManagerConf['gatewayClass'];
         } else {
-            $composerFile = \TYPO3\CMS\Core\Utility\PathUtility::stripPathSitePrefix(ExtensionManagementUtility::extPath($extensionKey)) . 'composer.json';
+            $composerFile =
+                GeneralUtility::getFileAbsFileName(
+                    ExtensionManagementUtility::extPath($extensionKey)) . 'composer.json';
+
             if (file_exists($composerFile)) {
                 $content = file_get_contents($composerFile);
                 $content = json_decode($content, true);
+
                 if (
                     isset($content['autoload']) &&
                     isset($content['autoload']['psr-4'])
                 ) {
                     $keys = array_keys($content['autoload']['psr-4']);
 
-                    if (isset($keys['0'])) {
-                        $this->gatewayClass = $keys['0'] . 'Domain\\Gateway';
+                    if (isset($keys[0])) {
+                        $this->gatewayClass = $keys[0] . 'Domain\\Gateway';
                     }
                 }
             }
@@ -119,14 +132,17 @@ class GatewayProxy implements \JambageCom\Transactor\Domain\GatewayInterface
     public function getGatewayObj ()
     {
         $result = false;
+
         if (
-            $this->getGatewayClass() != ''/* &&
+            $this->getGatewayClass() != '' /* &&
             class_exists($this->getGatewayClass())*/
         ) {
             $result = GeneralUtility::makeInstance($this->getGatewayClass());
         }
 
-        if (!is_object($result)) {
+        if (is_object($result)) {
+            $result->setRequest($this->request);
+        } else {
             throw new \RuntimeException('ERROR in the Payment Transactor API (transactor) used by the extension "' . $this->getGatewayExtension() . '": no object can be created for the class "' . $this->getGatewayClass() . '"', 2020290000);
         }
         return $result;
@@ -228,22 +244,56 @@ class GatewayProxy implements \JambageCom\Transactor\Domain\GatewayInterface
         $this->getGatewayObj()->setBasketSum($basketSum);
     }
 
-    public function getOrderUid ()
+    public function setTotals ($totals)
+    {
+        $this->getGatewayObj()->setTotals($totals);
+    }
+
+    public function getTotals ()
+    {
+        $result = $this->getGatewayObj()->getTotals();
+        return $result;
+    }
+
+    public function setAddresses ($addresses)
+    {
+        $this->getGatewayObj()->setAddresses($addresses);
+    }
+
+    public function getAddresses ()
+    {
+        $result = $this->getGatewayObj()->getAddresses();
+        return $result;
+    }
+
+
+    public function setShippingTitle ($shippingTitle)
+    {
+        $this->getGatewayObj()->setShippingTitle($shippingTitle);
+    }
+
+    public function getShippingTitle ()
+    {
+        $result = $this->getGatewayObj()->getShippingTitle();
+        return $result;
+    }
+
+    public function getOrderUid (): int
     {
         return $this->getGatewayObj()->getOrderUid();
     }
 
-    public function setOrderUid ($orderUid)
+    public function setOrderUid (int $orderUid)
     {
         $this->getGatewayObj()->setOrderUid($orderUid);
     }
 
-    public function getOrderNumber ()
+    public function getOrderNumber (): string
     {
         return $this->getGatewayObj()->getOrderNumber();
     }
 
-    public function setOrderNumber ($orderNumber)
+    public function setOrderNumber (string $orderNumber)
     {
         $this->getGatewayObj()->setOrderNumber($orderNumber);
     }
@@ -262,40 +312,42 @@ class GatewayProxy implements \JambageCom\Transactor\Domain\GatewayInterface
     /**
     * Initializes a transaction.
     *
-    * @param	integer		$action: Type of the transaction, one of the constants TX_TRANSACTOR_TRANSACTION_ACTION_*
+    * @param	integer		$action: Type of the transaction, one of the constants GatewayMode::*
     * @param	string		$paymentMethod: Payment method, one of the values of getSupportedMethods()
-    * @param	string		$extensionKey: Extension key of the calling script.
+    * @param	string		$callingExtensionKey: Extension key of the calling script.
+    * @param	string		$templateFilename: Template filename
     * @param	integer		$orderUid: order unique id
     * @param	string		$orderNumber: order identifier name which also contains the number
-    * @param	array		$config: configuration for the extension
+    * @param	string		$currency: 3 letter currency code as defined by ISO 4217.
+    * @param	array		$conf: configuration. This will override former configuration from the exension manager.
     * @param	array		$basket: items in the basket
     * @param	array		$extraData: 'return_url', 'cancel_url'
-    * @return	void
+    * @return	boolean     true if the initialization went fine
     * @access	public
     */
     public function transactionInit (
-        $action,
-        $method,
-        $callingExtensionKey,
-        $templateFilename = '',
-        $orderUid = 0,
-        $orderNumber = '0',
-        $currency = 'EUR',
-        $config = [],
-        $basket = [],
-        $extraData = []
-    )
+        int    $action,
+        string $paymentMethod,
+        string $callingExtensionKey,
+        string $templateFilename = '',
+        int    $orderUid = 0,
+        string $orderNumber = '0',
+        string $currency = 'EUR',
+        array  $conf = [],
+        array  $basket = [],
+        array  $extraData = []
+    ): bool
     {
         $this->getGatewayObj()->setTransactionUid(0);
         $result = $this->getGatewayObj()->transactionInit(
             $action,
-            $method,
+            $paymentMethod,
             $callingExtensionKey,
             $templateFilename,
             $orderUid,
             $orderNumber,
             $currency,
-            $config,
+            $conf,
             $basket,
             $extraData
         );
@@ -342,9 +394,9 @@ class GatewayProxy implements \JambageCom\Transactor\Domain\GatewayInterface
     * @return	boolean		true if the transaction went fine
     * @access	public
     */
-    public function transactionSucceeded ($resultsArr)
+    public function transactionSucceeded (array $transactionResults): bool
     {
-        $result = $this->getGatewayObj()->transactionSucceeded($resultsArr);
+        $result = $this->getGatewayObj()->transactionSucceeded($transactionResults);
         return $result;
     }
 
@@ -355,9 +407,9 @@ class GatewayProxy implements \JambageCom\Transactor\Domain\GatewayInterface
     * @return	boolean		true if the transaction went wrong
     * @access	public
     */
-    public function transactionFailed ($resultsArr)
+    public function transactionFailed ($transactionResults): bool
     {
-        $result = $this->getGatewayObj()->transactionFailed($resultsArr);
+        $result = $this->getGatewayObj()->transactionFailed($transactionResults);
         return $result;
     }
 
@@ -365,12 +417,12 @@ class GatewayProxy implements \JambageCom\Transactor\Domain\GatewayInterface
     * Returns if the message of the transaction
     *
     * @param	array		results from transaction_getResults
-    * @return	boolean		true if the transaction went wrong
+    * @return	string		error message if the transaction went wrong
     * @access	public
     */
-    public function transactionMessage ($resultsArr)
+    public function transactionMessage (array $transactionResults): string
     {
-        $result = $this->getGatewayObj()->transactionMessage($resultsArr);
+        $result = $this->getGatewayObj()->transactionMessage($transactionResults);
         return $result;
     }
 
@@ -793,54 +845,6 @@ class GatewayProxy implements \JambageCom\Transactor\Domain\GatewayInterface
     }
 
     /**
-    * Sets the checkout Ajax URI
-    *
-    * @param	string		checkout URI
-    * @return	void
-    * @access	public
-    */
-    public function setCheckoutURI ($checkoutURI)
-    {
-        $this->getGatewayObj()->setCheckoutURI($checkoutURI);
-    }
-
-    /**
-    * Fetches the checkout Ajax URI
-    *
-    * @return	string		checkout URI
-    * @access	public
-    */
-    public function getCheckoutURI ()
-    {
-        $result = $this->getGatewayObj()->getCheckoutURI();
-        return $result;
-    }
-
-    /**
-    * Sets the capture Transactor URI
-    *
-    * @param	string		capture URI
-    * @return	void
-    * @access	public
-    */
-    public function setCaptureURI ($captureURI)
-    {
-        $this->getGatewayObj()->setCaptureURI($captureURI);
-    }
-
-    /**
-    * Fetches the capture Transactor URI
-    *
-    * @return	string		capture URI
-    * @access	public
-    */
-    public function getCaptureURI ()
-    {
-        $result = $this->getGatewayObj()->getCaptureURI();
-        return $result;
-    }
-
-    /**
     * This gives the information if the order can only processed after a verification message has been received.
     *
     * @return	boolean		true if a verification message needs to be sent
@@ -858,11 +862,11 @@ class GatewayProxy implements \JambageCom\Transactor\Domain\GatewayInterface
     *
     * @access	public
     */
-    public function readActionParameters (ContentObjectRenderer $cObj) {
+    public function readActionParameters (): bool {
         $result = false;
 
         if (method_exists($this->getGatewayObj(), 'readActionParameters')) {
-            $result = $this->getGatewayObj()->readActionParameters($cObj);
+            $result = $this->getGatewayObj()->readActionParameters();
         }
         return $result;
     }
@@ -913,6 +917,16 @@ class GatewayProxy implements \JambageCom\Transactor\Domain\GatewayInterface
                 );
         }
         return $result;
+    }
+
+    public function setRequest(ServerRequestInterface $request)
+    {
+        $this->request = $request;
+    }
+
+    public function getRequest()
+    {
+        return $this->request;
     }
 }
 

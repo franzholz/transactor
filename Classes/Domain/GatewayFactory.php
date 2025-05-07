@@ -1,7 +1,8 @@
 <?php
 
-namespace JambageCom\Transactor\Domain;
+declare(strict_types=1);
 
+namespace JambageCom\Transactor\Domain;
 
 /***************************************************************
 *
@@ -35,11 +36,13 @@ namespace JambageCom\Transactor\Domain;
 * @author	Robert Lemke <robert@typo3.org>
 */
 
-
-use JambageCom\Transactor\Constants\GatewayMode;
+use Psr\Http\Message\ServerRequestInterface;
 
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Core\Utility\ExtensionManagementUtility;
+
+use JambageCom\Transactor\Constants\GatewayMode;
+use JambageCom\Transactor\Domain\GatewayProxy;
 
 
 final class GatewayFactory
@@ -94,12 +97,14 @@ final class GatewayFactory
     * @return		mixed		Proxied instance of the given extension or false if an error occurred.
     * @access		public
     */
-    static public function registerGatewayExtension ($extensionKey)
+    static public function registerGatewayExtension (
+        ServerRequestInterface $request,
+        $extensionKey
+    )
     {
-
         if (ExtensionManagementUtility::isLoaded($extensionKey)) {
-            $gatewayProxy = GeneralUtility::makeInstance(\JambageCom\Transactor\Domain\GatewayProxy::class);
-            $gatewayProxy->init($extensionKey);
+            $gatewayProxy = GeneralUtility::makeInstance(GatewayProxy::class);
+            $gatewayProxy->init($request, $extensionKey);
             self::$gatewayProxyObjects[$extensionKey] = $gatewayProxy;
             $result = self::$gatewayProxyObjects[$extensionKey];
         } else {

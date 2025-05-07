@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace JambageCom\Transactor\Api;
 
 /***************************************************************
@@ -61,13 +63,12 @@ abstract class Listener {
     * Main function which processes the tasks connected to the listener.
     * E.g an order in the shop is finalized.
     *
-    * @return	void
     */
     public function execute ($params)
     {
         if (is_array ($GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['transactor']['listener'])) {
             foreach ($GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['transactor']['listener'] as $classRef) {
-                $hookObj = 
+                $hookObj =
                     GeneralUtility::makeInstance($classRef);
 
                 if (

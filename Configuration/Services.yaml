@@ -1,0 +1,10 @@
+services:
+  _defaults:
+    autowire: true
+    autoconfigure: true
+    public: false
+
+  JambageCom\Transactor\:
+    resource: '../Classes/'
+    exclude: ['../Classes/{Constants,Domain,Helper,Middleware,SessionHandler}/']
+

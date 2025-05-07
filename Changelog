@@ -1,3 +1,17 @@
+
+
+2025-02-27 Franz Holzinger <franz@ttproducts.de>
+    * remove checkoutURI and captureURI methods
+
+2025-01-30 Franz Holzinger <franz@ttproducts.de>
+    * support for TYPO3 12 and 13 only
+    * Remove getLanguage methods. Use getLanguage from div2007 TranslationBase instead of it.
+    * add parameter ServerRequestInterface $request
+
+2024-12-19 Franz Holzinger <franz@ttproducts.de>
+    * remove unused class Request/Parameters
+    * add class SessionHandler/SessionHandler to store session data.
+
 2024-03-28 Franz Holzinger <franz@ttproducts.de>
     * remove the old API
 

@@ -20,6 +20,7 @@ namespace JambageCom\Transactor\Constants;
  */
 class Action
 {
+    const INIT = 0;                       // initialization phase
     const AUTHORIZE_TRANSFER = 200;       // TX_TRANSACTOR_TRANSACTION_ACTION_AUTHORIZEANDTRANSFER
     const AUTHORIZE = 201;                // TX_TRANSACTOR_TRANSACTION_ACTION_AUTHORIZE
     const TRANSFER = 202;                 // TX_TRANSACTOR_TRANSACTION_ACTION_TRANSFER
