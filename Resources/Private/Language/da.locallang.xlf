@@ -59,9 +59,9 @@
         <source>ERROR: The extension '|' has not been installed.</source>
         <target state="final">FEJL: Udvidelsen '|' er ikke blevet installeret.</target>
       </trans-unit>
-      <trans-unit id="feature_address_gatewayaccount" resname="feature_address_gatewayaccount">
+      <trans-unit id="feature_address_gatewayaccount" resname="feature_address_gatewayaccount" approved="yes">
         <source>fetch address from gateway account</source>
-        <target state="needs-translation">fetch address from gateway account</target>
+        <target state="final">hent adresse fra gatewaykonto</target>
       </trans-unit>
     </body>
   </file>
