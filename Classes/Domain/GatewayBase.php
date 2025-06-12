@@ -943,7 +943,8 @@ abstract class GatewayBase implements GatewayInterface, \TYPO3\CMS\Core\Singleto
                 $transactionResults['state'],
                 [
                     State::APPROVE_OK,
-                    State::APPROVE_DUPLICATE
+                    State::APPROVE_DUPLICATE,
+                    State::CAPTURE_OK
                 ]
             )
         ) {
@@ -965,10 +966,10 @@ abstract class GatewayBase implements GatewayInterface, \TYPO3\CMS\Core\Singleto
     {
         $result = '';
 
-        if (isset($transactionResults['message'])) {
+        if (!empty($transactionResults['message'])) {
             $result = $transactionResults['message'];
         } else {
-            $result = 'Internal error in extension "' . $this->getExtensionKey() . '": The $transactionResults array has not been filled inside of method transactionMessage';
+            $result = 'Internal error in extension "' . $this->getExtensionKey() . '": The message inside of the $transactionResults array has not been filled in method Gateway::transactionMessage';
         }
         return $result;
     }
