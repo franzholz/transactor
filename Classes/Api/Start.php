@@ -209,6 +209,7 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
 
         if (
             $orderUid &&
+            is_object($gatewayProxyObject) &&
             method_exists($gatewayProxyObject, 'generateReferenceUid')
         ) {
             $referenceUid =
@@ -825,8 +826,9 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
         string $orderNumber,
         string $notificationEmail,
         array $cardRow
-    )
+    ): string|bool
     {
+        $result = false;
         $gatewayExtKey = $confScript['extName'] ?? '';
 
         if (strpos($handleLib, 'transactor') !== false) {
@@ -926,7 +928,7 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
         $conf,
         $pid,
         $linkParamArray
-    )
+    ): string
     {
         $cObj = FrontendUtility::getContentObjectRenderer();
         if (!$pid) {
@@ -1567,6 +1569,8 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
         &$errorMessage,
         array $confScript,
     ): mixed {
+        $result = false;
+
         if (
             !empty($confScript['login'])
         ) {
@@ -1673,7 +1677,7 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
         &$errorMessage,
         Address &$addressModel,
         array $confScript,
-    )
+    ): string|bool
     {
         $accountFeatureClass = false;
         $languageObj = GeneralUtility::makeInstance(Localization::class);
@@ -1761,7 +1765,7 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
         $orderNumber, // text string of the order number
         $currency,
         array $extraData
-    ): string {
+    ): string|bool {
         $languageObj = GeneralUtility::makeInstance(Localization::class);
         $accountFeatureClass = false;
         $gatewayExtKey = $confScript['extName'] ?? '';
