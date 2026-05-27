@@ -97,7 +97,6 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
         } else {
             static::$id = $GLOBALS['TSFE']->id;
         }
-
     }
 
     static public function getMarkers (
@@ -932,7 +931,7 @@ class Start implements \TYPO3\CMS\Core\SingletonInterface
     {
         $cObj = FrontendUtility::getContentObjectRenderer();
         if (!$pid) {
-            $pid = $GLOBLAS['TSFE']->id;
+            $pid = static::id;
         }
         $target = '';
         $linkParams = '';

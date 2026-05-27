@@ -31,8 +31,9 @@ namespace JambageCom\Transactor\Domain;
 
 use Psr\Http\Message\ServerRequestInterface;
 
-use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Core\Utility\ExtensionManagementUtility;
+use TYPO3\CMS\Core\Utility\GeneralUtility;
+use TYPO3\CMS\Core\Utility\VersionNumberUtility;
 
 use JambageCom\Transactor\Constants\Action;
 use JambageCom\Transactor\Constants\Field;
@@ -517,6 +518,8 @@ abstract class GatewayBase implements GatewayInterface, \TYPO3\CMS\Core\Singleto
     {
         $result = true;
         $xmlOptions = '';
+        $id = '';
+
         $this->setDetails($detailsArray);
         $reference = $detailsArray['reference'];
         $transaction = $detailsArray['transaction'];
@@ -545,10 +548,18 @@ abstract class GatewayBase implements GatewayInterface, \TYPO3\CMS\Core\Singleto
                 $this->getConf()
             );
 
+        $typo3VersionArray = VersionNumberUtility::convertVersionStringToArray(VersionNumberUtility::getCurrentTypo3Version());
+        $typo3VersionMain = $typo3VersionArray['version_main'];
+
+        if ($typo3VersionMain >= 13) {
+            $id = $request->getAttribute('frontend.page.information')->getId();
+        } else {
+            $id = $GLOBALS['TSFE']->id;
+        }
 
         // Store order id in database
         $dataArray = [
-            'pid' => $GLOBALS['TSFE']->id,
+            'pid' => $id,
             'crdate' => time(),
             'ext_key' => $this->getCallingExtension(),
             'reference' => $reference,
