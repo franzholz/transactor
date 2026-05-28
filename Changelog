@@ -1,4 +1,6 @@
-
+2026-05-27 Franz Holzinger  <franz@ttproducts.de>
+    * tsfe is removed in TYPO3 14
+    * sys_page ==> $pageRepository from PageRepository
 
 2025-02-27 Franz Holzinger <franz@ttproducts.de>
     * remove checkoutURI and captureURI methods

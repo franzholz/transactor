@@ -24,8 +24,8 @@
     "GPL-2.0-or-later"
   ],
   "require": {
-    "php": "^8.0",
-    "typo3/cms-core": "^12.4 || ^13.4",
+    "php": "^8.2",
+    "typo3/cms-core": "^12.4 || ^13.4 || ^14",
     "jambagecom/div2007": "^2.3"
   },
   "suggest": {
@@ -41,7 +41,11 @@
   },
   "extra": {
     "typo3/cms": {
-      "extension-key": "transactor"
+      "extension-key": "transactor",
+      "version": "0.15.0",
+      "Package": {
+          "providesPackages": {}
+      }
     }
   }
 }
