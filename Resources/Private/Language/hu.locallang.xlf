@@ -5,63 +5,63 @@
     <body>
       <trans-unit id="error_feature_class" resname="error_feature_class">
         <source>ERROR: Could not find the class %s for the feature %s.</source>
-        <target state="needs-translation">ERROR: Could not find the class %s for the feature %s.</target>
+        <target state="translated">HIBA: Nem található a %s osztály a(z) %s funkcióhoz.</target>
       </trans-unit>
       <trans-unit id="error_feature_class_interface" resname="error_feature_class_interface">
         <source>ERROR: The feature class %s does not fit the required interface.</source>
-        <target state="needs-translation">ERROR: The feature class %s does not fit the required interface.</target>
+        <target state="translated">HIBA: A(z) %s funkcióosztály nem felel meg a megkövetelt interfésznek.</target>
       </trans-unit>
       <trans-unit id="error_gateway_missing" resname="error_gateway_missing">
         <source>ERROR: Could not find gateway object for payment method '|'.</source>
-        <target state="needs-translation">ERROR: Could not find gateway object for payment method '|'.</target>
+        <target state="translated">HIBA: Nem található átjáróobjektum a(z) '|' fizetési módhoz.</target>
       </trans-unit>
       <trans-unit id="error_gateway_unknown" resname="error_gateway_unknown">
         <source>ERROR: Unknown failure after Gateway processing!</source>
-        <target state="needs-translation">ERROR: Unknown failure after Gateway processing!</target>
+        <target state="translated">HIBA: Ismeretlen hiba az átjáró feldolgozása után!</target>
       </trans-unit>
       <trans-unit id="error_no_template" resname="error_no_template">
         <source>ERROR: The payment template file &quot;%s&quot; has not been found.</source>
-        <target state="needs-translation">ERROR: The payment template file "%s" has not been found.</target>
+        <target state="translated">HIBA: A(z) "%s" fizetési sablonfájl nem található.</target>
       </trans-unit>
       <trans-unit id="error_transaction_init" resname="error_transaction_init">
         <source>ERROR: Could not initialize transaction.</source>
-        <target state="needs-translation">ERROR: Could not initialize transaction.</target>
+        <target state="translated">HIBA: A tranzakció inicializálása nem sikerült.</target>
       </trans-unit>
       <trans-unit id="error_reference_id" resname="error_reference_id">
         <source>ERROR: reference ID could not be generated.</source>
-        <target state="needs-translation">ERROR: reference ID could not be generated.</target>
+        <target state="translated">HIBA: A referenciaazonosító generálása nem sikerült.</target>
       </trans-unit>
       <trans-unit id="error_transaction_details" resname="error_transaction_details">
         <source>ERROR: Setting details of transaction failed.</source>
-        <target state="needs-translation">ERROR: Setting details of transaction failed.</target>
+        <target state="translated">HIBA: A tranzakció adatainak beállítása sikertelen volt.</target>
       </trans-unit>
       <trans-unit id="error_transaction_no" resname="error_transaction_no">
         <source>ERROR: No transaction has been executed.</source>
-        <target state="needs-translation">ERROR: No transaction has been executed.</target>
+        <target state="translated">HIBA: Nem történt tranzakció végrehajtás.</target>
       </trans-unit>
       <trans-unit id="error_relay_url" resname="error_relay_url">
         <source>ERROR: No relay URL given!</source>
-        <target state="needs-translation">ERROR: No relay URL given!</target>
+        <target state="translated">HIBA: Nincs megadva relay URL!</target>
       </trans-unit>
       <trans-unit id="error_api_parameters" resname="error_api_parameters">
         <source>ERROR: Wrong parameter in the call of the Transactor API.</source>
-        <target state="needs-translation">ERROR: Wrong parameter in the call of the Transactor API.</target>
+        <target state="translated">HIBA: Hibás paraméter a Transactor API hívásában.</target>
       </trans-unit>
       <trans-unit id="error_invalid_data" resname="error_invalid_data">
         <source>ERROR: invalid data.</source>
-        <target state="needs-translation">ERROR: invalid data.</target>
+        <target state="translated">HIBA: érvénytelen adat.</target>
       </trans-unit>
       <trans-unit id="extension_payment_missing" resname="extension_payment_missing">
         <source>ERROR: No extension has been configured for the payment method.</source>
-        <target state="needs-translation">ERROR: No extension has been configured for the payment method.</target>
+        <target state="translated">HIBA: Nincs bővítmény konfigurálva ehhez a fizetési módhoz.</target>
       </trans-unit>
       <trans-unit id="extension_missing" resname="extension_missing">
         <source>ERROR: The extension '|' has not been installed.</source>
-        <target state="needs-translation">ERROR: The extension '|' has not been installed.</target>
+        <target state="translated">HIBA: A(z) '|' bővítmény nincs telepítve.</target>
       </trans-unit>
       <trans-unit id="feature_address_gatewayaccount" resname="feature_address_gatewayaccount">
         <source>fetch address from gateway account</source>
-        <target state="needs-translation">fetch address from gateway account</target>
+        <target state="translated">cím lekérése az átjáró-fiókból</target>
       </trans-unit>
     </body>
   </file>
