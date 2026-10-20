@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" version="1.2">
+  <file source-language="en" datatype="plaintext" original="EXT:transactor/Resources/Private/Language/locallang.xlf" date="2018-05-09T17:24:14Z" product-name="transactor" target-language="t3">
+    <header/>
+    <body>
+      <trans-unit id="error_feature_class" resname="error_feature_class">
+        <source>ERROR: Could not find the class %s for the feature %s.</source>
+        <target>crwdns165674:0%scrwdnd165674:0%scrwdne165674:0</target>
+      </trans-unit>
+      <trans-unit id="error_feature_class_interface" resname="error_feature_class_interface">
+        <source>ERROR: The feature class %s does not fit the required interface.</source>
+        <target>crwdns165676:0%scrwdne165676:0</target>
+      </trans-unit>
+      <trans-unit id="error_gateway_missing" resname="error_gateway_missing">
+        <source>ERROR: Could not find gateway object for payment method '|'.</source>
+        <target>crwdns165678:0crwdne165678:0</target>
+      </trans-unit>
+      <trans-unit id="error_gateway_unknown" resname="error_gateway_unknown">
+        <source>ERROR: Unknown failure after Gateway processing!</source>
+        <target>crwdns165680:0crwdne165680:0</target>
+      </trans-unit>
+      <trans-unit id="error_no_template" resname="error_no_template">
+        <source>ERROR: The payment template file &quot;%s&quot; has not been found.</source>
+        <target>crwdns165682:0%scrwdne165682:0</target>
+      </trans-unit>
+      <trans-unit id="error_transaction_init" resname="error_transaction_init">
+        <source>ERROR: Could not initialize transaction.</source>
+        <target>crwdns165684:0crwdne165684:0</target>
+      </trans-unit>
+      <trans-unit id="error_reference_id" resname="error_reference_id">
+        <source>ERROR: reference ID could not be generated.</source>
+        <target>crwdns165686:0crwdne165686:0</target>
+      </trans-unit>
+      <trans-unit id="error_transaction_details" resname="error_transaction_details">
+        <source>ERROR: Setting details of transaction failed.</source>
+        <target>crwdns165688:0crwdne165688:0</target>
+      </trans-unit>
+      <trans-unit id="error_transaction_no" resname="error_transaction_no">
+        <source>ERROR: No transaction has been executed.</source>
+        <target>crwdns165690:0crwdne165690:0</target>
+      </trans-unit>
+      <trans-unit id="error_relay_url" resname="error_relay_url">
+        <source>ERROR: No relay URL given!</source>
+        <target>crwdns165692:0crwdne165692:0</target>
+      </trans-unit>
+      <trans-unit id="error_api_parameters" resname="error_api_parameters">
+        <source>ERROR: Wrong parameter in the call of the Transactor API.</source>
+        <target>crwdns165694:0crwdne165694:0</target>
+      </trans-unit>
+      <trans-unit id="error_invalid_data" resname="error_invalid_data">
+        <source>ERROR: invalid data.</source>
+        <target>crwdns165696:0crwdne165696:0</target>
+      </trans-unit>
+      <trans-unit id="extension_payment_missing" resname="extension_payment_missing">
+        <source>ERROR: No extension has been configured for the payment method.</source>
+        <target>crwdns165698:0crwdne165698:0</target>
+      </trans-unit>
+      <trans-unit id="extension_missing" resname="extension_missing">
+        <source>ERROR: The extension '|' has not been installed.</source>
+        <target>crwdns165700:0crwdne165700:0</target>
+      </trans-unit>
+      <trans-unit id="feature_address_gatewayaccount" resname="feature_address_gatewayaccount">
+        <source>fetch address from gateway account</source>
+        <target>crwdns370854:0crwdne370854:0</target>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>
